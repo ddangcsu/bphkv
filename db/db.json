@@ -1,0 +1,538 @@
+{
+  "families": [
+    {
+      "_id": "FAM_300",
+      "id": "FAM_300",
+      "parishMember": true,
+      "parishNumber": "9012",
+      "address": {
+        "street": "321 Birch Rd",
+        "city": "Lakeside",
+        "state": "CA",
+        "zip": "94901"
+      },
+      "contacts": [
+        {
+          "lastName": "Green",
+          "firstName": "Laura",
+          "middle": "",
+          "relationship": "Mother",
+          "phone": "(714) 555-1010",
+          "email": "laura.green@example.com",
+          "isEmergency": false
+        },
+        {
+          "lastName": "Green",
+          "firstName": "Mark",
+          "middle": "",
+          "relationship": "Father",
+          "phone": "(949) 555-2020",
+          "email": "mark.green@example.com",
+          "isEmergency": true
+        }
+      ],
+      "children": [
+        {
+          "childId": "S:8c33307c-a54c-4356-93e8-e2b15c4106c7",
+          "lastName": "Green",
+          "firstName": "Anna",
+          "middle": "",
+          "saintName": "Bernadet",
+          "dob": "2012-04-15T00:00:00.000Z",
+          "allergies": [],
+          "is_name_exception": false,
+          "exception_notes": ""
+        },
+        {
+          "childId": "S:ca8dc252-452d-4b71-a923-5b2e724e0c4d",
+          "lastName": "Green",
+          "firstName": "Ben",
+          "middle": "William",
+          "saintName": "Jacob",
+          "dob": "2014-09-10T00:00:00.000Z",
+          "allergies": [
+            "peanuts"
+          ],
+          "is_name_exception": false,
+          "exception_notes": ""
+        }
+      ]
+    },
+    {
+      "_id": "FAM_100",
+      "id": "FAM_100",
+      "parishMember": true,
+      "parishNumber": "745",
+      "address": {
+        "street": "1011 Main Street",
+        "city": "Stanton",
+        "state": "CA",
+        "zip": "92863"
+      },
+      "contacts": [
+        {
+          "lastName": "Vu",
+          "firstName": "Emily",
+          "middle": "Thanh",
+          "relationship": "Mother",
+          "phone": "(714) 865-1475",
+          "email": "emily.vu@gmail.com",
+          "isEmergency": true
+        },
+        {
+          "lastName": "Tran",
+          "firstName": "Tom",
+          "middle": "Toan",
+          "relationship": "Father",
+          "phone": "(949) 951-4751",
+          "email": "ttran@abc.com",
+          "isEmergency": true
+        },
+        {
+          "lastName": "Trieu",
+          "firstName": "Tien",
+          "middle": null,
+          "relationship": "Uncle",
+          "phone": "(714) 959-4864",
+          "email": null,
+          "isEmergency": true
+        }
+      ],
+      "children": [
+        {
+          "childId": "S:d7ab9949-27d5-4448-b15a-0a0ce107a3ff",
+          "lastName": "Tran",
+          "firstName": "Thomas",
+          "middle": "Minh",
+          "saintName": "John",
+          "dob": "2018-04-17T00:00:00.000Z",
+          "allergies": [],
+          "isNameException": true,
+          "exceptionNotes": null
+        },
+        {
+          "childId": "S:ee87e331-403f-4dba-8ce1-5aa49b03b578",
+          "lastName": "Vuong",
+          "firstName": "Evelyn",
+          "middle": null,
+          "saintName": "Maria",
+          "dob": "2014-07-10T00:00:00.000Z",
+          "allergies": [
+            "shellfish"
+          ],
+          "isNameException": true,
+          "exceptionNotes": "Stepdaughter"
+        }
+      ]
+    },
+    {
+      "_id": "FAM_101",
+      "id": "FAM_101",
+      "parishMember": false,
+      "parishNumber": null,
+      "address": {
+        "street": "401 Piglet Circle",
+        "city": "Anaheim",
+        "state": "CA",
+        "zip": "92864"
+      },
+      "contacts": [
+        {
+          "lastName": "Tran",
+          "firstName": "Yen",
+          "middle": "Thuy",
+          "relationship": "Guardian",
+          "phone": "(714) 856-9542",
+          "email": null,
+          "isEmergency": true
+        },
+        {
+          "lastName": "Bui",
+          "firstName": "Thuc",
+          "middle": null,
+          "relationship": "Uncle",
+          "phone": "(714) 526-4527",
+          "email": "tbui@hotmail.com",
+          "isEmergency": true
+        }
+      ],
+      "children": [
+        {
+          "childId": "S:c337340c-86f5-4249-bdb7-3d9a16b284e8",
+          "lastName": "Duong",
+          "firstName": "Teresa",
+          "middle": null,
+          "saintName": "Madeline",
+          "dob": "2018-02-10T00:00:00.000Z",
+          "allergies": [
+            "milk"
+          ],
+          "isNameException": true,
+          "exceptionNotes": "Niece, full guardianship"
+        }
+      ]
+    },
+    {
+      "id": "FAM_102",
+      "_id": "FAM_102",
+      "parishMember": true,
+      "parishNumber": "745",
+      "address": {
+        "street": "12341 Nelson St.",
+        "city": "Garden Grove",
+        "state": "CA",
+        "zip": "92845"
+      },
+      "contacts": [
+        {
+          "lastName": "Do",
+          "firstName": "Yen",
+          "middle": "Thi",
+          "relationship": "Mother",
+          "phone": "(562) 475-1425",
+          "email": "ydo@fox.com",
+          "isEmergency": true
+        },
+        {
+          "lastName": "Williams",
+          "firstName": "Jeff",
+          "middle": "Jr",
+          "relationship": "Father",
+          "phone": "(856) 451-3512",
+          "email": "jwilliams@gmail.com",
+          "isEmergency": true
+        }
+      ],
+      "children": [
+        {
+          "childId": "S:d1c24cf9-3a62-4690-bda6-b67346531126",
+          "lastName": "Williams",
+          "firstName": "John",
+          "middle": "Tuan",
+          "saintName": "Paul",
+          "dob": "2015-03-14T00:00:00.000Z",
+          "allergies": [
+            "milk"
+          ],
+          "isNameException": false,
+          "exceptionNotes": null
+        },
+        {
+          "childId": "S:d067f115-9a47-4752-8213-5e9ed6df4407",
+          "lastName": "Do",
+          "firstName": "Trung",
+          "middle": "Hieu",
+          "saintName": "Barbara",
+          "dob": "2014-06-02T00:00:00.000Z",
+          "allergies": [],
+          "isNameException": false,
+          "exceptionNotes": null
+        },
+        {
+          "childId": "S:0e6146c2-0a0a-40f5-84a2-d4266638aff0",
+          "lastName": "Williams",
+          "firstName": "Sophia",
+          "middle": "Nhi",
+          "saintName": "Maria",
+          "dob": "2018-09-15T00:00:00.000Z",
+          "allergies": [
+            "cheese"
+          ],
+          "isNameException": false,
+          "exceptionNotes": null
+        }
+      ]
+    },
+    {
+      "id": "FAM_103",
+      "_id": "FAM_103",
+      "parishMember": true,
+      "parishNumber": "713",
+      "address": {
+        "street": "15321 Allen Dr",
+        "city": "Santa Ana",
+        "state": "CA",
+        "zip": "92846"
+      },
+      "contacts": [
+        {
+          "lastName": "Bui",
+          "firstName": "Thomas",
+          "middle": "Minh",
+          "relationship": "Father",
+          "phone": "(714) 868-4575",
+          "email": "tbui@hotmail.com",
+          "isEmergency": true
+        },
+        {
+          "lastName": "Vuong",
+          "firstName": "Christiana",
+          "middle": "Huong",
+          "relationship": "Mother",
+          "phone": "(949) 758-4685",
+          "email": "cvuong@abc.com",
+          "isEmergency": false
+        }
+      ],
+      "children": [
+        {
+          "childId": "S:91489867-5a85-4f12-b1d2-62e5191b0a5e",
+          "lastName": "Bui",
+          "firstName": "Hellen",
+          "middle": "Van An",
+          "saintName": "Emily",
+          "dob": "2016-06-14T00:00:00.000Z",
+          "allergies": [],
+          "isNameException": false,
+          "exceptionNotes": null
+        },
+        {
+          "childId": "S:b6266985-b16f-47ec-bf68-7c9d195edf17",
+          "lastName": "Bui",
+          "firstName": "Tiffany",
+          "middle": "Thuc Nhi",
+          "saintName": "Anna",
+          "dob": "2018-05-23T00:00:00.000Z",
+          "allergies": [
+            "milk",
+            "cheese",
+            "peanuts"
+          ],
+          "isNameException": false,
+          "exceptionNotes": null
+        }
+      ]
+    },
+    {
+      "id": "FAM_104",
+      "_id": "FAM_104",
+      "parishMember": false,
+      "parishNumber": null,
+      "address": {
+        "street": "1231 Donegall St.",
+        "city": "Garden Grove",
+        "state": "CA",
+        "zip": "92844"
+      },
+      "contacts": [
+        {
+          "lastName": "Huynh",
+          "firstName": "Diep",
+          "middle": "Van",
+          "relationship": "Father",
+          "phone": "(714) 594-5748",
+          "email": null,
+          "isEmergency": true
+        },
+        {
+          "lastName": "Ho",
+          "firstName": "Ha",
+          "middle": "Thanh",
+          "relationship": "Mother",
+          "phone": "(949) 857-4678",
+          "email": "hha@uci.edu",
+          "isEmergency": false
+        }
+      ],
+      "children": [
+        {
+          "childId": "S:a0ef2250-3a0a-4675-bdef-c18f2c2c5b3a",
+          "lastName": "Vuong",
+          "firstName": "Ton",
+          "middle": null,
+          "saintName": "John the Baptist",
+          "dob": "2012-08-12T00:00:00.000Z",
+          "allergies": [],
+          "isNameException": true,
+          "exceptionNotes": "Previous marriage"
+        },
+        {
+          "childId": "S:e953dc0c-55d7-41dc-85fb-8c5bb9db5c40",
+          "lastName": "Huynh",
+          "firstName": "Teresa",
+          "middle": "Thuy",
+          "saintName": "Cecilia",
+          "dob": "2015-07-15T00:00:00.000Z",
+          "allergies": [
+            "grass"
+          ],
+          "isNameException": false,
+          "exceptionNotes": null
+        }
+      ]
+    },
+    {
+      "id": "FAM_105",
+      "_id": "FAM_105",
+      "parishMember": true,
+      "parishNumber": "998",
+      "address": {
+        "street": "456 Gordon Cir",
+        "city": "Fullerton",
+        "state": "CA",
+        "zip": "92867"
+      },
+      "contacts": [
+        {
+          "lastName": "Du",
+          "firstName": "Thuong",
+          "middle": "M",
+          "relationship": "Mother",
+          "phone": "(657) 154-2547",
+          "email": null,
+          "isEmergency": false
+        },
+        {
+          "lastName": "Ton",
+          "firstName": "Nhat",
+          "middle": "M",
+          "relationship": "Guardian",
+          "phone": "(949) 714-1524",
+          "email": "tnhat@gmail.com",
+          "isEmergency": true
+        }
+      ],
+      "children": [
+        {
+          "childId": "S:80470227-4af1-4b3f-98fd-fcb516c04ede",
+          "lastName": "Vuong",
+          "firstName": "William",
+          "middle": "Minh",
+          "saintName": "Columban",
+          "dob": "2010-06-17T00:00:00.000Z",
+          "allergies": [],
+          "isNameException": true,
+          "exceptionNotes": "previous marriage"
+        }
+      ]
+    }
+  ],
+  "registrations": [
+    {
+      "id": "REGF_mah5g8",
+      "eventId": "REG_ADM_2025",
+      "familyId": "FAM_100",
+      "year": 2025,
+      "level": "family",
+      "status": "paid",
+      "payments": [
+        {
+          "code": "SECURITY",
+          "unitAmount": 30,
+          "quantity": 1,
+          "totalAmount": 30,
+          "method": "cash",
+          "txnRef": null,
+          "receiptNo": "R001A",
+          "receivedBy": "Alice",
+          "paidAt": "2025-08-20T10:14:00.000Z"
+        },
+        {
+          "code": "NONMEMBER",
+          "unitAmount": 50,
+          "quantity": 1,
+          "totalAmount": 50,
+          "method": "cash",
+          "txnRef": null,
+          "receiptNo": "R001B",
+          "receivedBy": "Alice",
+          "paidAt": "2025-08-20T10:14:30.000Z"
+        }
+      ]
+    },
+    {
+      "id": "REGC_s8k2p1",
+      "eventId": "REG_TNTT_2025",
+      "familyId": "FAM_100",
+      "year": 2025,
+      "level": "child",
+      "children": [
+        {
+          "childId": "S:d7ab9949-27d5-4448-b15a-0a0ce107a3ff"
+        },
+        {
+          "childId": "S:ee87e331-403f-4dba-8ce1-5aa49b03b578"
+        }
+      ],
+      "status": "paid",
+      "payments": [
+        {
+          "code": "REGISTRATION",
+          "unitAmount": 120,
+          "quantity": 2,
+          "totalAmount": 240,
+          "method": "zelle",
+          "txnRef": "Z-123basad",
+          "receiptNo": "R002",
+          "receivedBy": "Bob",
+          "paidAt": "2025-08-20T10:30:00.000Z"
+        }
+      ]
+    }
+  ],
+  "events": [
+    {
+      "id": "REG_ADM_2025",
+      "programId": "BPH",
+      "title": "Admin/Security (2025-26)",
+      "year": 2025,
+      "level": "PF",
+      "openDate": "2025-08-01",
+      "endDate": "2025-10-01",
+      "prerequisites": [],
+      "fees": [
+        {
+          "code": "SECF",
+          "amount": 30
+        },
+        {
+          "code": "NPMF",
+          "amount": 50
+        }
+      ],
+      "eventType": "ADM"
+    },
+    {
+      "id": "REG_TNTT_2025",
+      "programId": "TNTT",
+      "title": "TNTT Registration 2025-26",
+      "year": 2025,
+      "level": "PC",
+      "openDate": "2025-08-01",
+      "endDate": "2025-10-01",
+      "prerequisites": [
+        {
+          "eventId": "REG_ADM_2025"
+        }
+      ],
+      "fees": [
+        {
+          "code": "REGF",
+          "amount": 150
+        }
+      ],
+      "eventType": "REG"
+    },
+    {
+      "id": "EVT_2025_DoanCamp",
+      "programId": "TNTT",
+      "title": "TNTT Doan Camp 3/1/2026 3 days",
+      "year": 2025,
+      "level": "PC",
+      "openDate": "2026-01-01",
+      "endDate": "2026-02-01",
+      "prerequisites": [
+        {
+          "eventId": "REG_TNTT_2025"
+        }
+      ],
+      "fees": [
+        {
+          "code": "EVTF",
+          "amount": 55
+        }
+      ],
+      "eventType": "EVT"
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+{
+  "/families/:id/registrations": "/registrations?familyId=:id",
+  "/events/:id/registrations": "/registrations?eventId=:id",
+  "/families/:id/children": "/families/:id"
+}

@@ -1,0 +1,33 @@
+:root { --bg:#0b1220; --card:#141b2d; --muted:#8ea0b5; --text:#e8eef7; --primary:#5b9dff; --accent:#53d6b6; --danger:#ff7a7a; }
+* { box-sizing: border-box; }
+body { margin:0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:var(--bg); color:var(--text); }
+.topbar { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid #1f2940; position:sticky; top:0; background:var(--bg); z-index:2; }
+.topbar h1 { font-size:20px; margin:0; }
+.tabs button { margin-left:8px; }
+.page { padding:18px; }
+.card { background:var(--card); border:1px solid #1f2940; border-radius:14px; padding:16px; box-shadow:0 4px 16px rgba(0,0,0,0.25); }
+.toolbar { display:flex; gap:12px; margin-bottom:12px; }
+.input { width:100%; padding:10px 12px; background:#0e1629; border:1px solid #24304d; color:var(--text); border-radius:10px; outline:none; }
+.input:focus { border-color:var(--primary); }
+.table { width:100%; border-collapse:collapse; }
+.table th, .table td { padding:10px 12px; border-bottom:1px solid #1f2940; text-align:left; vertical-align:top; }
+.badge { text-transform:capitalize; }
+.badge[data-variant="member"] { color:var(--accent); }
+.badge[data-variant="nonMember"] { color:var(--danger); }
+.btn { padding:8px 12px; background:#15203a; border:1px solid #24304d; color:var(--text); border-radius:10px; cursor:pointer; }
+.btn:hover { border-color:var(--primary); }
+.btn.primary { background:linear-gradient(180deg, #5b9dff, #4b86df); color:#0b1220; border:none; }
+.btn.secondary { background:#103157; border-color:#305a97; }
+.link { background:none; border:none; color:var(--primary); cursor:pointer; padding:0; }
+.form h2 { margin-top:0; }
+.grid { display:grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap:12px; }
+@media (max-width: 920px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .grid { grid-template-columns: 1fr; } }
+.row { padding:12px; margin:10px 0; background:#0f1730; border:1px solid #253353; border-radius:10px; }
+.row-actions { margin-top:8px; }
+.checkbox { display:flex; align-items:center; gap:8px; }
+.footer { display:flex; gap:8px; margin-top:16px; flex-wrap: wrap; }
+.pre { margin:0; max-height:320px; overflow:auto; background:#0a1022; border-radius:10px; padding:12px; border:1px solid #253353; }
+.tabs button { background:none; border:1px solid #24304d; color:var(--text); padding:8px 10px; border-radius:10px; }
+.tabs .active { background:#122042; border-color:var(--primary); }
+.actions { display:flex; gap:8px; }

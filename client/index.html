@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <title>Families & Events — Vue Composition API</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="./css/light.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" />
+</head>
+
+<body>
+  <div id="app" v-cloak>
+    <div class="topbar">
+      <!-- LEFT: Burger + Breadcrumb -->
+      <div class="leftbar">
+        <!-- Burger Menu -->
+        <div class="menu-wrap" :class="{ open: menuOpen }">
+          <button class="btn menu-btn" type="button" @click="menuOpen = !menuOpen" aria-haspopup="menu"
+            :aria-expanded="menuOpen">
+            <i class="fa-solid fa-bars"></i> <span>Menu</span>
+          </button>
+          <div v-if="menuOpen" class="clickout-overlay" @click="menuOpen=false"></div>
+          <div v-if="menuOpen" class="menu-panel" role="menu">
+            <button class="btn secondary menu-item" type="button" role="menuitem"
+              @click="switchSection('families'); menuOpen=false;">
+              <i class="fa-solid fa-people-roof"></i> Families Data
+            </button>
+            <button class="btn secondary menu-item" type="button" role="menuitem"
+              @click="switchSection('events'); menuOpen=false;">
+              <i class="fa-solid fa-calendar-days"></i> Manage Events
+            </button>
+            <!-- Registrations will be added later -->
+          </div>
+        </div>
+
+        <!-- Breadcrumbs (anchors) -->
+        <div class="crumb">
+          <h4 class="crumb-text">
+            <template v-if="currentSection==='families'">
+              <a class="link" href="#" @click.prevent="goFamilyList">Families</a>
+              <span v-if="familyView === 'list'"> &gt; Search Family</span>
+              <span v-else-if="familyMode==='create'"> &gt; Create Family</span>
+              <span v-else> &gt; Edit Family</span>
+            </template>
+
+            <template v-else-if="currentSection==='events'">
+              <a class="link" href="#" @click.prevent="goEventList">Events</a>
+              <span v-if="eventView === 'list'"> &gt; Browse Events</span>
+              <span v-else-if="eventMode==='create'"> &gt; Create Event</span>
+              <span v-else> &gt; Edit Event</span>
+            </template>
+          </h4>
+        </div>
+      </div>
+
+      <!-- CENTER: Status -->
+      <div class="statusbar">
+        <div class="status" v-show="status.visible" :data-variant="status.variant">
+          <i :class="statusIcon"></i>
+          <span v-text="status.text"></span>
+        </div>
+      </div>
+
+      <!-- RIGHT: Actions -->
+      <nav class="actionbar">
+        <button v-if="currentSection==='families' && familyView !== 'form'" class="btn primary" type="button"
+          @click="beginCreateFamily">
+          <i class="fa-solid fa-plus"></i> <span>Family</span>
+        </button>
+
+        <button v-if="currentSection==='events' && eventView !== 'form'" class="btn primary" type="button"
+          @click="beginCreateEvent">
+          <i class="fa-solid fa-plus"></i> <span>Event</span>
+        </button>
+      </nav>
+    </div>
+
+    <transition name="fade" mode="out-in">
+      <!-- ====================== FAMILIES ====================== -->
+      <main v-if="currentSection==='families'">
+        <!-- List -->
+        <section v-if="familyView==='list'" class="page">
+          <div class="card">
+            <div class="toolbar">
+              <input v-model.trim="familySearch" class="input"
+                placeholder="Search familyId, membership #, contact name/phone/email, city..." autocomplete="off" />
+            </div>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Family ID</th>
+                  <th>Member</th>
+                  <th>Parish#</th>
+                  <th>Contact Info</th>
+                  <th>City</th>
+                  <th># Children</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <template v-for="f in filteredFamilyRows" :key="f.id">
+                  <tr>
+                    <td>{{ f.id }}</td>
+                    <td class="badge" :data-variant="codeToLabel(f.parishMember, YES_NO_OPTIONS)">{{
+                      codeToLabel(f.parishMember, YES_NO_OPTIONS) }}
+                    </td>
+                    <td>{{ f.parishNumber || '-' }}</td>
+                    <td>{{ contactDisplay(f) }}</td>
+                    <td>{{ f.address.city }}</td>
+                    <td>{{ f.children.length }}</td>
+                    <td class="actions">
+                      <button class="btn secondary" type="button" @click="beginEditFamily(f)">
+                        <i class="fa-solid fa-pen-to-square"></i> <span>Edit</span>
+                      </button>
+                    </td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Form -->
+        <section v-else class="page">
+          <form class="card form" @submit.prevent.stop="submitFamilyForm" novalidate autocomplete="off">
+            <div class="formtabs-bar">
+              <nav class="formtabs" role="tablist" aria-label="Family form sections">
+                <button v-for="t in FAMILY_TABS" :key="t.key" type="button" :class="{ active: familyTab===t.key }"
+                  role="tab" :aria-selected="familyTab===t.key" :aria-controls="'panel-'+t.key"
+                  @click="goFamilyTab(t.key)">
+                  {{ t.label }}
+                </button>
+              </nav>
+
+              <div class="formtabs-actions">
+                <button type="button" class="btn primary" @click="submitFamilyForm">
+                  {{ familyMode==='create' ? 'Create' : 'Update' }} <i class="far fa-save"></i>
+                </button>
+                <button type="button" class="btn" @click="goFamilyList">
+                  Cancel <i class="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Household -->
+            <section v-show="familyTab==='household'" id="panel-household" role="tabpanel" class="panel">
+              <fieldset :disabled="familyTab!=='household'">
+                <div class="item-header compact bordered">
+                  <h4 class="title">Household Information</h4>
+                </div>
+
+                <div>
+                  <div class="grid">
+                    <label v-for="f in familyFields.household.main" :key="f.col" :for="`household-${f.col}`"
+                      v-show="isVisible(f)">
+                      {{ f.label }}
+                      <small class="error" v-if="familyErrors?.household?.[f.col]">{{ familyErrors.household[f.col]
+                        }}</small>
+
+                      <template v-if="f.type === 'select'">
+                        <select class="input" :id="`household-${f.col}`" :name="`household.${f.col}`"
+                          v-model="familyForm[f.col]">
+                          <option disabled value="">-- choose --</option>
+                          <option v-for="opt in getOptions(f)" :key="String(opt.value)" :value="opt.value">
+                            {{ formatOptionLabel(opt) }}
+                          </option>
+                        </select>
+                      </template>
+
+                      <template v-else-if="f.type === 'checkbox'">
+                        <input class="check-lg" type="checkbox" :id="`household-${f.col}`" :name="`household.${f.col}`"
+                          v-model="familyForm[f.col]" />
+                      </template>
+
+                      <template v-else>
+                        <input class="input" :type="f.type || 'text'" :id="`household-${f.col}`"
+                          :name="`household.${f.col}`" v-model.trim="familyForm[f.col]" :placeholder="f.placeholder" />
+                      </template>
+                    </label>
+                  </div>
+
+                  <div class="grid">
+                    <label v-for="f in familyFields.household.address" :key="f.col" :for="`household-address-${f.col}`"
+                      v-show="isVisible(f)">
+                      {{ f.label }}
+                      <small class="error" v-if="familyErrors?.household?.[f.col]">{{ familyErrors.household[f.col]
+                        }}</small>
+
+                      <template v-if="f.type === 'select'">
+                        <select class="input" :id="`household-address-${f.col}`" :name="`household.address.${f.col}`"
+                          v-model="familyForm.address[f.col]">
+                          <option disabled value="">-- choose --</option>
+                          <option v-for="opt in getOptions(f)" :key="String(opt.value)" :value="opt.value">
+                            {{ formatOptionLabel(opt) }}
+                          </option>
+                        </select>
+                      </template>
+
+                      <template v-else-if="f.type === 'checkbox'">
+                        <input class="check-lg" type="checkbox" :id="`household-address-${f.col}`"
+                          :name="`household.address.${f.col}`" v-model="familyForm.address[f.col]" />
+                      </template>
+
+                      <template v-else>
+                        <input class="input" :type="f.type || 'text'" :id="`household-address-${f.col}`"
+                          :name="`household.address.${f.col}`" v-model.trim="familyForm.address[f.col]"
+                          :placeholder="f.placeholder" />
+                      </template>
+                    </label>
+                  </div>
+                </div>
+              </fieldset>
+            </section>
+
+            <!-- Contacts -->
+            <section v-show="familyTab==='contacts'" id="panel-contacts" role="tabpanel" class="panel">
+              <fieldset :disabled="familyTab!=='contacts'">
+                <div class="item-header compact bordered">
+                  <h4 class="title">Contacts Information</h4>
+                  <div class="actions">
+                    <button type="button" class="btn small accent" @click="addFamilyContact"><i
+                        class="fa-solid fa-plus"></i></button>
+                  </div>
+                  <div class="spacer"></div>
+                  <div class="pager" v-if="familyContactsMode==='single'">
+                    <button type="button" class="btn small" @click="prevFamilyContact"
+                      :disabled="familyContactsIndex===0">◀ </button>
+                    <span class="pager-status">{{ familyContactsIndex+1 }} / {{ familyForm.contacts.length }}</span>
+                    <button type="button" class="btn small" @click="nextFamilyContact"
+                      :disabled="familyContactsIndex>=familyForm.contacts.length-1"> ▶</button>
+                  </div>
+                  <div class="seg">
+                    <button type="button" :class="{ 'seg-active': familyContactsMode==='single' }"
+                      @click="familyContactsMode='single'">One</button>
+                    <button type="button" :class="{ 'seg-active': familyContactsMode==='all' }"
+                      @click="familyContactsMode='all'">All</button>
+                  </div>
+                </div>
+
+                <div v-for="row in visibleFamilyContacts" :key="'c'+row.i" class="row">
+                  <div class="item-header compact">
+                    <div class="title">
+                      <span>Contact {{row.i + 1}}: {{ row.c.lastName }}, {{ row.c.firstName }}</span>
+                    </div>
+                    <div class="actions">
+                      <button type="button" class="btn small danger" @click="removeFamilyContact(row.i)"
+                        v-if="familyForm.contacts.length>1">
+                        <i class="fa-solid fa-minus"></i>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="grid">
+                    <label v-for="f in familyFields.contacts" :key="f.col" :for="`contact-${row.i}-${f.col}`"
+                      v-show="isVisible(f)">
+                      {{ f.label }}
+                      <small class="error" v-if="familyErrors?.contacts?.[row.i]?.[f.col]">{{
+                        familyErrors.contacts[row.i][f.col] }}</small>
+
+                      <template v-if="f.type === 'select'">
+                        <select class="input" :id="`contact-${row.i}-${f.col}`" :name="`contact.${f.col}`"
+                          v-model="row.c[f.col]">
+                          <option disabled value="">-- choose --</option>
+                          <option v-for="opt in getOptions(f)" :key="String(opt.value)" :value="opt.value">
+                            {{ formatOptionLabel(opt) }}
+                          </option>
+                        </select>
+                      </template>
+
+                      <template v-else-if="f.type === 'checkbox'">
+                        <input class="check-lg" type="checkbox" :id="`contact-${row.i}-${f.col}`"
+                          :name="`contact.${f.col}`" v-model="row.c[f.col]" />
+                      </template>
+
+                      <template v-else>
+                        <input class="input" :type="f.type || 'text'" :id="`contact-${row.i}-${f.col}`"
+                          :name="`contact.${f.col}`" v-model.trim="row.c[f.col]" :placeholder="f.placeholder"
+                          @input="onFormFieldInput(row.c, f, $event)" @change="onFormFieldChange(row.c, f, $event)" />
+                      </template>
+                    </label>
+                  </div>
+                </div>
+              </fieldset>
+            </section>
+
+            <!-- Children -->
+            <section v-show="familyTab==='children'" id="panel-children" role="tabpanel" class="panel">
+              <fieldset :disabled="familyTab!=='children'">
+                <div class="item-header compact bordered">
+                  <h4 class="title">Children Information</h4>
+                  <span v-html="`of the <strong>${parentLastNamesDisplay}</strong> family`"></span>
+                  <div class="actions">
+                    <button type="button" class="btn small accent" @click="addFamilyChild">
+                      <i class="fa-solid fa-plus"></i>
+                    </button>
+                  </div>
+                  <div class="spacer"></div>
+                  <div class="pager" v-if="familyChildrenMode==='single'">
+                    <button type="button" class="btn small" @click="prevFamilyChild"
+                      :disabled="familyChildrenIndex===0">◀ </button>
+                    <span class="pager-status">{{ familyChildrenIndex+1 }} / {{ familyForm.children.length }}</span>
+                    <button type="button" class="btn small" @click="nextFamilyChild"
+                      :disabled="familyChildrenIndex>=familyForm.children.length-1"> ▶</button>
+                  </div>
+                  <div class="seg">
+                    <button type="button" :class="{ 'seg-active': familyChildrenMode==='single' }"
+                      @click="familyChildrenMode='single'">One</button>
+                    <button type="button" :class="{ 'seg-active': familyChildrenMode==='all' }"
+                      @click="familyChildrenMode='all'">All</button>
+                  </div>
+                </div>
+
+                <div v-for="row in visibleFamilyChildren" :key="'k'+row.i" class="row">
+                  <div class="item-header compact">
+                    <div class="title">
+                      <span>Child {{row.i + 1}} : {{displayChildNameAndAge(row.c)}}</span>
+                    </div>
+                    <div class="actions">
+                      <button type="button" class="btn small danger" @click="removeFamilyChild(row.i)"
+                        v-if="familyForm.children.length>1">
+                        <i class="fa-solid fa-minus"></i>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="grid">
+                    <label v-for="f in familyFields.children" :key="f.col" :for="`child-${row.i}-${f.col}`"
+                      v-show="isVisible(f)">
+                      {{ f.label }}
+                      <small class="error" v-if="familyErrors?.children?.[row.i]?.[f.col]">{{
+                        familyErrors.children[row.i][f.col] }}</small>
+
+                      <template v-if="f.type === 'select'">
+                        <select class="input" :id="`child-${row.i}-${f.col}`" :name="`child.${f.col}`"
+                          v-model="row.c[f.col]">
+                          <option disabled value="">-- choose --</option>
+                          <option v-for="opt in getOptions(f)" :key="String(opt.value)" :value="opt.value">
+                            {{ formatOptionLabel(opt) }}
+                          </option>
+                        </select>
+                      </template>
+
+                      <template v-else-if="f.type === 'checkbox'">
+                        <input class="check-lg" type="checkbox" :id="`child-${row.i}-${f.col}`" :name="`child.${f.col}`"
+                          v-model="row.c[f.col]" />
+                      </template>
+
+                      <template v-else>
+                        <input class="input" :type="f.type || 'text'" :id="`child-${row.i}-${f.col}`"
+                          :name="`child.${f.col}`" v-model.trim="row.c[f.col]" :placeholder="f.placeholder" />
+                      </template>
+                    </label>
+                  </div>
+                </div>
+              </fieldset>
+            </section>
+          </form>
+        </section>
+      </main>
+
+      <!-- ======================= EVENTS ======================= -->
+      <main v-else-if="currentSection==='events'">
+        <!-- List -->
+        <section v-if="eventView==='list'" class="page">
+          <div class="card">
+            <div class="toolbar">
+              <input v-model.trim="eventSearch" class="input" placeholder="Search by id, title, type, program, year…" />
+            </div>
+
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Event ID</th>
+                  <th>Program</th>
+                  <th>Type</th>
+                  <th>Description</th>
+                  <th>School Year</th>
+                  <th>Apply</th>
+                  <th>Open Window</th>
+                  <th>Schedule Fees</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="ev in filteredEventRows" :key="ev.id">
+                  <td>{{ ev.id }}</td>
+                  <td>{{ ev.programId }}</td>
+                  <td>{{ codeToLabel(ev.eventType, EVENT_TYPES) || '—' }}</td>
+                  <td>{{ ev.title }}</td>
+                  <td>{{ ev.year }}</td>
+                  <td>{{ codeToLabel(ev.level, LEVEL_OPTIONS) }}</td>
+                  <td>{{ ev.openDate }} → {{ ev.endDate }}</td>
+                  <td>{{ displayEventFees(ev) }}</td>
+                  <td class="actions">
+                    <button class="btn secondary" type="button" @click="beginEditEvent(ev)">
+                      <i class="fa-solid fa-pen-to-square"></i> Edit
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Form -->
+        <section v-else class="page">
+          <form class="card form" @submit.prevent.stop="submitEventForm" novalidate autocomplete="off">
+            <div class="formtabs-bar">
+              <nav class="formtabs" role="tablist" aria-label="Event Form Section">
+                <button type="button" :class="active" role="tab" :aria-selected="true" :aria-controls="panel-event">
+                  Event
+                </button>
+              </nav>
+
+              <div class="formtabs-actions">
+                <button type="button" class="btn primary" :disabled="!canSaveEvent" @click="submitEventForm">
+                  {{ eventMode==='create' ? 'Create' : 'Update' }} <i class="far fa-save"></i>
+                </button>
+                <button type="button" class="btn" @click="goEventList">
+                  Cancel <i class="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Meta-driven main fields -->
+            <section class="panel">
+              <fieldset>
+                <div class="item-header compact bordered">
+                  <h4 class="title">Event Information</h4>
+                </div>
+
+                <div class="grid">
+                  <label v-for="fld in eventFields.main" :key="fld.col"
+                    v-show="isMetaFieldVisible(fld, {form: eventForm})">
+                    {{ fld.label }}
+                    <small class="error" v-if="eventErrors[fld.col]">{{ eventErrors[fld.col] }}</small>
+
+                    <template v-if="fld.type === 'select'">
+                      <select class="input" v-model="eventForm[fld.col]" :id="`event-${fld.col}`"
+                        :name="`event-${fld.col}`"
+                        :disabled="getFieldDisabled(fld, {mode: eventMode, form: eventForm})">
+                        <option disabled value="">-- choose --</option>
+                        <option v-for="opt in getOptions(fld, {form: eventForm})" :key="String(opt.value)"
+                          :value="opt.value">
+                          {{ formatOptionLabel(opt) }}
+                        </option>
+                      </select>
+                    </template>
+
+                    <template v-else-if="fld.type === 'checkbox'">
+                      <input class="check-lg" type="checkbox" v-model="eventForm[fld.col]" :id="`event-${fld.col}`"
+                        :name="`event-${fld.col}`"
+                        :disabled="getFieldDisabled(fld, {mode: eventMode, form: eventForm})" />
+                    </template>
+
+                    <template v-else>
+                      <input class="input" :type="fld.type || 'text'" v-model.trim="eventForm[fld.col]"
+                        :id="`event-${fld.col}`" :name="`event-${fld.col}`" :placeholder="fld.placeholder"
+                        v-bind="fld.attrs || {}"
+                        :disabled="getFieldDisabled(fld, {mode: eventMode, form: eventForm})" />
+                    </template>
+                  </label>
+                </div>
+              </fieldset>
+              <!-- Fees -->
+              <div class="subpanel">
+                <div class="item-header compact bordered">
+                  <h4 class="title">Event Fees</h4>
+                  <div class="actions">
+                    <button class="btn small accent" type="button" @click="addEventFee">
+                      <i class="fa-solid fa-plus"></i>
+                    </button>
+                  </div>
+                  <div class="spacer"></div>
+                </div>
+
+                <div class="row" v-for="(row,i) in eventForm.fees" :key="'fee'+i">
+                  <div class="grid">
+                    <label v-for="rf in eventFields.feeRow" :key="rf.col">
+                      {{ rf.label }}
+                      <template v-if="rf.type==='select'">
+                        <select class="input" v-model="row[rf.col]" :id="`event-fee-${i}-${row[rf.col]}`"
+                          :name="`event-fee-${row[rf.col]}`">
+                          <option disabled value="">-- choose --</option>
+                          <option v-for="opt in getOptions(rf)" :key="String(opt.value)" :value="opt.value">
+                            {{ formatOptionLabel(opt) }}
+                          </option>
+                        </select>
+                      </template>
+                      <template v-else>
+                        <input class="input" :type="rf.type || 'text'" v-model.number="row[rf.col]"
+                          :id="`event-fee-${i}-${row[rf.col]}`" :name="`event-fee-${row[rf.col]}`"
+                          v-bind="rf.attrs || {}" />
+                      </template>
+                    </label>
+
+                    <div class="actions" style="align-self:end">
+                      <button class="btn small danger" type="button" @click="removeEventFee(i)"
+                        v-if="eventForm.fees.length>1">
+                        <i class="fa-solid fa-minus"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <small class="error" v-if="eventErrors.fees">{{ eventErrors.fees }}</small>
+              </div>
+
+              <!-- Prerequisites: shown for non-ADM only -->
+              <div class="subpanel" v-if="showPrerequisites">
+                <div class="item-header compact bordered">
+                  <h4 class="title">Event Prerequisites</h4>
+                  <div class="actions">
+                    <button class="btn small accent" type="button" @click="addEventPrerequisiteRow">
+                      <i class="fa-solid fa-plus"></i>
+                    </button>
+                  </div>
+                  <div class="spacer"></div>
+                </div>
+                <div class="row" v-for="(p, i) in eventForm.prerequisites" :key="'pre'+i">
+                  <!-- columns = 1 control + N relative displays + 1 actions -->
+                  <div class="grid grid--inline">
+                    <!-- Driving control (eventId) -->
+                    <template v-for="pf in eventFields.prerequisiteRow" :key="pf.col">
+                      <label>
+                        {{ pf.label }}
+                        <select class="input" v-model="p[pf.col]" :id="`event-prereq-${i}-${p[pf.col]}`"
+                          :name="`event-prereq-${p[pf.col]}`">
+                          <option disabled value="">-- choose --</option>
+                          <option v-for="opt in getOptions(pf, { index:i, form: eventForm })" :key="String(opt.value)"
+                            :value="opt.value">
+                            {{ formatOptionLabel(opt) }}
+                          </option>
+                        </select>
+                      </label>
+
+                      <!-- Relative displays as SIBLINGS (not nested inside the label above) -->
+                      <label v-for="rd in (pf.relativeDisplay || [])" :key="pf.col + '::' + rd.label">
+                        {{ rd.label }}
+                        <input class="input" disabled :value="relativeDisplayValue(p, pf, rd)" />
+                      </label>
+                    </template>
+
+                    <!-- Actions (delete row) -->
+                    <div class="actions" style="align-self:end">
+                      <button class="btn small danger" type="button" @click="removeEventPrerequisiteRow(i)"
+                        v-if="eventForm.prerequisites.length>1">
+                        <i class="fa-solid fa-minus"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <small class="error" v-if="eventErrors.prerequisites">{{ eventErrors.prerequisites }}</small>
+              </div>
+
+
+            </section>
+          </form>
+        </section>
+      </main>
+    </transition>
+  </div>
+
+  <!-- Axios -->
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <!-- Vue 3 -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <!-- App -->
+  <script src="./js/app.js"></script>
+</body>
+
+</html>

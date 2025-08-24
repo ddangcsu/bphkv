@@ -1,0 +1,645 @@
+/* put near the top of light.css */
+[v-cloak] {
+  visibility: hidden;
+}
+
+:root {
+  --bg: #f7fafc;
+  --card: #ffffff;
+  --muted: #64748b;
+  --text: #0f172a;
+  --border: #e5e7eb;
+  --border-strong: #d1d5db;
+  --primary: #2563eb;
+  --accent: #059669;
+  --danger: #ef4444;
+  --focus: #93c5fd;
+}
+
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* Topbar */
+.topbar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  height: 72px;
+  gap: 12px;
+  padding: 0px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--card);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+.crumb-text {
+  margin: 0;
+  font-size: 1em;
+}
+.link {
+  background: none;
+  border: none;
+  color: var(--primary);
+  cursor: pointer;
+  padding: 0;
+  text-decoration: none;
+}
+
+/* Status bar (center) */
+.statusbar {
+  display: flex;
+  justify-content: center;
+}
+.status {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 4px 16px;
+  border: 0px solid var(--border);
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.92rem;
+  background: #f8fafc;
+  color: #334155;
+}
+.status[data-variant="success"] {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+  color: #065f46;
+}
+.status[data-variant="warn"] {
+  background: #fffbeb;
+  border-color: #fde68a;
+  color: #92400e;
+}
+.status[data-variant="error"] {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+.status[data-variant="info"] {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  color: #1e3a8a;
+}
+
+/* Header action tabs (right) */
+.actionbar {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 8px;
+}
+
+/* Page + Card */
+.page {
+  padding: 8px;
+}
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 16px;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.06);
+}
+.toolbar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+/* Inputs */
+.input {
+  width: 100%;
+  padding: 6px 6px;
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+  border-radius: 5px;
+  font-size: 0.92rem;
+  outline: none;
+}
+.input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--focus);
+}
+
+/* Table */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: middle;
+}
+.table td {
+  padding: 5px 12px;
+  text-align: left;
+  vertical-align: middle;
+}
+.table tr {
+  border-bottom: 1px solid var(--border);
+}
+.table thead th {
+  background: #dceaf8;
+}
+
+/* zebra striping */
+table.table tbody tr:nth-child(odd) {
+  background: #f7f7fb;
+}
+table.table tbody tr:nth-child(even) {
+  background: #ffffff;
+}
+/* Badges */
+.badge {
+  text-transform: capitalize;
+  font-weight: 600;
+}
+.badge[data-variant="Yes"] {
+  color: var(--accent);
+}
+.badge[data-variant="No"] {
+  color: var(--danger);
+}
+
+/* buttons */
+/* Base defaults (mild step for light buttons) */
+.btn {
+  --btn-bg: #fff;
+  --btn-fg: var(--text);
+  --btn-border: var(--border-strong);
+
+  /* default hover/active strengths */
+  --hover-darken: 0.9; /* 90% of original lightness = subtle */
+  --active-darken: 0.82;
+
+  /* fallbacks for older browsers using color-mix */
+  --hover-mix: 90%;
+  --active-mix: 82%;
+
+  padding: 8px 14px;
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+  border: 1px solid var(--btn-border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* Variants */
+.btn.primary {
+  --btn-bg: var(--primary);
+  --btn-fg: #fff;
+  --btn-border: var(--primary);
+
+  /* 🔎 Stronger steps so the change is obvious on a saturated blue */
+  --hover-darken: 0.72; /* bigger jump */
+  --active-darken: 0.62; /* press state */
+  --hover-mix: 76%;
+  --active-mix: 66%;
+}
+
+.btn.secondary {
+  --btn-bg: var(--card);
+  --btn-fg: var(--text);
+  --btn-border: var(--border-strong);
+}
+
+.btn.accent {
+  --btn-bg: var(--accent);
+  --btn-fg: #fff;
+  --btn-border: var(--accent);
+}
+.btn.danger {
+  --btn-bg: var(--danger);
+  --btn-fg: #fff;
+  --btn-border: var(--danger);
+}
+
+/* Interactions only when enabled */
+@supports (color(from white oklch l c h)) {
+  .btn:not(:disabled, [aria-disabled="true"], .is-disabled):is(:hover, :focus-visible) {
+    background: color(from var(--btn-bg) oklch calc(l * var(--hover-darken)) c h);
+    border-color: color(from var(--btn-border) oklch calc(l * var(--hover-darken)) c h);
+  }
+  .btn:not(:disabled, [aria-disabled="true"], .is-disabled):active {
+    background: color(from var(--btn-bg) oklch calc(l * var(--active-darken)) c h);
+    border-color: color(from var(--btn-border) oklch calc(l * var(--active-darken)) c h);
+  }
+}
+
+/* Fallback for older browsers (no relative color syntax) */
+@supports not (color(from white oklch l c h)) {
+  .btn:not(:disabled, [aria-disabled="true"], .is-disabled):is(:hover, :focus-visible) {
+    background: color-mix(in oklch, var(--btn-bg) var(--hover-mix), black);
+    border-color: color-mix(in oklch, var(--btn-border) var(--hover-mix), black);
+  }
+  .btn:not(:disabled, [aria-disabled="true"], .is-disabled):active {
+    background: color-mix(in oklch, var(--btn-bg) var(--active-mix), black);
+    border-color: color-mix(in oklch, var(--btn-border) var(--active-mix), black);
+  }
+}
+
+/* Focus ring */
+.btn:not(:disabled, [aria-disabled="true"], .is-disabled):focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--focus);
+}
+
+/* Disabled: inert */
+.btn:is(:disabled, [aria-disabled="true"], .is-disabled) {
+  background: #cecfcf;
+  color: #fff;
+  border-color: #cecfcf;
+  cursor: not-allowed;
+  pointer-events: none;
+  box-shadow: none;
+}
+
+/* Small variant (unchanged) */
+.btn.small,
+.btn--sm {
+  padding: 4px 6px;
+  font-size: 0.9rem;
+  line-height: 1.1;
+  border-radius: 5px;
+}
+.btn.small i,
+.btn--sm i {
+  font-size: 0.9em;
+}
+
+/* Grid */
+.grid {
+  --cols: 4;
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  gap: 12px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+@media (max-width: 920px) {
+  .grid {
+    --cols: 2;
+  }
+}
+
+@media (max-width: 560px) {
+  .grid {
+    --cols: 1;
+  }
+}
+
+/* Rows */
+.subpanel {
+  --row-pad-y: 4px;
+  --row-pad-x: 12px;
+  margin-bottom: 10px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: var(--row-pad-y) var(--row-pad-x);
+}
+
+.row {
+  --row-pad-y: 4px;
+  --row-pad-x: 12px;
+  margin-bottom: 10px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: var(--row-pad-y) var(--row-pad-x);
+}
+
+/* zebra striping */
+.row:nth-child(odd) {
+  background: #f7f7fb;
+}
+.row:nth-child(even) {
+  background: #ffffff;
+}
+
+/* formtabs bar: tabs (left) + actions (right) */
+.formtabs-bar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 6px 0 0px;
+  border-bottom: 2px solid var(--border); /* one shared strip */
+  padding-bottom: 3px; /* prevent focus ring clipping */
+  flex-wrap: wrap; /* wrap on small screens */
+}
+
+/* Let the nav inherit all your existing .formtabs styles, but no extra strip */
+.formtabs-bar .formtabs {
+  border-bottom: none; /* strip now lives on .formtabs-bar */
+  margin: 0; /* tighten spacing when combined with actions */
+}
+
+/* Right-side actions */
+.formtabs-actions {
+  display: inline-flex;
+  gap: 8px;
+  margin-left: auto;
+  padding-bottom: 1px; /* align baseline with the tab faces */
+}
+
+/* Optional: keep this bar visible when scrolled (tweak top to your header height) */
+.formtabs-bar.sticky {
+  position: sticky;
+  top: 60px; /* adjust to match your header height */
+  background: var(--card);
+  z-index: 1;
+}
+
+/* formtabs */
+.formtabs {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  margin: 6px 0 12px;
+  border-bottom: solid var(--border);
+  padding-bottom: 1px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-gutter: stable;
+}
+.formtabs button {
+  appearance: none;
+  background: #f8fafc;
+  color: var(--muted);
+  border: 1px solid var(--border-strong);
+  border-bottom: none;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  padding: 8px 36px;
+  font-size: 0.95rem;
+  border-radius: 12px 12px 0 0;
+  margin-bottom: 0;
+}
+.formtabs button:hover {
+  background: #d9dcf6;
+  color: var(--text);
+}
+.formtabs button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--focus);
+}
+.formtabs .active {
+  background: #a8b2f6;
+  font-weight: 600;
+  color: var(--text);
+  border-color: var(--border-strong);
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 1px 0 var(--card), 0 -1px 0 rgba(0, 0, 0, 0.02) inset;
+}
+.formtabs .active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: var(--card);
+}
+
+/* Panels */
+.form .panel {
+  background: var(--card);
+  border: solid var(--border);
+  border-top: none;
+  border-radius: 0 0 6px 6px;
+  padding: 8px;
+}
+
+/* Item header */
+.item-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 44px;
+  padding: 4px 10px;
+  background: #e6e6f8;
+}
+.item-header.bordered {
+  margin-bottom: 12px;
+  border-bottom: solid var(--border);
+}
+.item-header .title {
+  margin: 0;
+  font-size: 0.95em;
+  font-weight: 600;
+  color: var(--text);
+}
+.item-header .spacer {
+  flex: 1 1 auto;
+}
+.item-header .actions {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.item-header.compact {
+  min-height: 0;
+}
+
+/* Errors */
+.error {
+  color: #b91c1c;
+  font-weight: 500;
+}
+
+/* put a red asterisk before any .error element's text */
+.error::before {
+  content: "*";
+  color: #d00;
+  font-weight: 700;
+  margin-right: 0.25em; /* adds a little space */
+}
+
+/* Checkbox (stacked label) */
+label:has(> input[type="checkbox"]) {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+label:has(> input[type="checkbox"]) input {
+  margin: 0;
+}
+.check-lg {
+  transform: scale(1.5);
+  transform-origin: center;
+  accent-color: #bbcdf6;
+}
+
+/* Segmented control + pager */
+.seg {
+  display: inline-flex;
+  border: 2px solid var(--border-strong);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.seg > button {
+  border: none;
+  background: #fff;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+.seg > button.seg-active {
+  background: #9fb4fa;
+  color: #101010;
+  font-weight: 600;
+}
+.pager {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0px 0;
+}
+.pager-status {
+  font-weight: 400;
+  margin-left: 2px;
+  margin-right: 2px;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.15s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* new: breadcrumb container used in header */
+.crumb {
+  display: flex;
+  align-items: center;
+}
+
+/* new: generic horizontal action group */
+.actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* optional: make action buttons in the table line up nicely */
+.table td.actions {
+  white-space: nowrap;
+}
+
+/* Header mini layout + menu */
+.leftbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.menu-wrap {
+  position: relative;
+}
+.menu-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.menu-panel {
+  position: absolute;
+  top: 44px;
+  left: 0;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.12);
+  padding: 8px;
+  min-width: 180px;
+  z-index: 5;
+}
+.menu-item {
+  width: 100%;
+  text-align: left;
+}
+.menu-panel .menu-item + .menu-item {
+  margin-top: 6px;
+}
+.clickout-overlay {
+  position: fixed;
+  inset: 0;
+  background: transparent;
+  z-index: 4;
+}
+/* Establish container padding vars (match your existing paddings) */
+/* Ensure the panel padding is addressable via a var */
+.form .panel {
+  --panel-pad: 8px; /* matches your .form .panel padding */
+  padding: var(--panel-pad);
+}
+
+/* Reset default fieldset spacing so it doesn't fight the bleed */
+.form .panel > fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* Make the fieldset header bleed to the panel edges */
+.form .panel > fieldset > .item-header {
+  /* break out of the panel padding on top + left/right */
+  margin-block-start: calc(var(--panel-pad) * -1);
+  margin-inline: calc(var(--panel-pad) * -1);
+  margin-block-end: 0;
+
+  /* inherit the panel’s top corner rounding + own bg */
+  border-top-left-radius: inherit;
+  border-top-right-radius: inherit;
+  background: var(--panel-header-bg, #e6e6f8);
+}
+
+/* (Optional) Keep content below the header from crowding it */
+.form .panel > fieldset > .item-header + .row {
+  margin-top: 8px;
+}
+
+.subpanel > .item-header {
+  margin-block-start: calc(var(--row-pad-y) * -1);
+  margin-inline: calc(var(--row-pad-x) * -1);
+  margin-block-end: 0;
+  margin-bottom: 10px;
+  border-top-left-radius: inherit;
+  border-top-right-radius: inherit;
+  background: var(--row-header-bg, #e6e6f8);
+}
+.row > .item-header {
+  margin-block-start: calc(var(--row-pad-y) * -1);
+  margin-inline: calc(var(--row-pad-x) * -1);
+  margin-block-end: 0;
+  border-top-left-radius: inherit;
+  border-top-right-radius: inherit;
+  background: var(--row-header-bg, #e6e6f8);
+}
+
+/* Limit checkbox click target to the box itself (stacked checkbox labels) */
+label:has(> input[type="checkbox"]) {
+  pointer-events: none; /* clicking the label won't toggle */
+}
+label:has(> input[type="checkbox"]) > input[type="checkbox"] {
+  pointer-events: auto; /* clicking the checkbox still works */
+}
