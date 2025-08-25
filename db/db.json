@@ -1,8 +1,7 @@
 {
   "families": [
     {
-      "_id": "FAM_300",
-      "id": "FAM_300",
+      "id": "F:8969-0294-6755",
       "parishMember": true,
       "parishNumber": "9012",
       "address": {
@@ -33,7 +32,7 @@
       ],
       "children": [
         {
-          "childId": "S:8c33307c-a54c-4356-93e8-e2b15c4106c7",
+          "childId": "S:1076-2594-1597",
           "lastName": "Green",
           "firstName": "Anna",
           "middle": "",
@@ -44,23 +43,20 @@
           "exception_notes": ""
         },
         {
-          "childId": "S:ca8dc252-452d-4b71-a923-5b2e724e0c4d",
+          "childId": "S:3370-9286-2450",
           "lastName": "Green",
           "firstName": "Ben",
           "middle": "William",
           "saintName": "Jacob",
           "dob": "2014-09-10T00:00:00.000Z",
-          "allergies": [
-            "peanuts"
-          ],
+          "allergies": ["peanuts"],
           "is_name_exception": false,
           "exception_notes": ""
         }
       ]
     },
     {
-      "_id": "FAM_100",
-      "id": "FAM_100",
+      "id": "F:6807-6648-6886",
       "parishMember": true,
       "parishNumber": "745",
       "address": {
@@ -100,7 +96,7 @@
       ],
       "children": [
         {
-          "childId": "S:d7ab9949-27d5-4448-b15a-0a0ce107a3ff",
+          "childId": "S:1465-0865-1718",
           "lastName": "Tran",
           "firstName": "Thomas",
           "middle": "Minh",
@@ -111,23 +107,20 @@
           "exceptionNotes": null
         },
         {
-          "childId": "S:ee87e331-403f-4dba-8ce1-5aa49b03b578",
+          "childId": "S:6650-1333-9616",
           "lastName": "Vuong",
           "firstName": "Evelyn",
           "middle": null,
           "saintName": "Maria",
           "dob": "2014-07-10T00:00:00.000Z",
-          "allergies": [
-            "shellfish"
-          ],
+          "allergies": ["shellfish"],
           "isNameException": true,
           "exceptionNotes": "Stepdaughter"
         }
       ]
     },
     {
-      "_id": "FAM_101",
-      "id": "FAM_101",
+      "id": "F:4421-8650-9883",
       "parishMember": false,
       "parishNumber": null,
       "address": {
@@ -158,23 +151,20 @@
       ],
       "children": [
         {
-          "childId": "S:c337340c-86f5-4249-bdb7-3d9a16b284e8",
+          "childId": "S:9421-8721-5139",
           "lastName": "Duong",
           "firstName": "Teresa",
           "middle": null,
           "saintName": "Madeline",
           "dob": "2018-02-10T00:00:00.000Z",
-          "allergies": [
-            "milk"
-          ],
+          "allergies": ["milk"],
           "isNameException": true,
           "exceptionNotes": "Niece, full guardianship"
         }
       ]
     },
     {
-      "id": "FAM_102",
-      "_id": "FAM_102",
+      "id": "F:7088-1898-8223",
       "parishMember": true,
       "parishNumber": "745",
       "address": {
@@ -205,20 +195,18 @@
       ],
       "children": [
         {
-          "childId": "S:d1c24cf9-3a62-4690-bda6-b67346531126",
+          "childId": "S:2743-5009-0569",
           "lastName": "Williams",
           "firstName": "John",
           "middle": "Tuan",
           "saintName": "Paul",
           "dob": "2015-03-14T00:00:00.000Z",
-          "allergies": [
-            "milk"
-          ],
+          "allergies": ["milk"],
           "isNameException": false,
           "exceptionNotes": null
         },
         {
-          "childId": "S:d067f115-9a47-4752-8213-5e9ed6df4407",
+          "childId": "S:9981-4520-9068",
           "lastName": "Do",
           "firstName": "Trung",
           "middle": "Hieu",
@@ -229,23 +217,20 @@
           "exceptionNotes": null
         },
         {
-          "childId": "S:0e6146c2-0a0a-40f5-84a2-d4266638aff0",
+          "childId": "S:1338-4737-9907",
           "lastName": "Williams",
           "firstName": "Sophia",
           "middle": "Nhi",
           "saintName": "Maria",
           "dob": "2018-09-15T00:00:00.000Z",
-          "allergies": [
-            "cheese"
-          ],
+          "allergies": ["cheese"],
           "isNameException": false,
           "exceptionNotes": null
         }
       ]
     },
     {
-      "id": "FAM_103",
-      "_id": "FAM_103",
+      "id": "F:7649-2651-4181",
       "parishMember": true,
       "parishNumber": "713",
       "address": {
@@ -276,7 +261,7 @@
       ],
       "children": [
         {
-          "childId": "S:91489867-5a85-4f12-b1d2-62e5191b0a5e",
+          "childId": "S:4088-1886-6806",
           "lastName": "Bui",
           "firstName": "Hellen",
           "middle": "Van An",
@@ -287,25 +272,20 @@
           "exceptionNotes": null
         },
         {
-          "childId": "S:b6266985-b16f-47ec-bf68-7c9d195edf17",
+          "childId": "S:8904-4061-1132",
           "lastName": "Bui",
           "firstName": "Tiffany",
           "middle": "Thuc Nhi",
           "saintName": "Anna",
           "dob": "2018-05-23T00:00:00.000Z",
-          "allergies": [
-            "milk",
-            "cheese",
-            "peanuts"
-          ],
+          "allergies": ["milk", "cheese", "peanuts"],
           "isNameException": false,
           "exceptionNotes": null
         }
       ]
     },
     {
-      "id": "FAM_104",
-      "_id": "FAM_104",
+      "id": "F:4007-6751-9912",
       "parishMember": false,
       "parishNumber": null,
       "address": {
@@ -336,7 +316,7 @@
       ],
       "children": [
         {
-          "childId": "S:a0ef2250-3a0a-4675-bdef-c18f2c2c5b3a",
+          "childId": "S:5926-7314-1094",
           "lastName": "Vuong",
           "firstName": "Ton",
           "middle": null,
@@ -347,23 +327,20 @@
           "exceptionNotes": "Previous marriage"
         },
         {
-          "childId": "S:e953dc0c-55d7-41dc-85fb-8c5bb9db5c40",
+          "childId": "S:2117-6266-8521",
           "lastName": "Huynh",
           "firstName": "Teresa",
           "middle": "Thuy",
           "saintName": "Cecilia",
           "dob": "2015-07-15T00:00:00.000Z",
-          "allergies": [
-            "grass"
-          ],
+          "allergies": ["grass"],
           "isNameException": false,
           "exceptionNotes": null
         }
       ]
     },
     {
-      "id": "FAM_105",
-      "_id": "FAM_105",
+      "id": "F:6275-8102-0982",
       "parishMember": true,
       "parishNumber": "998",
       "address": {
@@ -394,7 +371,7 @@
       ],
       "children": [
         {
-          "childId": "S:80470227-4af1-4b3f-98fd-fcb516c04ede",
+          "childId": "S:8520-7219-8961",
           "lastName": "Vuong",
           "firstName": "William",
           "middle": "Minh",
@@ -407,72 +384,9 @@
       ]
     }
   ],
-  "registrations": [
-    {
-      "id": "REGF_mah5g8",
-      "eventId": "REG_ADM_2025",
-      "familyId": "FAM_100",
-      "year": 2025,
-      "level": "family",
-      "status": "paid",
-      "payments": [
-        {
-          "code": "SECURITY",
-          "unitAmount": 30,
-          "quantity": 1,
-          "totalAmount": 30,
-          "method": "cash",
-          "txnRef": null,
-          "receiptNo": "R001A",
-          "receivedBy": "Alice",
-          "paidAt": "2025-08-20T10:14:00.000Z"
-        },
-        {
-          "code": "NONMEMBER",
-          "unitAmount": 50,
-          "quantity": 1,
-          "totalAmount": 50,
-          "method": "cash",
-          "txnRef": null,
-          "receiptNo": "R001B",
-          "receivedBy": "Alice",
-          "paidAt": "2025-08-20T10:14:30.000Z"
-        }
-      ]
-    },
-    {
-      "id": "REGC_s8k2p1",
-      "eventId": "REG_TNTT_2025",
-      "familyId": "FAM_100",
-      "year": 2025,
-      "level": "child",
-      "children": [
-        {
-          "childId": "S:d7ab9949-27d5-4448-b15a-0a0ce107a3ff"
-        },
-        {
-          "childId": "S:ee87e331-403f-4dba-8ce1-5aa49b03b578"
-        }
-      ],
-      "status": "paid",
-      "payments": [
-        {
-          "code": "REGISTRATION",
-          "unitAmount": 120,
-          "quantity": 2,
-          "totalAmount": 240,
-          "method": "zelle",
-          "txnRef": "Z-123basad",
-          "receiptNo": "R002",
-          "receivedBy": "Bob",
-          "paidAt": "2025-08-20T10:30:00.000Z"
-        }
-      ]
-    }
-  ],
   "events": [
     {
-      "id": "REG_ADM_2025",
+      "id": "E:4258-2776-0359",
       "programId": "BPH",
       "title": "Admin/Security (2025-26)",
       "year": 2025,
@@ -493,7 +407,7 @@
       "eventType": "ADM"
     },
     {
-      "id": "REG_TNTT_2025",
+      "id": "E:5216-9373-5181",
       "programId": "TNTT",
       "title": "TNTT Registration 2025-26",
       "year": 2025,
@@ -502,7 +416,7 @@
       "endDate": "2025-10-01",
       "prerequisites": [
         {
-          "eventId": "REG_ADM_2025"
+          "eventId": "E:4258-2776-0359"
         }
       ],
       "fees": [
@@ -514,7 +428,7 @@
       "eventType": "REG"
     },
     {
-      "id": "EVT_2025_DoanCamp",
+      "id": "E:7682-1175-2496",
       "programId": "TNTT",
       "title": "TNTT Doan Camp 3/1/2026 3 days",
       "year": 2025,
@@ -523,7 +437,7 @@
       "endDate": "2026-02-01",
       "prerequisites": [
         {
-          "eventId": "REG_TNTT_2025"
+          "eventId": "E:5216-9373-5181"
         }
       ],
       "fees": [
@@ -533,6 +447,263 @@
         }
       ],
       "eventType": "EVT"
+    }
+  ],
+  "registrations": [
+    {
+      "id": "R:1353-9958-9565",
+      "eventId": "E:4258-2776-0359",
+      "familyId": "F:7649-2651-4181",
+      "status": "paid",
+      "event": {
+        "title": "Admin/Security (2025-26)",
+        "year": 2025,
+        "programId": "BPH",
+        "eventType": "ADM"
+      },
+      "contacts": [
+        {
+          "name": "Bui, Thomas Minh",
+          "relationship": "Father",
+          "phone": "(714) 868-4575"
+        },
+        {
+          "name": "Vuong, Christiana Huong",
+          "relationship": "Mother",
+          "phone": "(949) 758-4685"
+        }
+      ],
+      "children": [],
+      "payments": [
+        {
+          "code": "SECF",
+          "amount": 30,
+          "quantity": 1,
+          "method": "cash",
+          "txnRef": null,
+          "receiptNo": "R101A",
+          "receivedBy": "Alice",
+          "paidAt": "2025-08-21T09:05:00.000Z"
+        },
+        {
+          "code": "NPMF",
+          "amount": 50,
+          "quantity": 1,
+          "method": "cash",
+          "txnRef": null,
+          "receiptNo": "R101B",
+          "receivedBy": "Alice",
+          "paidAt": "2025-08-21T09:05:30.000Z"
+        }
+      ],
+      "acceptedBy": "Admin Staff",
+      "createdAt": "2025-08-21T09:05:00.000Z",
+      "updatedAt": "2025-08-21T09:05:30.000Z"
+    },
+    {
+      "id": "R:4241-8122-9737",
+      "eventId": "E:4258-2776-0359",
+      "familyId": "F:7088-1898-8223",
+      "status": "paid",
+      "event": {
+        "title": "Admin/Security (2025-26)",
+        "year": 2025,
+        "programId": "BPH",
+        "eventType": "ADM"
+      },
+      "contacts": [
+        {
+          "name": "Do, Yen Thi",
+          "relationship": "Mother",
+          "phone": "(562) 475-1425"
+        },
+        {
+          "name": "Williams, Jeff Jr",
+          "relationship": "Father",
+          "phone": "(856) 451-3512"
+        }
+      ],
+      "children": [],
+      "payments": [
+        {
+          "code": "SECF",
+          "amount": 30,
+          "quantity": 1,
+          "method": "check",
+          "txnRef": "CHK-221",
+          "receiptNo": "R305A",
+          "receivedBy": "Alice",
+          "paidAt": "2025-08-21T10:40:00.000Z"
+        },
+        {
+          "code": "NPMF",
+          "amount": 50,
+          "quantity": 1,
+          "method": "zelle",
+          "txnRef": "Z-9981",
+          "receiptNo": "R305B",
+          "receivedBy": "Alice",
+          "paidAt": "2025-08-21T10:42:00.000Z"
+        }
+      ],
+      "acceptedBy": "Alice",
+      "createdAt": "2025-08-21T10:39:30.000Z",
+      "updatedAt": "2025-08-21T10:42:00.000Z"
+    },
+    {
+      "id": "R:2852-4524-4686",
+      "eventId": "E:5216-9373-5181",
+      "familyId": "F:6807-6648-6886",
+      "status": "paid",
+      "event": {
+        "title": "TNTT Registration 2025-26",
+        "year": 2025,
+        "programId": "TNTT",
+        "eventType": "REG"
+      },
+      "contacts": [
+        {
+          "name": "Vu, Emily Thanh",
+          "relationship": "Mother",
+          "phone": "(714) 865-1475"
+        },
+        {
+          "name": "Tran, Tom Toan",
+          "relationship": "Father",
+          "phone": "(949) 951-4751"
+        }
+      ],
+      "children": [
+        {
+          "childId": "S:1465-0865-1718",
+          "fullName": "Tran, Thomas Minh",
+          "dob": "2018-04-17T00:00:00.000Z",
+          "allergies": [],
+          "status": "confirmed"
+        },
+        {
+          "childId": "S:6650-1333-9616",
+          "fullName": "Vuong, Evelyn",
+          "dob": "2014-07-10T00:00:00.000Z",
+          "allergies": ["shellfish"],
+          "status": "confirmed"
+        }
+      ],
+      "payments": [
+        {
+          "code": "REGF",
+          "amount": 300,
+          "quantity": 2,
+          "method": "zelle",
+          "txnRef": "Z-123basad",
+          "receiptNo": "R002",
+          "receivedBy": "Bob",
+          "paidAt": "2025-08-20T10:30:00.000Z"
+        }
+      ],
+      "acceptedBy": "Vu, Emily Thanh",
+      "createdAt": "2025-08-20T10:28:50.000Z",
+      "updatedAt": "2025-08-20T10:30:00.000Z"
+    },
+    {
+      "id": "R:4331-0291-5157",
+      "eventId": "EVT_2025_DoanCamp",
+      "familyId": "F:6807-6648-6886",
+      "status": "paid",
+      "event": {
+        "title": "TNTT Doan Camp 3/1/2026 3 days",
+        "year": 2025,
+        "programId": "TNTT",
+        "eventType": "EVT"
+      },
+      "contacts": [
+        {
+          "name": "Vu, Emily Thanh",
+          "relationship": "Mother",
+          "phone": "(714) 865-1475"
+        },
+        {
+          "name": "Tran, Tom Toan",
+          "relationship": "Father",
+          "phone": "(949) 951-4751"
+        }
+      ],
+      "children": [
+        {
+          "childId": "S:6650-1333-9616",
+          "fullName": "Vuong, Evelyn",
+          "dob": "2014-07-10T00:00:00.000Z",
+          "allergies": ["shellfish"],
+          "status": "confirmed",
+          "consentSignedBy": "Tran, Tom Toan",
+          "consentSignedAt": "2026-01-10T11:25:00.000Z"
+        }
+      ],
+      "payments": [
+        {
+          "code": "EVTF",
+          "amount": 55,
+          "quantity": 1,
+          "method": "check",
+          "txnRef": "523",
+          "receiptNo": "R050",
+          "receivedBy": "Timothy",
+          "paidAt": "2026-01-10T11:30:00.000Z"
+        }
+      ],
+      "acceptedBy": "Camp Admin",
+      "createdAt": "2026-01-10T11:24:30.000Z",
+      "updatedAt": "2026-01-10T11:30:00.000Z"
+    },
+    {
+      "id": "R:5939-6341-8143",
+      "eventId": "E:4258-2776-0359",
+      "familyId": "F:6807-6648-6886",
+      "status": "paid",
+      "event": {
+        "title": "Admin/Security (2025-26)",
+        "year": 2025,
+        "programId": "BPH",
+        "eventType": "ADM"
+      },
+      "contacts": [
+        {
+          "name": "Vu, Emily Thanh",
+          "relationship": "Mother",
+          "phone": "(714) 865-1475"
+        },
+        {
+          "name": "Tran, Tom Toan",
+          "relationship": "Father",
+          "phone": "(949) 951-4751"
+        }
+      ],
+      "children": [],
+      "payments": [
+        {
+          "code": "SECF",
+          "amount": 30,
+          "quantity": 1,
+          "method": "cash",
+          "txnRef": null,
+          "receiptNo": "R-ADM-A",
+          "receivedBy": "Alice",
+          "paidAt": "2025-08-25T00:05:00.000Z"
+        },
+        {
+          "code": "NPMF",
+          "amount": 50,
+          "quantity": 1,
+          "method": "cash",
+          "txnRef": null,
+          "receiptNo": "R-ADM-B",
+          "receivedBy": "Alice",
+          "paidAt": "2025-08-25T00:05:30.000Z"
+        }
+      ],
+      "acceptedBy": "Vu, Emily Thanh",
+      "createdAt": "2025-08-25T00:00:00.000Z",
+      "updatedAt": "2025-08-25T00:00:00.000Z"
     }
   ]
 }

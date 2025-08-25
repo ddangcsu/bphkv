@@ -160,7 +160,8 @@
 
                       <template v-if="f.type === 'select'">
                         <select class="input" :id="`household-${f.col}`" :name="`household.${f.col}`"
-                          v-model="familyForm[f.col]">
+                          v-model="familyForm[f.col]"
+                          :disabled="getFieldDisabled(f, {mode: familyMode, form: familyForm})">
                           <option disabled value="">-- choose --</option>
                           <option v-for="opt in getOptions(f)" :key="String(opt.value)" :value="opt.value">
                             {{ formatOptionLabel(opt) }}
@@ -170,12 +171,14 @@
 
                       <template v-else-if="f.type === 'checkbox'">
                         <input class="check-lg" type="checkbox" :id="`household-${f.col}`" :name="`household.${f.col}`"
+                          :disabled="getFieldDisabled(f, {mode: familyMode, form: familyForm})"
                           v-model="familyForm[f.col]" />
                       </template>
 
                       <template v-else>
                         <input class="input" :type="f.type || 'text'" :id="`household-${f.col}`"
-                          :name="`household.${f.col}`" v-model.trim="familyForm[f.col]" :placeholder="f.placeholder" />
+                          :name="`household.${f.col}`" v-model.trim="familyForm[f.col]" :placeholder="f.placeholder"
+                          :disabled="getFieldDisabled(f, {mode: familyMode, form: familyForm})" />
                       </template>
                     </label>
                   </div>
@@ -189,7 +192,8 @@
 
                       <template v-if="f.type === 'select'">
                         <select class="input" :id="`household-address-${f.col}`" :name="`household.address.${f.col}`"
-                          v-model="familyForm.address[f.col]">
+                          v-model="familyForm.address[f.col]"
+                          :disabled="getFieldDisabled(f, {mode: familyMode, form: familyForm})">
                           <option disabled value="">-- choose --</option>
                           <option v-for="opt in getOptions(f)" :key="String(opt.value)" :value="opt.value">
                             {{ formatOptionLabel(opt) }}
@@ -199,11 +203,13 @@
 
                       <template v-else-if="f.type === 'checkbox'">
                         <input class="check-lg" type="checkbox" :id="`household-address-${f.col}`"
+                          :disabled="getFieldDisabled(f, {mode: familyMode, form: familyForm})"
                           :name="`household.address.${f.col}`" v-model="familyForm.address[f.col]" />
                       </template>
 
                       <template v-else>
                         <input class="input" :type="f.type || 'text'" :id="`household-address-${f.col}`"
+                          :disabled="getFieldDisabled(f, {mode: familyMode, form: familyForm})"
                           :name="`household.address.${f.col}`" v-model.trim="familyForm.address[f.col]"
                           :placeholder="f.placeholder" />
                       </template>
@@ -260,7 +266,7 @@
 
                       <template v-if="f.type === 'select'">
                         <select class="input" :id="`contact-${row.i}-${f.col}`" :name="`contact.${f.col}`"
-                          v-model="row.c[f.col]">
+                          :disabled="getFieldDisabled(f, {mode: familyMode, form: familyForm})" v-model="row.c[f.col]">
                           <option disabled value="">-- choose --</option>
                           <option v-for="opt in getOptions(f)" :key="String(opt.value)" :value="opt.value">
                             {{ formatOptionLabel(opt) }}
@@ -270,11 +276,13 @@
 
                       <template v-else-if="f.type === 'checkbox'">
                         <input class="check-lg" type="checkbox" :id="`contact-${row.i}-${f.col}`"
+                          :disabled="getFieldDisabled(f, {mode: familyMode, form: familyForm})"
                           :name="`contact.${f.col}`" v-model="row.c[f.col]" />
                       </template>
 
                       <template v-else>
                         <input class="input" :type="f.type || 'text'" :id="`contact-${row.i}-${f.col}`"
+                          :disabled="getFieldDisabled(f, {mode: familyMode, form: familyForm})"
                           :name="`contact.${f.col}`" v-model.trim="row.c[f.col]" :placeholder="f.placeholder"
                           @input="onFormFieldInput(row.c, f, $event)" @change="onFormFieldChange(row.c, f, $event)" />
                       </template>
@@ -314,7 +322,7 @@
                 <div v-for="row in visibleFamilyChildren" :key="'k'+row.i" class="row">
                   <div class="item-header compact">
                     <div class="title">
-                      <span>Child {{row.i + 1}} : {{displayChildNameAndAge(row.c)}}</span>
+                      <span>ID: {{row.c.childId}} : {{displayChildNameAndAge(row.c)}}</span>
                     </div>
                     <div class="actions">
                       <button type="button" class="btn small danger" @click="removeFamilyChild(row.i)"
@@ -333,7 +341,7 @@
 
                       <template v-if="f.type === 'select'">
                         <select class="input" :id="`child-${row.i}-${f.col}`" :name="`child.${f.col}`"
-                          v-model="row.c[f.col]">
+                          :disabled="getFieldDisabled(f, {mode: familyMode, form: familyForm})" v-model="row.c[f.col]">
                           <option disabled value="">-- choose --</option>
                           <option v-for="opt in getOptions(f)" :key="String(opt.value)" :value="opt.value">
                             {{ formatOptionLabel(opt) }}
@@ -343,12 +351,14 @@
 
                       <template v-else-if="f.type === 'checkbox'">
                         <input class="check-lg" type="checkbox" :id="`child-${row.i}-${f.col}`" :name="`child.${f.col}`"
+                          :disabled="getFieldDisabled(f, {mode: familyMode, form: familyForm})"
                           v-model="row.c[f.col]" />
                       </template>
 
                       <template v-else>
                         <input class="input" :type="f.type || 'text'" :id="`child-${row.i}-${f.col}`"
-                          :name="`child.${f.col}`" v-model.trim="row.c[f.col]" :placeholder="f.placeholder" />
+                          :disabled="getFieldDisabled(f, {mode: familyMode, form: familyForm})" :name="`child.${f.col}`"
+                          v-model.trim="row.c[f.col]" :placeholder="f.placeholder" />
                       </template>
                     </label>
                   </div>
@@ -481,6 +491,7 @@
                       {{ rf.label }}
                       <template v-if="rf.type==='select'">
                         <select class="input" v-model="row[rf.col]" :id="`event-fee-${i}-${row[rf.col]}`"
+                          :disabled="getFieldDisabled(rf, {mode: eventMode, form: eventForm})"
                           :name="`event-fee-${row[rf.col]}`">
                           <option disabled value="">-- choose --</option>
                           <option v-for="opt in getOptions(rf)" :key="String(opt.value)" :value="opt.value">
@@ -490,6 +501,7 @@
                       </template>
                       <template v-else>
                         <input class="input" :type="rf.type || 'text'" v-model.number="row[rf.col]"
+                          :disabled="getFieldDisabled(rf, {mode: eventMode, form: eventForm})"
                           :id="`event-fee-${i}-${row[rf.col]}`" :name="`event-fee-${row[rf.col]}`"
                           v-bind="rf.attrs || {}" />
                       </template>
@@ -525,6 +537,7 @@
                       <label>
                         {{ pf.label }}
                         <select class="input" v-model="p[pf.col]" :id="`event-prereq-${i}-${p[pf.col]}`"
+                          :disabled="getFieldDisabled(pf, {mode: eventMode, form: eventForm})"
                           :name="`event-prereq-${p[pf.col]}`">
                           <option disabled value="">-- choose --</option>
                           <option v-for="opt in getOptions(pf, { index:i, form: eventForm })" :key="String(opt.value)"
