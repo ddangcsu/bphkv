@@ -484,16 +484,6 @@
           "receiptNo": "R101A",
           "receivedBy": "Alice",
           "paidAt": "2025-08-21T09:05:00.000Z"
-        },
-        {
-          "code": "NPMF",
-          "amount": 50,
-          "quantity": 1,
-          "method": "cash",
-          "txnRef": null,
-          "receiptNo": "R101B",
-          "receivedBy": "Alice",
-          "paidAt": "2025-08-21T09:05:30.000Z"
         }
       ],
       "acceptedBy": "Admin Staff",
@@ -534,16 +524,6 @@
           "receiptNo": "R305A",
           "receivedBy": "Alice",
           "paidAt": "2025-08-21T10:40:00.000Z"
-        },
-        {
-          "code": "NPMF",
-          "amount": 50,
-          "quantity": 1,
-          "method": "zelle",
-          "txnRef": "Z-9981",
-          "receiptNo": "R305B",
-          "receivedBy": "Alice",
-          "paidAt": "2025-08-21T10:42:00.000Z"
         }
       ],
       "acceptedBy": "Alice",

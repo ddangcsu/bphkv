@@ -70,22 +70,22 @@ body {
   background: #f8fafc;
   color: #334155;
 }
-.status[data-variant="success"] {
+.status[data-variant='success'] {
   background: #ecfdf5;
   border-color: #a7f3d0;
   color: #065f46;
 }
-.status[data-variant="warn"] {
+.status[data-variant='warn'] {
   background: #fffbeb;
   border-color: #fde68a;
   color: #92400e;
 }
-.status[data-variant="error"] {
+.status[data-variant='error'] {
   background: #fef2f2;
   border-color: #fecaca;
   color: #991b1b;
 }
-.status[data-variant="info"] {
+.status[data-variant='info'] {
   background: #eff6ff;
   border-color: #bfdbfe;
   color: #1e3a8a;
@@ -167,10 +167,10 @@ table.table tbody tr:nth-child(even) {
   text-transform: capitalize;
   font-weight: 600;
 }
-.badge[data-variant="Yes"] {
+.badge[data-variant='Yes'] {
   color: var(--accent);
 }
-.badge[data-variant="No"] {
+.badge[data-variant='No'] {
   color: var(--danger);
 }
 
@@ -230,11 +230,11 @@ table.table tbody tr:nth-child(even) {
 
 /* Interactions only when enabled */
 @supports (color(from white oklch l c h)) {
-  .btn:not(:disabled, [aria-disabled="true"], .is-disabled):is(:hover, :focus-visible) {
+  .btn:not(:disabled, [aria-disabled='true'], .is-disabled):is(:hover, :focus-visible) {
     background: color(from var(--btn-bg) oklch calc(l * var(--hover-darken)) c h);
     border-color: color(from var(--btn-border) oklch calc(l * var(--hover-darken)) c h);
   }
-  .btn:not(:disabled, [aria-disabled="true"], .is-disabled):active {
+  .btn:not(:disabled, [aria-disabled='true'], .is-disabled):active {
     background: color(from var(--btn-bg) oklch calc(l * var(--active-darken)) c h);
     border-color: color(from var(--btn-border) oklch calc(l * var(--active-darken)) c h);
   }
@@ -242,24 +242,24 @@ table.table tbody tr:nth-child(even) {
 
 /* Fallback for older browsers (no relative color syntax) */
 @supports not (color(from white oklch l c h)) {
-  .btn:not(:disabled, [aria-disabled="true"], .is-disabled):is(:hover, :focus-visible) {
+  .btn:not(:disabled, [aria-disabled='true'], .is-disabled):is(:hover, :focus-visible) {
     background: color-mix(in oklch, var(--btn-bg) var(--hover-mix), black);
     border-color: color-mix(in oklch, var(--btn-border) var(--hover-mix), black);
   }
-  .btn:not(:disabled, [aria-disabled="true"], .is-disabled):active {
+  .btn:not(:disabled, [aria-disabled='true'], .is-disabled):active {
     background: color-mix(in oklch, var(--btn-bg) var(--active-mix), black);
     border-color: color-mix(in oklch, var(--btn-border) var(--active-mix), black);
   }
 }
 
 /* Focus ring */
-.btn:not(:disabled, [aria-disabled="true"], .is-disabled):focus-visible {
+.btn:not(:disabled, [aria-disabled='true'], .is-disabled):focus-visible {
   outline: none;
   box-shadow: 0 0 0 3px var(--focus);
 }
 
 /* Disabled: inert */
-.btn:is(:disabled, [aria-disabled="true"], .is-disabled) {
+.btn:is(:disabled, [aria-disabled='true'], .is-disabled) {
   background: #cecfcf;
   color: #fff;
   border-color: #cecfcf;
@@ -284,11 +284,20 @@ table.table tbody tr:nth-child(even) {
 /* Grid */
 .grid {
   --cols: 4;
+  --gap: 0.75rem;
   display: grid;
   grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
-  gap: 12px;
+  gap: var(--gap);
   padding-top: 8px;
   padding-bottom: 8px;
+}
+
+/* new variants just change the variable */
+.grid.col3 {
+  --cols: 3;
+}
+.grid.col5 {
+  --cols: 5;
 }
 
 @media (max-width: 920px) {
@@ -409,7 +418,7 @@ table.table tbody tr:nth-child(even) {
   box-shadow: 0 1px 0 var(--card), 0 -1px 0 rgba(0, 0, 0, 0.02) inset;
 }
 .formtabs .active::after {
-  content: "";
+  content: '';
   position: absolute;
   left: 0;
   right: 0;
@@ -467,20 +476,20 @@ table.table tbody tr:nth-child(even) {
 
 /* put a red asterisk before any .error element's text */
 .error::before {
-  content: "*";
+  content: '*';
   color: #d00;
   font-weight: 700;
   margin-right: 0.25em; /* adds a little space */
 }
 
 /* Checkbox (stacked label) */
-label:has(> input[type="checkbox"]) {
+label:has(> input[type='checkbox']) {
   display: inline-flex;
   flex-direction: column;
   align-items: center;
   gap: 10px;
 }
-label:has(> input[type="checkbox"]) input {
+label:has(> input[type='checkbox']) input {
   margin: 0;
 }
 .check-lg {
@@ -570,7 +579,7 @@ label:has(> input[type="checkbox"]) input {
   border-radius: 6px;
   box-shadow: 0 6px 20px rgba(15, 23, 42, 0.12);
   padding: 8px;
-  min-width: 180px;
+  min-width: 250px;
   z-index: 5;
 }
 .menu-item {
@@ -637,9 +646,9 @@ label:has(> input[type="checkbox"]) input {
 }
 
 /* Limit checkbox click target to the box itself (stacked checkbox labels) */
-label:has(> input[type="checkbox"]) {
+label:has(> input[type='checkbox']) {
   pointer-events: none; /* clicking the label won't toggle */
 }
-label:has(> input[type="checkbox"]) > input[type="checkbox"] {
+label:has(> input[type='checkbox']) > input[type='checkbox'] {
   pointer-events: auto; /* clicking the checkbox still works */
 }
