@@ -117,6 +117,27 @@ body {
   margin-bottom: 12px;
 }
 
+/* toolbar filter cluster */
+.toolbar-filters {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-left: 0.5rem; /* space after search input */
+}
+
+/* a single filter control (label + select) */
+.toolbar-filter {
+  display: inline-flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+/* keep selects wide enough for labels */
+.toolbar-filter .input {
+  min-width: 12rem;
+}
+
 /* Inputs */
 .input {
   width: 100%;
@@ -162,6 +183,13 @@ table.table tbody tr:nth-child(odd) {
 table.table tbody tr:nth-child(even) {
   background: #ffffff;
 }
+
+/* optional: make inline links look like links inside tables */
+.table a.link {
+  text-decoration: none;
+  cursor: crosshair;
+}
+
 /* Badges */
 .badge {
   text-transform: capitalize;

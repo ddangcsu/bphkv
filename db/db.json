@@ -103,7 +103,7 @@
           "saintName": "John",
           "dob": "2018-04-17T00:00:00.000Z",
           "allergies": [],
-          "isNameException": true,
+          "isNameException": false,
           "exceptionNotes": null
         },
         {
@@ -114,8 +114,8 @@
           "saintName": "Maria",
           "dob": "2014-07-10T00:00:00.000Z",
           "allergies": ["shellfish"],
-          "isNameException": true,
-          "exceptionNotes": "Stepdaughter"
+          "isNameException": false,
+          "exceptionNotes": null
         }
       ]
     },
@@ -382,6 +382,50 @@
           "exceptionNotes": "previous marriage"
         }
       ]
+    },
+    {
+      "id": "F:1891-6475-7766",
+      "parishMember": true,
+      "parishNumber": "784",
+      "address": {
+        "street": "123 Main Street",
+        "city": "Fountain Valley",
+        "state": "CA",
+        "zip": "92708"
+      },
+      "contacts": [
+        {
+          "lastName": "Ho",
+          "firstName": "Tien",
+          "middle": null,
+          "relationship": "Father",
+          "phone": "(657) 278-1542",
+          "email": "ho.tien@gmail.com",
+          "isEmergency": true
+        },
+        {
+          "lastName": "Vuong",
+          "firstName": "Yen",
+          "middle": "Ngu",
+          "relationship": "Mother",
+          "phone": "(657) 142-7458",
+          "email": null,
+          "isEmergency": true
+        }
+      ],
+      "children": [
+        {
+          "childId": "S:7947-1982-7057",
+          "lastName": "Ho",
+          "firstName": "Trish",
+          "middle": "Thanh",
+          "saintName": "Evelyn",
+          "dob": "2010-03-15T00:00:00.000Z",
+          "allergies": ["fish"],
+          "isNameException": false,
+          "exceptionNotes": null
+        }
+      ]
     }
   ],
   "events": [
@@ -447,6 +491,27 @@
         }
       ],
       "eventType": "EVT"
+    },
+    {
+      "id": "E:7036-8713-7616",
+      "programId": "TNTT",
+      "eventType": "EVT",
+      "title": "TNTT DoiTruongPho 2 days",
+      "year": 2025,
+      "level": "PC",
+      "openDate": "2025-10-01",
+      "endDate": "2025-10-31",
+      "fees": [
+        {
+          "code": "EVTF",
+          "amount": 50
+        }
+      ],
+      "prerequisites": [
+        {
+          "eventId": "E:5216-9373-5181"
+        }
+      ]
     }
   ],
   "registrations": [
@@ -455,6 +520,7 @@
       "eventId": "E:4258-2776-0359",
       "familyId": "F:7649-2651-4181",
       "status": "paid",
+      "parishMember": true,
       "event": {
         "title": "Admin/Security (2025-26)",
         "year": 2025,
@@ -483,18 +549,19 @@
           "txnRef": null,
           "receiptNo": "R101A",
           "receivedBy": "Alice",
-          "paidAt": "2025-08-21T09:05:00.000Z"
+          "paidAt": "2025-08-27T23:42:31.412Z"
         }
       ],
-      "acceptedBy": "Admin Staff",
+      "acceptedBy": "Bui, Thomas Minh",
       "createdAt": "2025-08-21T09:05:00.000Z",
-      "updatedAt": "2025-08-21T09:05:30.000Z"
+      "updatedAt": "2025-08-27T23:42:31.412Z"
     },
     {
       "id": "R:4241-8122-9737",
       "eventId": "E:4258-2776-0359",
       "familyId": "F:7088-1898-8223",
       "status": "paid",
+      "parishMember": true,
       "event": {
         "title": "Admin/Security (2025-26)",
         "year": 2025,
@@ -523,18 +590,19 @@
           "txnRef": "CHK-221",
           "receiptNo": "R305A",
           "receivedBy": "Alice",
-          "paidAt": "2025-08-21T10:40:00.000Z"
+          "paidAt": "2025-08-27T23:42:40.897Z"
         }
       ],
-      "acceptedBy": "Alice",
+      "acceptedBy": "Williams, Jeff Jr",
       "createdAt": "2025-08-21T10:39:30.000Z",
-      "updatedAt": "2025-08-21T10:42:00.000Z"
+      "updatedAt": "2025-08-27T23:42:40.897Z"
     },
     {
       "id": "R:2852-4524-4686",
       "eventId": "E:5216-9373-5181",
       "familyId": "F:6807-6648-6886",
       "status": "paid",
+      "parishMember": true,
       "event": {
         "title": "TNTT Registration 2025-26",
         "year": 2025,
@@ -556,17 +624,19 @@
       "children": [
         {
           "childId": "S:1465-0865-1718",
-          "fullName": "Tran, Thomas Minh",
+          "saintName": "John",
+          "fullName": "Tran, Thomas",
           "dob": "2018-04-17T00:00:00.000Z",
           "allergies": [],
-          "status": "confirmed"
+          "status": "pending"
         },
         {
           "childId": "S:6650-1333-9616",
+          "saintName": "Maria",
           "fullName": "Vuong, Evelyn",
           "dob": "2014-07-10T00:00:00.000Z",
           "allergies": ["shellfish"],
-          "status": "confirmed"
+          "status": "pending"
         }
       ],
       "payments": [
@@ -575,21 +645,22 @@
           "amount": 300,
           "quantity": 2,
           "method": "zelle",
-          "txnRef": "Z-123basad",
-          "receiptNo": "R002",
-          "receivedBy": "Bob",
-          "paidAt": "2025-08-20T10:30:00.000Z"
+          "txnRef": "A1290BE123",
+          "receiptNo": "A123908890",
+          "receivedBy": "Alice",
+          "paidAt": "2025-08-28T00:23:14.443Z"
         }
       ],
       "acceptedBy": "Vu, Emily Thanh",
       "createdAt": "2025-08-20T10:28:50.000Z",
-      "updatedAt": "2025-08-20T10:30:00.000Z"
+      "updatedAt": "2025-08-28T00:23:14.443Z"
     },
     {
       "id": "R:4331-0291-5157",
-      "eventId": "EVT_2025_DoanCamp",
+      "eventId": "E:7682-1175-2496",
       "familyId": "F:6807-6648-6886",
       "status": "paid",
+      "parishMember": true,
       "event": {
         "title": "TNTT Doan Camp 3/1/2026 3 days",
         "year": 2025,
@@ -610,13 +681,12 @@
       ],
       "children": [
         {
-          "childId": "S:6650-1333-9616",
-          "fullName": "Vuong, Evelyn",
-          "dob": "2014-07-10T00:00:00.000Z",
-          "allergies": ["shellfish"],
-          "status": "confirmed",
-          "consentSignedBy": "Tran, Tom Toan",
-          "consentSignedAt": "2026-01-10T11:25:00.000Z"
+          "childId": "S:1465-0865-1718",
+          "saintName": "John",
+          "fullName": "Tran, Thomas",
+          "dob": "2018-04-17T00:00:00.000Z",
+          "allergies": [],
+          "status": "pending"
         }
       ],
       "payments": [
@@ -624,22 +694,23 @@
           "code": "EVTF",
           "amount": 55,
           "quantity": 1,
-          "method": "check",
-          "txnRef": "523",
-          "receiptNo": "R050",
-          "receivedBy": "Timothy",
-          "paidAt": "2026-01-10T11:30:00.000Z"
+          "method": "cash",
+          "txnRef": null,
+          "receiptNo": "A193427987",
+          "receivedBy": "Bob",
+          "paidAt": "2025-08-28T00:24:48.160Z"
         }
       ],
-      "acceptedBy": "Camp Admin",
+      "acceptedBy": "Tran, Tom Toan",
       "createdAt": "2026-01-10T11:24:30.000Z",
-      "updatedAt": "2026-01-10T11:30:00.000Z"
+      "updatedAt": "2025-08-28T00:24:48.160Z"
     },
     {
       "id": "R:5939-6341-8143",
       "eventId": "E:4258-2776-0359",
       "familyId": "F:6807-6648-6886",
       "status": "paid",
+      "parishMember": true,
       "event": {
         "title": "Admin/Security (2025-26)",
         "year": 2025,
@@ -668,22 +739,63 @@
           "txnRef": null,
           "receiptNo": "R-ADM-A",
           "receivedBy": "Alice",
-          "paidAt": "2025-08-25T00:05:00.000Z"
+          "paidAt": "2025-08-27T23:43:00.811Z"
+        }
+      ],
+      "acceptedBy": "Vu, Emily Thanh",
+      "createdAt": "2025-08-25T00:00:00.000Z",
+      "updatedAt": "2025-08-27T23:43:00.811Z"
+    },
+    {
+      "id": "R:4603-1277-2219",
+      "eventId": "E:4258-2776-0359",
+      "familyId": "F:4421-8650-9883",
+      "status": "paid",
+      "parishMember": false,
+      "event": {
+        "title": "Admin/Security (2025-26)",
+        "year": 2025,
+        "programId": "BPH",
+        "eventType": "ADM"
+      },
+      "contacts": [
+        {
+          "name": "Tran, Yen Thuy",
+          "relationship": "Guardian",
+          "phone": "(714) 856-9542"
+        },
+        {
+          "name": "Bui, Thuc",
+          "relationship": "Uncle",
+          "phone": "(714) 526-4527"
+        }
+      ],
+      "children": [],
+      "payments": [
+        {
+          "code": "SECF",
+          "amount": 30,
+          "quantity": 1,
+          "method": "check",
+          "txnRef": "CHK312",
+          "receiptNo": "A12313212",
+          "receivedBy": "Bob",
+          "paidAt": "2025-08-27T23:43:07.199Z"
         },
         {
           "code": "NPMF",
           "amount": 50,
           "quantity": 1,
-          "method": "cash",
-          "txnRef": null,
-          "receiptNo": "R-ADM-B",
-          "receivedBy": "Alice",
-          "paidAt": "2025-08-25T00:05:30.000Z"
+          "method": "check",
+          "txnRef": "CHK313",
+          "receiptNo": "A12312313",
+          "receivedBy": "Bob",
+          "paidAt": "2025-08-27T23:43:07.199Z"
         }
       ],
-      "acceptedBy": "Vu, Emily Thanh",
-      "createdAt": "2025-08-25T00:00:00.000Z",
-      "updatedAt": "2025-08-25T00:00:00.000Z"
+      "acceptedBy": "Tran, Yen Thuy",
+      "createdAt": "2025-08-27T21:16:40.171Z",
+      "updatedAt": "2025-08-27T23:43:07.199Z"
     }
   ]
 }

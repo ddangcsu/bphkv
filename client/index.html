@@ -29,7 +29,7 @@
           </div>
         </div>
 
-        <!-- Breadcrumbs (anchors) -->
+        <!-- Breadcrumbs -->
         <div class="crumb">
           <h4 class="crumb-text">
             <template v-for="(c,i) in breadcrumbs" :key="i">
@@ -51,15 +51,15 @@
 
       <!-- RIGHT: Actions -->
       <nav class="actionbar">
-        <button v-if="SECTION.FAMILIES && MODE.LIST " class="btn primary" type="button" @click="beginCreateFamily">
+        <button v-if="SECTION.FAMILIES && MODE.LIST" class="btn primary" type="button" @click="beginCreateFamily">
           <i class="fa-solid fa-plus"></i> <span>Family</span>
         </button>
 
-        <button v-if="SECTION.EVENTS && MODE.LIST " class="btn primary" type="button" @click="beginCreateEvent">
+        <button v-if="SECTION.EVENTS && MODE.LIST" class="btn primary" type="button" @click="beginCreateEvent">
           <i class="fa-solid fa-plus"></i> <span>Event</span>
         </button>
 
-        <button v-if="SECTION.REGISTRATIONS && MODE.LIST " class="btn primary" type="button"
+        <button v-if="SECTION.REGISTRATIONS && MODE.LIST" class="btn primary" type="button"
           @click="beginCreateRegistration">
           <i class="fa-solid fa-plus"></i> <span>Registration</span>
         </button>
@@ -67,7 +67,6 @@
     </div>
 
     <transition name="fade" mode="out-in">
-
       <!-- ====================== FAMILIES ====================== -->
       <main v-if="SECTION.FAMILIES">
         <!-- List -->
@@ -94,8 +93,7 @@
                   <tr>
                     <td>{{ f.id }}</td>
                     <td class="badge" :data-variant="codeToLabel(f.parishMember, YES_NO_OPTIONS)">{{
-                      codeToLabel(f.parishMember, YES_NO_OPTIONS) }}
-                    </td>
+                      codeToLabel(f.parishMember, YES_NO_OPTIONS) }}</td>
                     <td>{{ f.parishNumber || '-' }}</td>
                     <td>{{ contactDisplay(f) }}</td>
                     <td>{{ f.address.city }}</td>
@@ -147,49 +145,58 @@
                 <div>
                   <div class="grid">
                     <label v-for="f in familyFields.household.main" :key="f.col" :for="`household-${f.col}`"
-                      v-show="isVisible(f)">
+                      v-show="isVisible(f, {form: familyForm})">
                       {{ f.label }}
                       <small class="error" v-if="familyErrors?.household?.[f.col]">{{ familyErrors.household[f.col]
                         }}</small>
 
                       <template v-if="f.type === 'select'">
-                        <select class="input" :id="`household-${f.col}`" :name="`household.${f.col}`"
+                        <select class="input" :id="`household-${f.col}`" :name="`family.${f.col}`"
                           v-model="familyForm[f.col]"
-                          :disabled="getFieldDisabled(f, {mode: currentMode, form: familyForm})">
+                          :disabled="getFieldDisabled(f, {mode: currentMode, form: familyForm})"
+                          @input="onFormFieldInput(f, {form: familyForm }, $event)"
+                          @change="onFormFieldChange(f, {form: familyForm }, $event)">
                           <option disabled value="">-- choose --</option>
-                          <option v-for="opt in getOptions(f)" :key="String(opt.value)" :value="opt.value">
+                          <option v-for="opt in getOptions(f, {form: familyForm})" :key="String(opt.value)"
+                            :value="opt.value">
                             {{ formatOptionLabel(opt) }}
                           </option>
                         </select>
                       </template>
 
                       <template v-else-if="f.type === 'checkbox'">
-                        <input class="check-lg" type="checkbox" :id="`household-${f.col}`" :name="`household.${f.col}`"
+                        <input class="check-lg" type="checkbox" :id="`household-${f.col}`" :name="`family.${f.col}`"
                           :disabled="getFieldDisabled(f, {mode: currentMode, form: familyForm})"
-                          v-model="familyForm[f.col]" />
+                          v-model="familyForm[f.col]" @input="onFormFieldInput(f, {form: familyForm }, $event)"
+                          @change="onFormFieldChange(f, {form: familyForm }, $event)" />
                       </template>
 
                       <template v-else>
                         <input class="input" :type="f.type || 'text'" :id="`household-${f.col}`"
-                          :name="`household.${f.col}`" v-model.trim="familyForm[f.col]" :placeholder="f.placeholder"
-                          :disabled="getFieldDisabled(f, {mode: currentMode, form: familyForm})" />
+                          :name="`family.${f.col}`" v-model.trim="familyForm[f.col]" :placeholder="f.placeholder"
+                          :disabled="getFieldDisabled(f, {mode: currentMode, form: familyForm})"
+                          @input="onFormFieldInput(f, {form: familyForm }, $event)"
+                          @change="onFormFieldChange(f, {form: familyForm }, $event)" />
                       </template>
                     </label>
                   </div>
 
                   <div class="grid">
                     <label v-for="f in familyFields.household.address" :key="f.col" :for="`household-address-${f.col}`"
-                      v-show="isVisible(f)">
+                      v-show="isVisible(f, {form: familyForm})">
                       {{ f.label }}
                       <small class="error" v-if="familyErrors?.household?.[f.col]">{{ familyErrors.household[f.col]
                         }}</small>
 
                       <template v-if="f.type === 'select'">
-                        <select class="input" :id="`household-address-${f.col}`" :name="`household.address.${f.col}`"
+                        <select class="input" :id="`household-address-${f.col}`" :name="`family.address.${f.col}`"
                           v-model="familyForm.address[f.col]"
-                          :disabled="getFieldDisabled(f, {mode: currentMode, form: familyForm})">
+                          :disabled="getFieldDisabled(f, {mode: currentMode, form: familyForm})"
+                          @input="onFormFieldInput(f, {form: familyForm }, $event)"
+                          @change="onFormFieldChange(f, {form: familyForm }, $event)">
                           <option disabled value="">-- choose --</option>
-                          <option v-for="opt in getOptions(f)" :key="String(opt.value)" :value="opt.value">
+                          <option v-for="opt in getOptions(f, {form: familyForm})" :key="String(opt.value)"
+                            :value="opt.value">
                             {{ formatOptionLabel(opt) }}
                           </option>
                         </select>
@@ -197,15 +204,19 @@
 
                       <template v-else-if="f.type === 'checkbox'">
                         <input class="check-lg" type="checkbox" :id="`household-address-${f.col}`"
+                          :name="`family.address.${f.col}`"
                           :disabled="getFieldDisabled(f, {mode: currentMode, form: familyForm})"
-                          :name="`household.address.${f.col}`" v-model="familyForm.address[f.col]" />
+                          v-model="familyForm.address[f.col]" @input="onFormFieldInput(f, {form: familyForm }, $event)"
+                          @change="onFormFieldChange(f, {form: familyForm }, $event)" />
                       </template>
 
                       <template v-else>
                         <input class="input" :type="f.type || 'text'" :id="`household-address-${f.col}`"
+                          :name="`family.address.${f.col}`"
                           :disabled="getFieldDisabled(f, {mode: currentMode, form: familyForm})"
-                          :name="`household.address.${f.col}`" v-model.trim="familyForm.address[f.col]"
-                          :placeholder="f.placeholder" />
+                          v-model.trim="familyForm.address[f.col]" :placeholder="f.placeholder"
+                          @input="onFormFieldInput(f, {form: familyForm }, $event)"
+                          @change="onFormFieldChange(f, {form: familyForm }, $event)" />
                       </template>
                     </label>
                   </div>
@@ -225,10 +236,10 @@
                   <div class="spacer"></div>
                   <div class="pager" v-if="familyContactsMode==='single'">
                     <button type="button" class="btn small" @click="prevFamilyContact"
-                      :disabled="familyContactsIndex===0">◀ </button>
+                      :disabled="familyContactsIndex===0">◀</button>
                     <span class="pager-status">{{ familyContactsIndex+1 }} / {{ familyForm.contacts.length }}</span>
                     <button type="button" class="btn small" @click="nextFamilyContact"
-                      :disabled="familyContactsIndex>=familyForm.contacts.length-1"> ▶</button>
+                      :disabled="familyContactsIndex>=familyForm.contacts.length-1">▶</button>
                   </div>
                   <div class="seg">
                     <button type="button" :class="{ 'seg-active': familyContactsMode==='single' }"
@@ -253,16 +264,20 @@
 
                   <div class="grid">
                     <label v-for="f in familyFields.contacts" :key="f.col" :for="`contact-${row.i}-${f.col}`"
-                      v-show="isVisible(f)">
+                      v-show="isVisible(f, {form: familyForm})">
                       {{ f.label }}
                       <small class="error" v-if="familyErrors?.contacts?.[row.i]?.[f.col]">{{
                         familyErrors.contacts[row.i][f.col] }}</small>
 
                       <template v-if="f.type === 'select'">
-                        <select class="input" :id="`contact-${row.i}-${f.col}`" :name="`contact.${f.col}`"
-                          :disabled="getFieldDisabled(f, {mode: currentMode, form: familyForm})" v-model="row.c[f.col]">
+                        <select class="input" :id="`contact-${row.i}-${f.col}`"
+                          :name="`family.contacts[${row.i}].${f.col}`"
+                          :disabled="getFieldDisabled(f, {mode: currentMode, form: familyForm})" v-model="row.c[f.col]"
+                          @input="onFormFieldInput(f, {form: row.c }, $event)"
+                          @change="onFormFieldChange(f, {form: row.c }, $event)">
                           <option disabled value="">-- choose --</option>
-                          <option v-for="opt in getOptions(f)" :key="String(opt.value)" :value="opt.value">
+                          <option v-for="opt in getOptions(f, {form: row.c})" :key="String(opt.value)"
+                            :value="opt.value">
                             {{ formatOptionLabel(opt) }}
                           </option>
                         </select>
@@ -270,15 +285,19 @@
 
                       <template v-else-if="f.type === 'checkbox'">
                         <input class="check-lg" type="checkbox" :id="`contact-${row.i}-${f.col}`"
-                          :disabled="getFieldDisabled(f, {mode: currentMode, form: familyForm})"
-                          :name="`contact.${f.col}`" v-model="row.c[f.col]" />
+                          :name="`family.contacts[${row.i}].${f.col}`"
+                          :disabled="getFieldDisabled(f, {mode: currentMode, form: familyForm})" v-model="row.c[f.col]"
+                          @input="onFormFieldInput(f, {form: row.c }, $event)"
+                          @change="onFormFieldChange(f, {form: row.c }, $event)" />
                       </template>
 
                       <template v-else>
                         <input class="input" :type="f.type || 'text'" :id="`contact-${row.i}-${f.col}`"
+                          :name="`family.contacts[${row.i}].${f.col}`"
                           :disabled="getFieldDisabled(f, {mode: currentMode, form: familyForm})"
-                          :name="`contact.${f.col}`" v-model.trim="row.c[f.col]" :placeholder="f.placeholder"
-                          @input="onFormFieldInput(row.c, f, $event)" @change="onFormFieldChange(row.c, f, $event)" />
+                          v-model.trim="row.c[f.col]" :placeholder="f.placeholder"
+                          @input="onFormFieldInput(f, {form: row.c }, $event)"
+                          @change="onFormFieldChange(f, {form: row.c }, $event)" />
                       </template>
                     </label>
                   </div>
@@ -300,10 +319,10 @@
                   <div class="spacer"></div>
                   <div class="pager" v-if="familyChildrenMode==='single'">
                     <button type="button" class="btn small" @click="prevFamilyChild"
-                      :disabled="familyChildrenIndex===0">◀ </button>
+                      :disabled="familyChildrenIndex===0">◀</button>
                     <span class="pager-status">{{ familyChildrenIndex+1 }} / {{ familyForm.children.length }}</span>
                     <button type="button" class="btn small" @click="nextFamilyChild"
-                      :disabled="familyChildrenIndex>=familyForm.children.length-1"> ▶</button>
+                      :disabled="familyChildrenIndex>=familyForm.children.length-1">▶</button>
                   </div>
                   <div class="seg">
                     <button type="button" :class="{ 'seg-active': familyChildrenMode==='single' }"
@@ -313,7 +332,7 @@
                   </div>
                 </div>
 
-                <div v-for="row in visibleFamilyChildren" :key="'k'+row.i" class="row">
+                <div class="row" v-for="row in visibleFamilyChildren" :key="'k'+row.i">
                   <div class="item-header compact">
                     <div class="title">
                       <span>ID: {{row.c.childId}} - {{displayChildNameAndAge(row.c)}}</span>
@@ -328,31 +347,40 @@
 
                   <div class="grid">
                     <label v-for="f in familyFields.children" :key="f.col" :for="`child-${row.i}-${f.col}`"
-                      v-show="isVisible(f)">
+                      v-show="isVisible(f, {form: familyForm})">
                       {{ f.label }}
                       <small class="error" v-if="familyErrors?.children?.[row.i]?.[f.col]">{{
                         familyErrors.children[row.i][f.col] }}</small>
 
                       <template v-if="f.type === 'select'">
-                        <select class="input" :id="`child-${row.i}-${f.col}`" :name="`child.${f.col}`"
-                          :disabled="getFieldDisabled(f, {mode: currentMode, form: familyForm})" v-model="row.c[f.col]">
+                        <select class="input" :id="`child-${row.i}-${f.col}`"
+                          :name="`family.children[${row.i}].${f.col}`"
+                          :disabled="getFieldDisabled(f, {mode: currentMode, form: familyForm})" v-model="row.c[f.col]"
+                          @input="onFormFieldInput(f, {form: row.c }, $event)"
+                          @change="onFormFieldChange(f, {form: row.c }, $event)">
                           <option disabled value="">-- choose --</option>
-                          <option v-for="opt in getOptions(f)" :key="String(opt.value)" :value="opt.value">
+                          <option v-for="opt in getOptions(f, {form: familyForm})" :key="String(opt.value)"
+                            :value="opt.value">
                             {{ formatOptionLabel(opt) }}
                           </option>
                         </select>
                       </template>
 
                       <template v-else-if="f.type === 'checkbox'">
-                        <input class="check-lg" type="checkbox" :id="`child-${row.i}-${f.col}`" :name="`child.${f.col}`"
-                          :disabled="getFieldDisabled(f, {mode: currentMode, form: familyForm})"
-                          v-model="row.c[f.col]" />
+                        <input class="check-lg" type="checkbox" :id="`child-${row.i}-${f.col}`"
+                          :name="`family.children[${row.i}].${f.col}`"
+                          :disabled="getFieldDisabled(f, {mode: currentMode, form: familyForm})" v-model="row.c[f.col]"
+                          @input="onFormFieldInput(f, {form: row.c }, $event)"
+                          @change="onFormFieldChange(f, {form: row.c }, $event)" />
                       </template>
 
                       <template v-else>
                         <input class="input" :type="f.type || 'text'" :id="`child-${row.i}-${f.col}`"
+                          :name="`family.children[${row.i}].${f.col}`"
                           :disabled="getFieldDisabled(f, {mode: currentMode, form: familyForm})"
-                          :name="`child.${f.col}`" v-model.trim="row.c[f.col]" :placeholder="f.placeholder" />
+                          v-model.trim="row.c[f.col]" :placeholder="f.placeholder"
+                          @input="onFormFieldInput(f, {form: row.c }, $event)"
+                          @change="onFormFieldChange(f, {form: row.c }, $event)" />
                       </template>
                     </label>
                   </div>
@@ -412,7 +440,7 @@
           <form class="card form" @submit.prevent.stop="submitEventForm" novalidate autocomplete="off">
             <div class="formtabs-bar">
               <nav class="formtabs" role="tablist" aria-label="Event Form Section">
-                <button type="button" :class="active" role="tab" :aria-selected="true" :aria-controls="panel-event">
+                <button type="button" class="active" role="tab" aria-selected="true" aria-controls="panel-event">
                   Event
                 </button>
               </nav>
@@ -428,22 +456,24 @@
             </div>
 
             <!-- Meta-driven main fields -->
-            <section class="panel">
+            <section class="panel" id="panel-event" role="tabpanel">
               <fieldset>
                 <div class="item-header compact bordered">
                   <h4 class="title">Event Information</h4>
                 </div>
 
                 <div class="grid">
-                  <label v-for="fld in eventFields.main" :key="fld.col"
-                    v-show="isMetaFieldVisible(fld, {form: eventForm})">
+                  <label v-for="fld in eventFields.main" :key="fld.col" v-show="isVisible(fld, {form: eventForm})"
+                    :for="`event-${fld.col}`">
                     {{ fld.label }}
                     <small class="error" v-if="eventErrors[fld.col]">{{ eventErrors[fld.col] }}</small>
 
                     <template v-if="fld.type === 'select'">
                       <select class="input" v-model="eventForm[fld.col]" :id="`event-${fld.col}`"
-                        :name="`event-${fld.col}`"
-                        :disabled="getFieldDisabled(fld, {mode: currentMode, form: eventForm})">
+                        :name="`event.${fld.col}`"
+                        :disabled="getFieldDisabled(fld, {mode: currentMode, form: eventForm})"
+                        @input="onFormFieldInput(fld, {form: eventForm }, $event)"
+                        @change="onFormFieldChange(fld, {form: eventForm }, $event)">
                         <option disabled value="">-- choose --</option>
                         <option v-for="opt in getOptions(fld, {form: eventForm})" :key="String(opt.value)"
                           :value="opt.value">
@@ -454,19 +484,23 @@
 
                     <template v-else-if="fld.type === 'checkbox'">
                       <input class="check-lg" type="checkbox" v-model="eventForm[fld.col]" :id="`event-${fld.col}`"
-                        :name="`event-${fld.col}`"
-                        :disabled="getFieldDisabled(fld, {mode: currentMode, form: eventForm})" />
+                        :name="`event.${fld.col}`"
+                        :disabled="getFieldDisabled(fld, {mode: currentMode, form: eventForm})"
+                        @input="onFormFieldInput(fld, {form: eventForm }, $event)"
+                        @change="onFormFieldChange(fld, {form: eventForm }, $event)" />
                     </template>
 
                     <template v-else>
                       <input class="input" :type="fld.type || 'text'" v-model.trim="eventForm[fld.col]"
-                        :id="`event-${fld.col}`" :name="`event-${fld.col}`" :placeholder="fld.placeholder"
-                        v-bind="fld.attrs || {}"
-                        :disabled="getFieldDisabled(fld, {mode: currentMode, form: eventForm})" />
+                        :id="`event-${fld.col}`" :name="`event.${fld.col}`" :placeholder="fld.placeholder"
+                        v-bind="fld.attrs || {}" :disabled="getFieldDisabled(fld, {mode: currentMode, form: eventForm})"
+                        @input="onFormFieldInput(fld, {form: eventForm }, $event)"
+                        @change="onFormFieldChange(fld, {form: eventForm }, $event)" />
                     </template>
                   </label>
                 </div>
               </fieldset>
+
               <!-- Fees -->
               <div class="subpanel">
                 <div class="item-header compact bordered">
@@ -481,14 +515,18 @@
 
                 <div class="row" v-for="(row,i) in eventForm.fees" :key="'fee'+i">
                   <div class="grid">
-                    <label v-for="rf in eventFields.feeRow" :key="rf.col">
+                    <label v-for="rf in eventFields.feeRow" :key="rf.col" :for="`event-fee-${i}-${rf.col}`"
+                      v-show="isVisible(rf, {form: row})">
                       {{ rf.label }}
                       <template v-if="rf.type==='select'">
-                        <select class="input" v-model="row[rf.col]" :id="`event-fee-${i}-${row[rf.col]}`"
+                        <select class="input" v-model="row[rf.col]" :id="`event-fee-${i}-${rf.col}`"
+                          :name="`event.fees[${i}].${rf.col}`"
                           :disabled="getFieldDisabled(rf, {mode: currentMode, form: eventForm})"
-                          :name="`event-fee-${row[rf.col]}`">
+                          @input="onFormFieldInput(rf, {form: row }, $event)"
+                          @change="onFormFieldChange(rf, {form: row }, $event)">
                           <option disabled value="">-- choose --</option>
-                          <option v-for="opt in getOptions(rf)" :key="String(opt.value)" :value="opt.value">
+                          <option v-for="opt in getOptions(rf, {form: eventForm})" :key="String(opt.value)"
+                            :value="opt.value">
                             {{ formatOptionLabel(opt) }}
                           </option>
                         </select>
@@ -496,8 +534,9 @@
                       <template v-else>
                         <input class="input" :type="rf.type || 'text'" v-model.number="row[rf.col]"
                           :disabled="getFieldDisabled(rf, {mode: currentMode, form: eventForm})"
-                          :id="`event-fee-${i}-${row[rf.col]}`" :name="`event-fee-${row[rf.col]}`"
-                          v-bind="rf.attrs || {}" />
+                          :id="`event-fee-${i}-${rf.col}`" :name="`event.fees[${i}].${rf.col}`" v-bind="rf.attrs || {}"
+                          @input="onFormFieldInput(rf, {form: row }, $event)"
+                          @change="onFormFieldChange(rf, {form: row }, $event)" />
                       </template>
                     </label>
 
@@ -523,16 +562,18 @@
                   </div>
                   <div class="spacer"></div>
                 </div>
+
                 <div class="row" v-for="(p, i) in eventForm.prerequisites" :key="'pre'+i">
-                  <!-- columns = 1 control + N relative displays + 1 actions -->
                   <div class="grid grid--inline">
-                    <!-- Driving control (eventId) -->
+                    <!-- Driving control -->
                     <template v-for="pf in eventFields.prerequisiteRow" :key="pf.col">
-                      <label>
+                      <label :for="`event-prereq-${i}-${pf.col}`" v-show="isVisible(pf, {form: p})">
                         {{ pf.label }}
-                        <select class="input" v-model="p[pf.col]" :id="`event-prereq-${i}-${p[pf.col]}`"
+                        <select class="input" v-model="p[pf.col]" :id="`event-prereq-${i}-${pf.col}`"
+                          :name="`event.prerequisites[${i}].${pf.col}`"
                           :disabled="getFieldDisabled(pf, {mode: currentMode, form: eventForm})"
-                          :name="`event-prereq-${p[pf.col]}`">
+                          @input="onFormFieldInput(pf, {form: p }, $event)"
+                          @change="onFormFieldChange(pf, {form: p }, $event)">
                           <option disabled value="">-- choose --</option>
                           <option v-for="opt in getOptions(pf, { index:i, form: eventForm })" :key="String(opt.value)"
                             :value="opt.value">
@@ -541,14 +582,16 @@
                         </select>
                       </label>
 
-                      <!-- Relative displays as SIBLINGS (not nested inside the label above) -->
+                      <!-- Relative displays -->
                       <label v-for="rd in (pf.relativeDisplay || [])" :key="pf.col + '::' + rd.label">
                         {{ rd.label }}
-                        <input class="input" disabled :value="relativeDisplayValue(p, pf, rd)" />
+                        <input class="input" :id="`event-prereq-${i}-${pf.col}-${rd.label}`"
+                          :name="`event.prerequisites[${i}].rd.${rd.label}`" disabled
+                          :value="relativeDisplayValue(p, pf, rd)" />
                       </label>
                     </template>
 
-                    <!-- Actions (delete row) -->
+                    <!-- Actions -->
                     <div class="actions" style="align-self:end">
                       <button class="btn small danger" type="button" @click="removeEventPrerequisiteRow(i)"
                         v-if="eventForm.prerequisites.length>1">
@@ -559,8 +602,6 @@
                 </div>
                 <small class="error" v-if="eventErrors.prerequisites">{{ eventErrors.prerequisites }}</small>
               </div>
-
-
             </section>
           </form>
         </section>
@@ -573,12 +614,50 @@
           <div class="card">
             <div class="toolbar">
               <input v-model.trim="registrationSearch" class="input" placeholder="Search by reg id, event, family…" />
+
+              <div class="toolbar-filter">
+                <!-- School Year -->
+                <label class="toolbar-filter">
+                  <span>Year</span>
+                  <select class="input" v-model="registrationFilter.year" style="min-width: 12rem;">
+                    <option value="">All years</option>
+                    <option v-for="opt in YEAR_OPTIONS" :key="String(opt.value)" :value="opt.value">
+                      {{ opt.label }}
+                    </option>
+                  </select>
+                </label>
+
+                <!-- Program -->
+                <label class="toolbar-filter">
+                  <span>Program</span>
+                  <select class="input" v-model="registrationFilter.programId" style="min-width: 12rem;">
+                    <option value="">All programs</option>
+                    <option v-for="opt in PROGRAM_OPTIONS" :key="String(opt.value)" :value="opt.value">
+                      {{ formatOptionLabel(opt) }}
+                    </option>
+                  </select>
+                </label>
+
+                <!-- Event Type -->
+                <label class="toolbar-filter">
+                  <span>Type</span>
+                  <select class="input" v-model="registrationFilter.eventType" style="min-width: 12rem;">
+                    <option value="">All types</option>
+                    <option v-for="opt in EVENT_TYPES" :key="String(opt.value)" :value="opt.value">
+                      {{ formatOptionLabel(opt) }}
+                    </option>
+                  </select>
+                </label>
+              </div>
             </div>
+
             <table class="table">
               <thead>
                 <tr>
                   <th>Reg ID</th>
                   <th>Event</th>
+                  <th>School Year</th>
+                  <th>Program</th>
                   <th>Family</th>
                   <th>Status</th>
                   <th>Payments</th>
@@ -589,8 +668,14 @@
               <tbody>
                 <tr v-for="r in filteredRegistrationRows" :key="r.id">
                   <td>{{ r.id }}</td>
-                  <td>{{ r.event?.title }} ({{ r.event?.year }})</td>
-                  <td>{{ r.contacts[0]?.name }} {{ maskLast4(r.contacts[0]?.phone) }}</td>
+                  <td> <a href="#" class="link" title="Edit this event" @click.prevent="editEventFromReg(r)">
+                      {{ r.event?.title }}
+                    </a></td>
+                  <td>{{ codeToLabel(r.event?.year, YEAR_OPTIONS) }} </td>
+                  <td>{{ r.event?.programId }}</td>
+                  <td><a href="#" class="link" title="Edit this family" @click.prevent="editFamilyFromReg(r)">
+                      {{ r.contacts[0]?.name || r.familyId }} {{ maskLast4(r.contacts[0]?.phone) }}
+                    </a></td>
                   <td class="badge" :data-variant="r.status">{{ r.status }}</td>
                   <td>{{ (r.payments||[]).map(p=>p.code+':$'+p.amount).join(' / ') }}</td>
                   <td>{{ (r.updatedAt||r.createdAt||'').slice(0,10) }}</td>
@@ -634,18 +719,21 @@
                 </div>
 
                 <div class="grid">
-                  <label v-for="fld in registrationFields.main" :key="fld.col" v-show="isVisible(fld)">
+                  <label v-for="fld in registrationFields.main" :key="fld.col"
+                    v-show="isVisible(fld, {form: registrationForm})" :for="`reg-${fld.col}`">
                     {{ fld.label }}
                     <small class="error" v-if="registrationErrors?.main?.[fld.col]">{{ registrationErrors.main[fld.col]
                       }}</small>
 
                     <template v-if="fld.type === 'select'">
-                      <select class="input" v-model="registrationForm[fld.col]"
+                      <select class="input" v-model="registrationForm[fld.col]" :id="`reg-${fld.col}`"
+                        :name="`registration.${fld.col}`"
                         :disabled="getFieldDisabled(fld, {mode: currentMode, form: registrationForm})"
-                        @change="handleFieldChange(fld, {form: registrationForm}, $event)">
+                        @input="onFormFieldInput(fld, {form: registrationForm }, $event)"
+                        @change="onFormFieldChange(fld, {form: registrationForm }, $event)">
                         <option disabled value="">-- choose --</option>
-                        <option v-for="opt in fld.options ? fld.options({form: registrationForm}) : []"
-                          :key="String(opt.value)" :value="opt.value">
+                        <option v-for="opt in getOptions(fld, { form: registrationForm })" :key="String(opt.value)"
+                          :value="opt.value">
                           {{ formatOptionLabel(opt) }}
                         </option>
                       </select>
@@ -653,18 +741,19 @@
 
                     <template v-else-if="fld.type === 'datalist'">
                       <input class="input" list="family-datalist" v-model="registrationForm[fld.col]"
+                        :id="`reg-${fld.col}`" :name="`registration.${fld.col}`"
                         :placeholder="fld.placeholder || 'Start typing…'"
                         :disabled="getFieldDisabled(fld, {mode: currentMode, form: registrationForm})"
-                        @input="handleFieldInput(fld, {form: registrationForm}, $event)"
-                        @change="handleFieldChange(fld, {form: registrationForm}, $event)" />
+                        @input="onFormFieldInput(fld, {form: registrationForm }, $event)"
+                        @change="onFormFieldChange(fld, {form: registrationForm }, $event)" />
                     </template>
 
                     <template v-else>
                       <input class="input" :type="fld.type || 'text'" v-model.trim="registrationForm[fld.col]"
-                        :placeholder="fld.placeholder"
+                        :id="`reg-${fld.col}`" :name="`registration.${fld.col}`" :placeholder="fld.placeholder"
                         :disabled="getFieldDisabled(fld, {mode: currentMode, form: registrationForm})"
-                        @input="handleFieldInput(fld, {form: registrationForm}, $event)"
-                        @change="handleFieldChange(fld, {form: registrationForm}, $event)" />
+                        @input="onFormFieldInput(fld, {form: registrationForm }, $event)"
+                        @change="onFormFieldChange(fld, {form: registrationForm }, $event)" />
                     </template>
                   </label>
                 </div>
@@ -681,8 +770,11 @@
                     <h4 class="title">Event Snapshot</h4>
                   </div>
                   <div class="grid">
-                    <label v-for="f in registrationFields.eventSnapshot" :key="f.col">{{ f.label }}
-                      <input class="input" :disabled="getFieldDisabled(f, {form: registrationForm})"
+                    <label v-for="f in registrationFields.eventSnapshot" :key="f.col" :for="`reg-event-${f.col}`"
+                      v-show="isVisible(f, {form: registrationForm})">
+                      {{ f.label }}
+                      <input class="input" :id="`reg-event-${f.col}`" :name="`registration.event.${f.col}`"
+                        :disabled="getFieldDisabled(f, {form: registrationForm})"
                         :value="f.transform ? f.transform(registrationForm.event[f.col]) : registrationForm.event[f.col]" />
                     </label>
                   </div>
@@ -693,11 +785,14 @@
                   <div class="item-header compact bordered">
                     <h4 class="title">Contacts Snapshot</h4>
                   </div>
-                  <div class="grid">
+                  <div class="grid col3">
                     <template v-for="(c, i) in registrationForm.contacts" :key="'rc'+i">
-                      <label v-for="cf in registrationFields.contactSnapshot" :key="cf.col + i">{{ cf.label }}
-                        <input class="input" :disabled="getFieldDisabled(cf, {form: registrationForm})"
-                          :value="c[cf.col]" />
+                      <label v-for="cf in registrationFields.contactSnapshot" :key="cf.col + i"
+                        :for="`reg-contact-${i}-${cf.col}`" v-show="isVisible(cf, {form: registrationForm})">
+                        {{ cf.label }}
+                        <input class="input" :id="`reg-contact-${i}-${cf.col}`"
+                          :name="`registration.contacts[${i}].${cf.col}`"
+                          :disabled="getFieldDisabled(cf, {form: registrationForm})" :value="c[cf.col]" />
                       </label>
                     </template>
                   </div>
@@ -713,19 +808,27 @@
                 </div>
 
                 <div class="grid">
-                  <label v-for="mf in registrationFields.meta" :key="mf.col">
+                  <label v-for="mf in registrationFields.meta" :key="mf.col" :for="`reg-meta-${mf.col}`"
+                    v-show="isVisible(mf, {form: registrationForm})">
                     {{ mf.label }}
+
                     <template v-if="mf.type==='select'">
-                      <select class="input" v-model="registrationForm[mf.col]"
-                        @change="handleFieldChange(mf, {form: registrationForm}, $event)">
-                        <option v-for="opt in mf.options ? mf.options({form: registrationForm}) : []"
-                          :key="String(opt.value)" :value="opt.value">{{ formatOptionLabel(opt) }}</option>
+                      <select class="input" v-model="registrationForm[mf.col]" :id="`reg-meta-${mf.col}`"
+                        :name="`registration.${mf.col}`" :disabled="getFieldDisabled(mf, {form: registrationForm})"
+                        @input="onFormFieldInput(mf, {form: registrationForm }, $event)"
+                        @change="onFormFieldChange(mf, {form: registrationForm }, $event)">
+                        <option v-for="opt in getOptions(mf, { form: registrationForm })" :key="String(opt.value)"
+                          :value="opt.value">
+                          {{ formatOptionLabel(opt) }}
+                        </option>
                       </select>
                     </template>
+
                     <template v-else>
-                      <input class="input" v-model.trim="registrationForm[mf.col]"
-                        @input="handleFieldInput(mf, {form: registrationForm}, $event)"
-                        @change="handleFieldChange(mf, {form: registrationForm}, $event)" />
+                      <input class="input" v-model.trim="registrationForm[mf.col]" :id="`reg-meta-${mf.col}`"
+                        :name="`registration.${mf.col}`" :disabled="getFieldDisabled(mf, {form: registrationForm})"
+                        @input="onFormFieldInput(mf, {form: registrationForm }, $event)"
+                        @change="onFormFieldChange(mf, {form: registrationForm }, $event)" />
                     </template>
                   </label>
                 </div>
@@ -744,31 +847,43 @@
                   </div>
 
                   <div class="row" v-for="(row,i) in registrationForm.children" :key="'ch'+i">
-                    <div class="grid">
+                    <div class="grid col5">
                       <template v-for="cf in registrationFields.childrenRow" :key="cf.col">
-                        <label v-if="cf.col==='childId'">
+                        <label :for="`reg-child-${i}-${cf.col}`" v-show="isVisible(cf, {form: row})">
                           {{ cf.label }}
-                          <select class="input" v-model="row[cf.col]"
-                            @change="handleFieldChange(cf, {row, index: i}, $event)">
-                            <option disabled value="">-- choose --</option>
-                            <option v-for="opt in childOptionsForRow(i)" :key="opt.value" :value="opt.value">{{
-                              opt.label }}</option>
-                          </select>
-                          <small class="error" v-if="registrationErrors?.children?.[i]?.childId">{{
-                            registrationErrors.children[i].childId }}</small>
+
+                          <template v-if="cf.type === 'select'">
+                            <select class="input" v-model="row[cf.col]" :id="`reg-child-${i}-${cf.col}`"
+                              :name="`registration.children[${i}].${cf.col}`"
+                              @input="onFormFieldInput(cf, {form: row, index: i }, $event)"
+                              @change="onFormFieldChange(cf, {form: row, index: i }, $event)">
+                              <option disabled value="">-- choose --</option>
+                              <option v-for="opt in getOptions(cf, {form: row, index: i })" :key="String(opt.value)"
+                                :value="opt.value">{{ formatOptionLabel(opt)}}</option>
+                            </select>
+                            <small class="error" v-if="registrationErrors?.children?.[i]?.childId">{{
+                              registrationErrors.children[i].childId }}</small>
+                          </template>
+                          <template v-else-if="cf.type === 'text'">
+                            <input class="input" :id="`reg-child-${i}-${cf.col}`"
+                              :name="`registration.children[${i}].${cf.col}`"
+                              :disabled="getFieldDisabled(cf, {row: row, index: i})"
+                              :value="cf.transform ? cf.transform(row[cf.col]) : row[cf.col]"
+                              @input="onFormFieldInput(cf, {form: row, index: i }, $event)"
+                              @change="onFormFieldChange(cf, {form: row, index: i }, $event)" />
+
+                          </template>
                         </label>
-                        <label v-else>
-                          {{ cf.label }}
-                          <input class="input" :disabled="getFieldDisabled(cf, {row: row, index: i})"
-                            :value="cf.transform ? cf.transform(row[cf.col]) : row[cf.col]" />
-                        </label>
+
                       </template>
+
+                      <div class="actions">
+                        <button class="btn small danger" type="button" @click="removeRegChildRow(i)">
+                          <i class="fa-solid fa-minus"></i>
+                        </button>
+                      </div>
                     </div>
-                    <div class="actions" style="align-self:end">
-                      <button class="btn small danger" type="button" @click="removeRegChildRow(i)">
-                        <i class="fa-solid fa-minus"></i>
-                      </button>
-                    </div>
+
                   </div>
 
                   <small class="error" v-if="registrationErrors?.childrenRoot">{{ registrationErrors.childrenRoot
@@ -784,20 +899,30 @@
                   <div class="row" v-for="(p,i) in registrationForm.payments" :key="'pay'+i">
                     <div class="grid">
                       <template v-for="pf in registrationFields.paymentsRow" :key="pf.col">
-                        <label>
+                        <label :for="`reg-pay-${i}-${pf.col}`"
+                          v-show="isVisible(pf, { row: p, index: i, form: registrationForm })">
                           {{ pf.label }}
+
                           <template v-if="pf.type==='select'">
-                            <select class="input" v-model="p[pf.col]" :disabled="getFieldDisabled(pf, {row:p, index:i})"
-                              @change="handleFieldChange(pf, {row: p, index: i}, $event)">
+                            <select class="input" v-model="p[pf.col]" :id="`reg-pay-${i}-${pf.col}`"
+                              :name="`registration.payments[${i}].${pf.col}`"
+                              :disabled="getFieldDisabled(pf, {row:p, index:i})"
+                              @input="onFormFieldInput(pf, {form: p, index: i }, $event)"
+                              @change="onFormFieldChange(pf, {form: p, index: i }, $event)">
                               <option disabled value="">-- choose --</option>
-                              <option v-for="opt in pf.options ? pf.options({row:p, index:i}) : []"
-                                :key="String(opt.value)" :value="opt.value">{{ formatOptionLabel(opt) }}</option>
+                              <option v-for="opt in getOptions(pf, { form: registrationForm })" :key="String(opt.value)"
+                                :value="opt.value">
+                                {{ formatOptionLabel(opt) }}
+                              </option>
                             </select>
                           </template>
+
                           <template v-else>
-                            <input class="input" :disabled="getFieldDisabled(pf, {row:p, index:i})" :value="p[pf.col]"
-                              @input="handleFieldInput(pf, {row: p, index: i}, $event)"
-                              @change="handleFieldChange(pf, {row: p, index: i}, $event)" />
+                            <input class="input" :id="`reg-pay-${i}-${pf.col}`"
+                              :name="`registration.payments[${i}].${pf.col}`"
+                              :disabled="getFieldDisabled(pf, {row:p, index:i})" v-model.trim="p[pf.col]"
+                              @input="onFormFieldInput(pf, {form: p, index: i }, $event)"
+                              @change="onFormFieldChange(pf, {form: p, index: i }, $event)" />
                           </template>
                         </label>
                       </template>
@@ -809,7 +934,6 @@
           </form>
         </section>
       </main>
-
     </transition>
   </div>
 

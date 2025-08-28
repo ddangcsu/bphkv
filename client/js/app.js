@@ -57,7 +57,7 @@ const app = createApp({
     function switchSection(s, mode = MODE_NAMES.LIST) {
       currentSection.value = s;
       currentMode.value = mode;
-      menuOpen.value = false; // keep your auto-close
+      menuOpen.value = false; // auto-close burger menu
     }
 
     const BURGER_MENU = [
@@ -73,20 +73,16 @@ const app = createApp({
 
     const breadcrumbs = computed(() => {
       if (SECTION.FAMILIES) {
-        return [
-          { label: 'Families', onClick: goFamilyList },
-          { label: MODE.LIST ? 'Browse Families' : MODE.CREATE ? 'Create Family' : 'Edit Family' },
-        ];
+        return [{ label: 'Families', onClick: goFamilyList }, { label: MODE.LIST ? 'Browse Families' : MODE.CREATE ? 'Create Family' : 'Edit Family' }];
       }
       if (SECTION.EVENTS) {
-        return [
-          { label: 'Events', onClick: goEventList },
-          { label: MODE.LIST ? 'Browse Events' : MODE.CREATE ? 'Create Event' : 'Edit Event' },
-        ];
+        return [{ label: 'Events', onClick: goEventList }, { label: MODE.LIST ? 'Browse Events' : MODE.CREATE ? 'Create Event' : 'Edit Event' }];
       }
       return [
         { label: 'Registrations', onClick: goRegistrationList },
-        { label: MODE.LIST ? 'Browse Registrations' : MODE.CREATE ? 'Create Registration' : 'Edit Registration' },
+        {
+          label: MODE.LIST ? 'Browse Registrations' : MODE.CREATE ? 'Create Registration' : 'Edit Registration',
+        },
       ];
     });
 
@@ -110,7 +106,7 @@ const app = createApp({
     }
 
     // =========================================================
-    // OPTIONS ({ value, label }) — NEW CODES ONLY
+    // OPTIONS ({ value, label }) — codes/labels centralized
     // =========================================================
 
     const RELATIONSHIP_OPTIONS = [
@@ -175,27 +171,13 @@ const app = createApp({
       return years;
     });
 
-    // Helpers for option rendering
-    function getOptions(field, ctx = {}) {
-      if (typeof field.selOpt === 'function') return field.selOpt(ctx) || [];
-      if (Array.isArray(field.selOpt)) return field.selOpt || [];
-      return [];
-    }
-
-    function formatOptionLabel(opt, withValue = false) {
-      if (opt == null) return '';
-      if (opt.label == null || opt.label === '' || opt.label === opt.value) return String(opt.value);
-      if (typeof opt.value === 'boolean' || !withValue) return opt.label;
-      return `${opt.value} - ${opt.label}`;
-    }
-
     // --- Relative Display: source registry ------------------------------------
     const RD_SOURCES = {
       eventRows: () => eventRows.value,
     };
 
     // =========================================================
-    // COMMON HELPERS
+    // COMMON HELPERS (refactored & only what's used)
     // =========================================================
 
     function randInt(bound) {
@@ -256,20 +238,61 @@ const app = createApp({
       return String(raw);
     }
 
+    // Accept Array | Function(ctx)=>Array | Ref<Array> | undefined
+    function resolveOptions(source, ctx) {
+      if (!source) return [];
+      if (Array.isArray(source)) return source;
+      if (typeof source === 'function') return source(ctx) || [];
+      if (typeof source === 'object' && 'value' in source) {
+        const v = source.value;
+        return Array.isArray(v) ? v : [];
+      }
+      return [];
+    }
+
+    // Option → label
     function codeToLabel(value, source, ctx = undefined, { withCode = false, fallback = '' } = {}) {
-      const options = typeof source === 'function' ? source(ctx) || [] : source || [];
+      const options = resolveOptions(source, ctx);
       const found = options.find((o) => o && o.value === value);
       if (!found) return fallback || (value ?? '');
       const label = found.label ?? found.value;
       return withCode ? `${found.value} - ${label}` : label;
     }
 
-    function uid(prefix = 'S') {
-      if (typeof crypto !== 'undefined' && crypto.randomUUID) return `${prefix}:${crypto.randomUUID()}`;
-      return `${prefix}:${Math.random().toString(36).slice(2)}`;
+    // Unified meta-driven handlers
+    function onFormFieldChange(fieldMeta, ctx = {}, event) {
+      if (typeof fieldMeta?.onChange === 'function') {
+        fieldMeta.onChange(fieldMeta, ctx, event);
+      }
+    }
+    function onFormFieldInput(fieldMeta, ctx = {}, event) {
+      if (typeof fieldMeta?.onInput === 'function') {
+        fieldMeta.onInput(fieldMeta, ctx, event);
+      }
+    }
+
+    // Options resolver (now passes fieldMeta to selOpt functions)
+    function getOptions(fieldMeta, ctx = {}) {
+      const src = fieldMeta?.selOpt;
+      if (!src) return [];
+      if (Array.isArray(src)) return src;
+      if (typeof src === 'function') return src(fieldMeta, ctx) || [];
+      if (typeof src === 'object' && 'value' in src) {
+        const v = src.value;
+        return Array.isArray(v) ? v : [];
+      }
+      return [];
+    }
+
+    function formatOptionLabel(opt, withValue = false) {
+      if (opt == null) return '';
+      if (opt.label == null || opt.label === '' || opt.label === opt.value) return String(opt.value);
+      if (typeof opt.value === 'boolean' || !withValue) return opt.label;
+      return `${opt.value} - ${opt.label}`;
     }
 
     const normPhone = (s = '') => (s || '').replace(/\D+/g, '');
+
     function formatUSPhone(raw = '') {
       const d = normPhone(raw).slice(0, 10);
       if (!d) return '';
@@ -277,9 +300,11 @@ const app = createApp({
       if (d.length < 7) return `(${d.slice(0, 3)}) ${d.slice(3)}`;
       return `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}`;
     }
+
     function evalMaybe(val, ctx) {
       return typeof val === 'function' ? val(ctx) : val;
     }
+
     function setDefault(target, column, value) {
       const keys = String(column).split('.');
       let obj = target;
@@ -290,35 +315,44 @@ const app = createApp({
       }
       obj[keys[keys.length - 1]] = value;
     }
+
     function getDefaultValue(field, ctx) {
       if ('default' in field) return typeof field.default === 'function' ? field.default(ctx) : field.default;
       return field.type === 'checkbox' ? false : '';
     }
+
     function buildFromFields(fields, { ctx = {}, overrides = {} } = {}) {
       const out = {};
       for (const f of fields) setDefault(out, f.col, getDefaultValue(f, ctx));
       for (const [path, value] of Object.entries(overrides)) setDefault(out, path, value);
       return out;
     }
+
+    // === Unified meta switches ===
     function isVisible(field, ctx = {}) {
       if (!Object.prototype.hasOwnProperty.call(field, 'show')) return true;
       return !!evalMaybe(field.show, ctx);
     }
-    function isMetaFieldVisible(field, ctx = {}) {
-      if (!Object.prototype.hasOwnProperty.call(field, 'show')) return true;
-      return !!evalMaybe(field.show, ctx);
-    }
+
     function getFieldDisabled(field, ctx = {}) {
+      if (!Object.prototype.hasOwnProperty.call(field, 'disabled')) return false;
       return !!evalMaybe(field.disabled, ctx);
     }
+
     function isNonNegativeNumber(val) {
       if (val === null || val === undefined || val === '') return false;
       if (typeof val !== 'number' || !Number.isFinite(val)) return false;
-      return val > 0;
+      return val >= 0;
     }
+
     function displayEventFees(evt) {
       return evt.fees?.length > 0 ? evt.fees.map((item) => item.code + '-$' + String(item.amount)).join(' / ') : '—';
     }
+
+    const maskLast4 = (s = '') => {
+      const d = normPhone(s);
+      return d ? `•${d.slice(-4)}` : '';
+    };
 
     // =========================================================
     // FAMILIES
@@ -342,28 +376,12 @@ const app = createApp({
         const { data } = await api.get('/families', { params: { _: Date.now() } });
         const list = Array.isArray(data) ? data : Array.isArray(data.families) ? data.families : [];
         familyRows.value = list.map(normalizeFamilyRow);
-        if (showStatusIfActive && currentSection.value === 'families') setStatus('Families loaded.', 'info', 1200);
+        if (showStatusIfActive && SECTION.FAMILIES) setStatus('Families loaded.', 'info', 1200);
       } catch {
         familyRows.value = [];
       }
     }
 
-    // Generic input updater that uses field meta
-    function onFormFieldInput(targetObj, fieldMeta, evt) {
-      const raw = evt?.target?.value ?? '';
-      const next = typeof fieldMeta.onInput === 'function' ? fieldMeta.onInput(raw) : raw;
-      setDefault(targetObj, fieldMeta.col, next);
-    }
-
-    function onFormFieldChange(targetObj, fieldMeta, evt) {
-      const val = fieldMeta.type === 'checkbox' ? !!evt?.target?.checked : evt?.target?.value;
-      setDefault(targetObj, fieldMeta.col, val);
-    }
-
-    const maskLast4 = (s = '') => {
-      const d = normPhone(s);
-      return d ? `•${d.slice(-4)}` : '';
-    };
     const contactDisplay = (f) => {
       const arr = Array.isArray(f.contacts) ? f.contacts : [];
       if (!arr.length) return '—';
@@ -374,6 +392,17 @@ const app = createApp({
       return last4 ? `${name} · ${last4}` : name;
     };
 
+    function onContactPhoneInput({ ctx, event, field }) {
+      const raw = event?.target?.value ?? '';
+      const formatted = formatUSPhone(raw);
+      // write-back here (meta function owns mutation)
+      if (ctx?.form && field?.col) {
+        // setDefault supports deep paths if you ever use nested cols
+        setDefault(ctx.form, field.col, formatted);
+      }
+    }
+
+    // FAMILIES_META
     const familyFields = {
       household: {
         main: [
@@ -383,16 +412,16 @@ const app = createApp({
             type: 'text',
             placeholder: '',
             default: makeId('F'),
-            disabled: () => true,
-            show: () => true,
+            disabled: true,
+            show: true,
           },
-          { col: 'parishMember', label: 'Parish Member', type: 'select', selOpt: YES_NO_OPTIONS, default: () => true },
+          { col: 'parishMember', label: 'Parish Member', type: 'select', selOpt: YES_NO_OPTIONS, default: true },
           {
             col: 'parishNumber',
             label: 'Parish Number',
             type: 'text',
             default: '',
-            show: () => familyForm.parishMember === true,
+            show: ({ form }) => form.parishMember === true,
           },
         ],
         address: [
@@ -411,7 +440,7 @@ const app = createApp({
           col: 'phone',
           label: 'Contact Phone',
           type: 'tel',
-          onInput: formatUSPhone,
+          onInput: onContactPhoneInput,
           placeholder: '(714) 123-4567',
           default: '',
         },
@@ -419,7 +448,7 @@ const app = createApp({
         { col: 'isEmergency', label: 'Emergency Contact', type: 'checkbox', default: false },
       ],
       children: [
-        { col: 'childId', label: 'Child ID', type: 'text', show: false, default: () => makeId('S') },
+        { col: 'childId', label: 'Child ID', type: 'text', show: false, default: makeId('S') },
         { col: 'lastName', label: 'Last Name', type: 'text', default: '' },
         { col: 'firstName', label: 'First Name', type: 'text', default: '' },
         { col: 'middle', label: 'Middle', type: 'text', default: '' },
@@ -485,9 +514,7 @@ const app = createApp({
           if (!c.lastName?.trim()) ce.lastName = 'required';
           if (!c.firstName?.trim()) ce.firstName = 'required';
           if (!c.dob?.trim()) ce.dob = 'required.';
-          const matchesParent = parentLastNameList.value.some(
-            (p) => p.toLowerCase() === (c.lastName || '').toLowerCase(),
-          );
+          const matchesParent = parentLastNameList.value.some((p) => p.toLowerCase() === (c.lastName || '').toLowerCase());
           if (!matchesParent) {
             if (!c.is_name_exception) ce.is_name_exception = 'Check here if name exception';
             if (!c.exception_notes?.trim()) ce.exception_notes = 'required';
@@ -502,18 +529,6 @@ const app = createApp({
     }
 
     function goFamilyTab(tKey) {
-      if (familyTab.value === tKey) return;
-      /*
-       * We should allow free navigation between tab.  SaveEdit will catch these
-       *
-      if (!validateFamilyTab()) {
-        const label = FAMILY_TABS.find((t) => t.key === familyTab.value)?.label || '';
-        setStatus(`Please fix errors in ${label}.`, 'error', 2500);
-        if (familyTab.value === 'contacts' && familyContactsMode.value !== 'all') familyContactsMode.value = 'all';
-        if (familyTab.value === 'children' && familyChildrenMode.value !== 'all') familyChildrenMode.value = 'all';
-        return;
-      }
-      */
       familyTab.value = tKey;
     }
 
@@ -582,7 +597,7 @@ const app = createApp({
       hydrateFamilyErrors();
       familyTab.value = FAMILY_TABS[0].key;
       snapshotFamilyForm();
-      switchSection(SECTION_NAMES.FAMILIES, MODE_NAMES.EDIT);
+      switchSection(SECTION_NAMES.FAMILIES, MODE_NAMES.CREATE);
       setStatus('Creating new family…', 'info', 1200);
     }
     function beginEditFamily(f) {
@@ -646,9 +661,7 @@ const app = createApp({
       const qDigits = normPhone(familySearch.value);
       return familyRows.value.filter((f) => {
         const hitsTop =
-          (f.id || '').toLowerCase().includes(q) ||
-          (f.parishNumber || '').toLowerCase().includes(q) ||
-          (f.address?.city || '').toLowerCase().includes(q);
+          (f.id || '').toLowerCase().includes(q) || (f.parishNumber || '').toLowerCase().includes(q) || (f.address?.city || '').toLowerCase().includes(q);
         const hitsContacts = (f.contacts || []).some(
           (c) =>
             (c.lastName || '').toLowerCase().includes(q) ||
@@ -766,7 +779,7 @@ const app = createApp({
           return;
         }
       }
-      if (JSON.stringify(familyForm) === familyOriginalSnapshot.value) {
+      if (!isFamilyDirty.value) {
         setStatus('No changes to save.', 'warn', 1500);
         return;
       }
@@ -812,23 +825,11 @@ const app = createApp({
     // EVENTS
     // =========================================================
     const eventRows = ref([]);
-    const registrationRows = ref([]);
 
     async function loadEvents({ showStatusIfActive = false } = {}) {
       const { data } = await api.get('/events', { params: { _: Date.now() } });
       eventRows.value = Array.isArray(data) ? data : data?.events || [];
-      if (showStatusIfActive && currentSection.value === 'events') setStatus('Events loaded.', 'info', 1200);
-    }
-
-    async function loadRegistrations({ showStatusIfActive = false } = {}) {
-      try {
-        const { data } = await api.get('/registrations', { params: { _: Date.now() } });
-        registrationRows.value = Array.isArray(data) ? data : data?.registrations || [];
-        if (showStatusIfActive && currentSection.value === 'registrations')
-          setStatus('Registrations loaded.', 'info', 1200);
-      } catch {
-        registrationRows.value = [];
-      }
+      if (showStatusIfActive && SECTION.EVENTS) setStatus('Events loaded.', 'info', 1200);
     }
 
     const eventSearch = ref('');
@@ -840,7 +841,7 @@ const app = createApp({
       for (const k of Object.keys(eventErrors)) delete eventErrors[k];
     }
 
-    // Meta definition
+    // EVENTS_META
     const eventFields = {
       main: [
         {
@@ -849,14 +850,14 @@ const app = createApp({
           type: 'text',
           placeholder: 'Self Generated',
           default: () => makeId('E'),
-          disabled: () => true,
+          disabled: true,
         },
         {
           col: 'programId',
           label: 'Program',
           type: 'select',
           selOpt: PROGRAM_OPTIONS,
-          default: () => PROGRAM_OPTIONS[0].value,
+          default: PROGRAM_OPTIONS[0].value,
         },
         { col: 'eventType', label: 'Type', type: 'select', selOpt: EVENT_TYPES, default: 'REG' },
         { col: 'title', label: 'Title', type: 'text', default: '', placeholder: 'TNTT Roster 2025-26' },
@@ -864,15 +865,15 @@ const app = createApp({
           col: 'year',
           label: 'School Year',
           type: 'select',
-          selOpt: () => YEAR_OPTIONS.value,
+          selOpt: YEAR_OPTIONS,
           default: () => new Date().getFullYear(),
         },
-        { col: 'level', label: 'Level', type: 'select', selOpt: LEVEL_OPTIONS, default: () => LEVEL_OPTIONS[0].value },
+        { col: 'level', label: 'Level', type: 'select', selOpt: LEVEL_OPTIONS, default: LEVEL_OPTIONS[0].value },
         { col: 'openDate', label: 'Open Date', type: 'date', default: '' },
         { col: 'endDate', label: 'End Date', type: 'date', default: '' },
       ],
       feeRow: [
-        { col: 'code', label: 'Code', type: 'select', selOpt: FEE_CODES, default: 'REGF' },
+        { col: 'code', label: 'Code', type: 'select', selOpt: FEE_CODES, default: FEE_CODES[0].value },
         { col: 'amount', label: 'Amount', type: 'number', default: 0, attrs: { min: 0, step: 1 } },
       ],
       prerequisiteRow: [
@@ -888,7 +889,7 @@ const app = createApp({
           default: '',
           relativeDisplay: [
             { label: 'Type', rdSource: 'eventRows', rdKey: 'id', rdCol: 'eventType', map: EVENT_TYPES },
-            { label: 'Title', rdSource: 'eventRows', rdKey: 'id', rdCol: 'title' },
+            { label: 'Description', rdSource: 'eventRows', rdKey: 'id', rdCol: 'title' },
           ],
         },
       ],
@@ -897,15 +898,9 @@ const app = createApp({
     function availablePrerequisiteOptions(rowIndex) {
       const reqType = requiredPrereqType();
       if (!reqType) return [];
-      const selectedElsewhere = new Set(
-        (eventForm.prerequisites || []).map((p, i) => (i === rowIndex ? null : p.eventId)).filter(Boolean),
-      );
+      const selectedElsewhere = new Set((eventForm.prerequisites || []).map((p, i) => (i === rowIndex ? null : p.eventId)).filter(Boolean));
       return eventRows.value.filter(
-        (ev) =>
-          Number(ev.year) === Number(eventForm.year) &&
-          ev.id !== eventForm.id &&
-          (ev.eventType || '') === reqType &&
-          !selectedElsewhere.has(ev.id),
+        (ev) => Number(ev.year) === Number(eventForm.year) && ev.id !== eventForm.id && (ev.eventType || '') === reqType && !selectedElsewhere.has(ev.id),
       );
     }
 
@@ -952,9 +947,7 @@ const app = createApp({
     }
 
     function addEventPrerequisiteRow() {
-      eventForm.prerequisites.push(
-        buildFromFields(eventFields.prerequisiteRow, { ctx: { index: 0, form: eventForm } }),
-      );
+      eventForm.prerequisites.push(buildFromFields(eventFields.prerequisiteRow, { ctx: { index: 0, form: eventForm } }));
     }
     function removeEventPrerequisiteRow(i) {
       eventForm.prerequisites.splice(i, 1);
@@ -1044,7 +1037,7 @@ const app = createApp({
             break;
           }
           if (!isNonNegativeNumber(f.amount)) {
-            e.fees = 'fee amount > 0';
+            e.fees = 'fee amount ≥ 0';
             break;
           }
         }
@@ -1103,8 +1096,7 @@ const app = createApp({
       if (!LEVEL_OPTIONS.some((o) => o.value === eventForm.level)) return false;
       if (!eventForm.openDate || !eventForm.endDate) return false;
       if (!Array.isArray(eventForm.fees) || eventForm.fees.length === 0) return false;
-      if (!eventForm.fees.every((f) => FEE_CODES.some((o) => o.value === f.code) && Number(f.amount) >= 0))
-        return false;
+      if (!eventForm.fees.every((f) => FEE_CODES.some((o) => o.value === f.code) && Number(f.amount) >= 0)) return false;
 
       const reqType = requiredPrereqType();
       if (reqType) {
@@ -1170,6 +1162,18 @@ const app = createApp({
     // =========================================================
     // REGISTRATION — fields-metadata renderer
     // =========================================================
+    const registrationRows = ref([]);
+
+    async function loadRegistrations({ showStatusIfActive = false } = {}) {
+      try {
+        const { data } = await api.get('/registrations', { params: { _: Date.now() } });
+        registrationRows.value = Array.isArray(data) ? data : data?.registrations || [];
+        if (showStatusIfActive && SECTION.REGISTRATIONS) setStatus('Registrations loaded.', 'info', 1200);
+      } catch {
+        registrationRows.value = [];
+      }
+    }
+
     const REG_TABS = [
       { key: 'main', label: 'Main' },
       { key: 'registration', label: 'Registration' },
@@ -1181,6 +1185,8 @@ const app = createApp({
     ];
 
     const registrationSearch = ref('');
+    const registrationFilter = reactive({ year: '', programId: '', eventType: '' });
+
     const editingRegistrationId = ref(null);
 
     const registrationForm = reactive(newRegistrationForm());
@@ -1194,14 +1200,31 @@ const app = createApp({
         familyId: '',
         status: REG_STATUS_OPTIONS[0].value,
         acceptedBy: '',
+        parishMember: null,
         event: { title: '', year: '', programId: '', eventType: '' }, // snapshot (disabled)
-        contacts: [], // snapshot (disabled)
-        children: [], // [{childId, fullName, dob, allergies, status}]
+        contacts: [], // snapshot (disabled) - 2 rows
+        children: [], // [{childId, fullName, saintName, dob, allergies, status}]
         payments: [], // [{code, quantity, amount, method, txnRef, receiptNo, receivedBy}]
         createdAt: null,
         updatedAt: null,
       };
     }
+
+    // Select option for eventId on Registration Form
+    const eventOptionsForRegistration = computed(() => {
+      const src = MODE.CREATE ? eventRows.value.filter(isOpenEvent) : eventRows.value;
+      return src.map((ev) => ({
+        value: ev.id,
+        label: `${ev.programId}_${ev.eventType}_${ev.year} — ${ev.title}`,
+      }));
+    });
+
+    watch(
+      () => registrationForm.children.map((c) => c.childId).join(','),
+      () => {
+        recomputePayments();
+      },
+    );
 
     // Derived helpers
     const selectedEvent = computed(() => eventRows.value.find((e) => e.id === registrationForm.eventId) || null);
@@ -1224,27 +1247,39 @@ const app = createApp({
       return ex;
     });
 
+    // Full families list for Family ID (kept computed for easy future rules)
     const familyDatalistOptions = computed(() =>
-      familyRows.value
-        .filter((f) => !excludedFamilyIds.value.has(f.id))
-        .map((f) => ({
-          value: f.id,
-          label: `${f.id} — ${f.contacts?.[0]?.lastName || ''}, ${f.contacts?.[0]?.firstName || ''} — ${
-            f.address?.city || ''
-          }`,
-        })),
+      familyRows.value.map((f) => ({
+        value: f.id,
+        label: `${f.parishMember ? 'Member' : 'NonMember'} — ${f.contacts?.[0]?.lastName || ''}, ${f.contacts?.[0]?.firstName || ''}
+        — ${f.contacts?.[0]?.phone} - ${f.address?.city || ''}`,
+      })),
     );
 
     const filteredRegistrationRows = computed(() => {
       const q = (registrationSearch.value || '').toLowerCase();
-      return registrationRows.value.filter(
-        (r) =>
+      const qDigits = normPhone(registrationSearch.value);
+      return registrationRows.value.filter((r) => {
+        const hitTop =
           (r.id || '').toLowerCase().includes(q) ||
           (r.familyId || '').toLowerCase().includes(q) ||
+          (r.event?.programId || '').toLowerCase().includes(q) ||
+          (r.event?.eventType || '').toLowerCase().includes(q) ||
           (r.event?.title || '').toLowerCase().includes(q) ||
-          String(r.event?.year || '').includes(q),
-      );
+          String(r.event?.year || '').includes(q);
+        const hitContacts = (r.contacts || []).some((c) => (c.name || '').toLowerCase().includes(q) || (qDigits && normalPhone(c.phone).includes(qDigits)));
+        const byYear = !registrationFilter.year || Number(r.event?.year) === Number(registrationFilter.year);
+        const byProg = !registrationFilter.programId || r.event?.programId === registrationFilter.programId;
+        const byType = !registrationFilter.eventType || r.event?.eventType === registrationFilter.eventType;
+
+        return (hitTop || hitContacts) && byYear && byProg && byType;
+      });
     });
+
+    const isOpenEvent = ({ openDate, endDate }) => {
+      const todayPST = new Date(Date.now() - 8 * 3600 * 1000).toISOString().slice(0, 10);
+      return (!openDate || openDate <= todayPST) && (!endDate || todayPST <= endDate);
+    };
 
     function goRegistrationList() {
       switchSection(SECTION_NAMES.REGISTRATIONS, MODE_NAMES.LIST);
@@ -1264,7 +1299,7 @@ const app = createApp({
     function beginCreateRegistrationForFamily(f) {
       beginCreateRegistration();
       registrationForm.familyId = f?.id || '';
-      hydrateContactsSnapshot();
+      hydrateRegistrationContacts();
       recomputePayments();
       switchSection(SECTION_NAMES.REGISTRATIONS, MODE_NAMES.CREATE);
     }
@@ -1286,37 +1321,53 @@ const app = createApp({
       const fam = familyById(registrationForm.familyId);
       if (!fam) return [];
       const selectedSet = new Set((registrationForm.children || []).map((c) => c.childId).filter(Boolean));
-      return (fam.children || [])
-        .filter((c) => !selectedSet.has(c.childId))
-        .map((c) => ({ value: c.childId, label: `${c.lastName}, ${c.firstName}` }));
+      return (fam.children || []).filter((c) => !selectedSet.has(c.childId)).map((c) => ({ value: c.childId, label: `${c.lastName}, ${c.firstName}` }));
     });
-    function childOptionsForRow(rowIndex) {
+
+    // selOpt for childId (understands { form: <row>, index })
+    function childOptionsForRow(_fieldMeta, ctx = {}) {
+      const idx = Number.isInteger(ctx.index) ? ctx.index : 0;
       const fam = familyById(registrationForm.familyId);
       if (!fam) return [];
-      const selectedElsewhere = new Set(
-        registrationForm.children.map((c, i) => (i === rowIndex ? null : c.childId)).filter(Boolean),
-      );
-      return (fam.children || [])
-        .filter((c) => !selectedElsewhere.has(c.childId))
-        .map((c) => ({ value: c.childId, label: `${c.lastName}, ${c.firstName}` }));
+
+      const chosenElsewhere = new Set((registrationForm.children || []).map((c, i) => (i === idx ? null : c.childId)).filter(Boolean));
+
+      return (fam.children || []).filter((c) => !chosenElsewhere.has(c.childId)).map((c) => ({ value: c.childId, label: `${c.lastName}, ${c.firstName}` }));
     }
+
+    // onChange for childId (hydrates snapshot into that row)
+    function hydrateChildSnapshot(_fieldMeta, ctx = {}) {
+      const row = ctx.form;
+      if (!row) return;
+
+      const fam = familyById(registrationForm.familyId);
+      const ch = (fam?.children || []).find((c) => c.childId === row.childId);
+      if (!ch) return;
+
+      row.fullName = `${ch.lastName}, ${ch.firstName}`;
+      row.saintName = ch.saintName;
+      row.dob = ch.dob;
+      row.allergies = Array.isArray(ch.allergies) ? ch.allergies.slice() : [];
+      row.status = row.status || 'pending';
+
+      // keep payments in sync with selected children
+      recomputePayments();
+    }
+
     function addRegChildRow() {
-      registrationForm.children.push({ childId: '', fullName: '', dob: '', allergies: [], status: 'pending' });
+      registrationForm.children.push({
+        childId: '',
+        fullName: '',
+        saintName: '',
+        dob: '',
+        allergies: [],
+        status: 'pending',
+      });
       registrationErrors.children.push({});
     }
     function removeRegChildRow(i) {
       registrationForm.children.splice(i, 1);
       registrationErrors.children.splice(i, 1);
-      recomputePayments();
-    }
-    function hydrateChildSnapshot(row) {
-      const fam = familyById(registrationForm.familyId);
-      const ch = (fam?.children || []).find((c) => c.childId === row.childId);
-      if (!ch) return;
-      row.fullName = `${ch.lastName}, ${ch.firstName}`;
-      row.dob = ch.dob;
-      row.allergies = Array.isArray(ch.allergies) ? ch.allergies.slice() : [];
-      row.status = row.status || 'pending';
       recomputePayments();
     }
 
@@ -1331,145 +1382,161 @@ const app = createApp({
       const mustHaveIds = new Set(prereqs.map((p) => (typeof p === 'string' ? p : p?.eventId)).filter(Boolean));
       const year = Number(ev.year);
       const hasAll = Array.from(mustHaveIds).every((reqId) =>
-        registrationRows.value.some(
-          (r) => r.familyId === famId && r.eventId === reqId && Number(r.event?.year) === year,
-        ),
+        registrationRows.value.some((r) => r.familyId === famId && r.eventId === reqId && Number(r.event?.year) === year),
       );
       return hasAll ? { ok: true } : { ok: false, message: 'Prerequisite not met for this family/year.' };
     }
 
     // Snapshots & payments prefills
-    function hydrateEventSnapshot() {
+    function hydrateRegistrationEvent() {
       const ev = selectedEvent.value;
       registrationForm.event = ev
         ? { title: ev.title, year: ev.year, programId: ev.programId, eventType: ev.eventType }
         : { title: '', year: '', programId: '', eventType: '' };
     }
-    function hydrateContactsSnapshot() {
+
+    function hydrateRegistrationContacts() {
       const fam = familyById(registrationForm.familyId);
       if (!fam) {
         registrationForm.contacts = [];
+        registrationForm.parishMember = null;
         return;
       }
-      // Exactly up to 2 contacts (first two)
-      const pick = (fam.contacts || []).slice(0, 2);
+      const contacts = Array.isArray(fam.contacts) ? fam.contacts : [];
+
+      // Prioritize the first 2 among Father / Mother / Guardian
+      const prioritized = contacts.filter((c) => PARENT_RELATIONSHIPS.has((c.relationship || '').trim()));
+      const others = contacts.filter((c) => !PARENT_RELATIONSHIPS.has((c.relationship || '').trim()));
+      const pick = [...prioritized, ...others].slice(0, 2);
+
       registrationForm.contacts = pick.map((c) => ({
         name: `${c.lastName}, ${c.firstName}${c.middle ? ' ' + c.middle : ''}`,
         relationship: c.relationship || '',
         phone: formatUSPhone(c.phone || ''),
       }));
+
+      registrationForm.parishMember = !!fam.parishMember;
     }
 
     function computeQuantity(ev) {
-      return ev?.level === 'PC' ? (registrationForm.children || []).filter((c) => c.childId).length : 1;
+      return ev?.level === 'PC' ? Math.max(1, (registrationForm.children || []).filter((c) => c.childId).length) : 1;
     }
-    function feesForEventAndFamily(ev, fam) {
-      let baseFees = Array.isArray(ev?.fees) ? ev.fees : [];
-      if (!ev) return [];
-      if (ev.eventType === 'ADM') {
-        const want = new Set(fam?.parishMember === true ? ['SECF'] : ['SECF', 'NPMF']);
-        baseFees = baseFees.filter((f) => want.has(f.code));
-      }
-      return baseFees;
-    }
-    function recomputePayments() {
+
+    function hydrateRegistrationPayments() {
       const ev = selectedEvent.value;
-      const fam = familyById(registrationForm.familyId);
       if (!ev) {
         registrationForm.payments = [];
         return;
       }
-      const quantity = computeQuantity(ev);
-      const baseFees = feesForEventAndFamily(ev, fam);
-      registrationForm.payments = baseFees.map((f, i) => ({
-        code: f.code,
-        quantity,
-        amount: Number(f.amount || 0) * quantity,
-        method: registrationForm.payments?.[i]?.method || '',
-        txnRef: registrationForm.payments?.[i]?.txnRef || '',
-        receiptNo: registrationForm.payments?.[i]?.receiptNo || '',
-        receivedBy: registrationForm.payments?.[i]?.receivedBy || '',
-      }));
+
+      const fam = familyById(registrationForm.familyId);
+      if (!fam) {
+        registrationForm.payments = [];
+        return;
+      }
+
+      const qty = computeQuantity(ev);
+
+      const fees = Array.isArray(ev.fees) ? ev.fees : [];
+      registrationForm.payments = fees
+        .filter((f) => {
+          if (registrationForm.parishMember === true) {
+            return f.code !== 'NPMF';
+          }
+          return true;
+        })
+        .map((f) => ({
+          code: f.code,
+          quantity: qty,
+          amount: Number(f.amount || 0) * qty,
+          method: '',
+          txnRef: '',
+          receiptNo: '',
+          receivedBy: '',
+        }));
     }
 
-    // ---------- Generic field handlers for meta ----------
-    function handleFieldChange(field, ctx = {}, evt) {
-      if (typeof field.onChange === 'function') {
-        field.onChange({ ctx, evt, form: registrationForm, selectedEvent: selectedEvent.value });
-      }
+    // (Optional) Keep the old name if it's referenced elsewhere
+    function recomputePayments() {
+      const qty = selectedEventLevel.value === 'PC' ? Math.max(1, (registrationForm.children || []).filter((c) => c.childId).length) : 1;
+      registrationForm.payments.forEach((r) => {
+        r.qty = qty;
+      });
     }
-    function handleFieldInput(field, ctx = {}, evt) {
-      if (typeof field.onInput === 'function') {
-        const raw = evt?.target?.value;
-        field.onInput({ ctx, evt, value: raw, form: registrationForm });
+
+    function onRegEventChange() {
+      // (a) Snapshot event data
+      hydrateRegistrationEvent();
+
+      // (b) Hydrate payments from event fees (user fills method/refs later)
+      hydrateRegistrationPayments();
+
+      // (c) If per-child event, ensure one empty row exists at start
+      const ev = selectedEvent.value;
+      if (ev?.level === 'PC' && registrationForm.children.length === 0) {
+        addRegChildRow();
       }
     }
 
-    // Fields metadata (disabled snapshots + meta-driven handlers)
+    function onRegFamilyChange() {
+      // Snapshot (two) contacts, prioritized Father/Mother/Guardian
+      hydrateRegistrationContacts();
+
+      // Remove any already-chosen children that don't belong to this family
+      const fam = familyById(registrationForm.familyId);
+      registrationForm.children = (registrationForm.children || []).filter((row) => fam?.children?.some((c) => c.childId === row.childId));
+      registrationErrors.children = registrationForm.children.map(() => ({}));
+
+      // Recompute total amounts in case quantity depends on children
+      hydrateRegistrationPayments();
+    }
+
+    // REG_META
     const registrationFields = {
       main: [
         { col: 'id', label: 'Registration ID', type: 'text', disabled: true },
-        {
-          col: 'eventId',
-          label: 'Event',
-          type: 'select',
-          options: () =>
-            eventRows.value.map((ev) => ({
-              value: ev.id,
-              label: `${ev.programId}_${ev.eventType}_${ev.year} — ${ev.title}`,
-            })),
-          onChange: () => {
-            hydrateEventSnapshot();
-            // clear family if it's now excluded
-            if (registrationForm.familyId && excludedFamilyIds.value.has(registrationForm.familyId)) {
-              registrationForm.familyId = '';
-              registrationForm.contacts = [];
-              registrationForm.children = [];
-            }
-            recomputePayments();
-            const pre = checkPrerequisites();
-            if (!pre.ok) registrationErrors.main.prereq = pre.message;
-            else delete registrationErrors.main.prereq;
-          },
-        },
         {
           col: 'familyId',
           label: 'Family ID',
           type: 'datalist',
           placeholder: 'Start typing ID or name…',
-          onChange: () => {
-            hydrateContactsSnapshot();
-            const fam = familyById(registrationForm.familyId);
-            registrationForm.children = (registrationForm.children || []).filter((row) =>
-              fam?.children?.some((c) => c.childId === row.childId),
-            );
-            registrationErrors.children = registrationForm.children.map(() => ({}));
-            recomputePayments();
-            const pre = checkPrerequisites();
-            if (!pre.ok) registrationErrors.main.prereq = pre.message;
-            else delete registrationErrors.main.prereq;
-          },
+          onChange: onRegFamilyChange,
           onInput: () => {},
+        },
+        {
+          col: 'eventId',
+          label: 'Event',
+          type: 'select',
+          selOpt: eventOptionsForRegistration,
+          onChange: onRegEventChange,
+        },
+        {
+          col: 'parishMember',
+          label: 'Parish Member',
+          type: 'select',
+          selOpt: YES_NO_OPTIONS,
+          disabled: true,
+          show: ({ form }) => !!form.familyId, // only show after a family is chosen
         },
       ],
       eventSnapshot: [
-        { col: 'title', label: 'Title', disabled: true },
-        { col: 'year', label: 'Year', disabled: true },
+        { col: 'title', label: 'Event Description', disabled: true },
+        { col: 'year', label: 'School Year', disabled: true, transform: (v) => codeToLabel(v, YEAR_OPTIONS) },
         { col: 'programId', label: 'Program', disabled: true, transform: (v) => codeToLabel(v, PROGRAM_OPTIONS) },
-        { col: 'eventType', label: 'Type', disabled: true, transform: (v) => codeToLabel(v, EVENT_TYPES) },
+        { col: 'eventType', label: 'Event Type', disabled: true, transform: (v) => codeToLabel(v, EVENT_TYPES) },
       ],
       contactSnapshot: [
-        { col: 'name', label: 'Name', disabled: true },
+        { col: 'name', label: 'Contact Name', disabled: true },
         { col: 'relationship', label: 'Relationship', disabled: true },
         { col: 'phone', label: 'Phone', disabled: true },
       ],
       meta: [
-        { col: 'status', label: 'Status', type: 'select', options: () => REG_STATUS_OPTIONS },
+        { col: 'status', label: 'Status', type: 'select', selOpt: () => REG_STATUS_OPTIONS },
         {
           col: 'acceptedBy',
-          label: 'Accepted By',
+          label: 'Accepted & Signed By',
           type: 'select',
-          options: () => {
+          selOpt: () => {
             const fam = familyById(registrationForm.familyId);
             return (fam?.contacts || []).map((c) => {
               const name = `${c.lastName}, ${c.firstName}${c.middle ? ' ' + c.middle : ''}`;
@@ -1479,63 +1546,105 @@ const app = createApp({
         },
       ],
       childrenRow: [
-        { col: 'childId', label: 'Child', onChange: ({ ctx }) => hydrateChildSnapshot(ctx.row) },
-        { col: 'fullName', label: 'Full Name', disabled: true, show: () => false },
-        { col: 'dob', label: 'DOB', disabled: true, transform: (v) => (v || '').slice(0, 10) },
+        {
+          col: 'childId',
+          label: 'Child Name',
+          type: 'select',
+          selOpt: childOptionsForRow,
+          onChange: hydrateChildSnapshot,
+        },
+        { col: 'fullName', label: 'Full Name', type: 'text', disabled: true, show: false },
+        { col: 'saintName', label: 'Saint Name', type: 'text', disabled: true },
+        { col: 'dob', label: 'Date of Birth', type: 'text', disabled: true, transform: (v) => (v || '').slice(0, 10) },
         {
           col: 'allergies',
           label: 'Allergies',
+          type: 'text',
           disabled: true,
           transform: (v) => (Array.isArray(v) ? v.join(', ') : ''),
         },
       ],
       paymentsRow: [
-        { col: 'code', label: 'Fee Code', disabled: true },
-        { col: 'quantity', label: 'Qty', disabled: true },
-        { col: 'amount', label: 'Amount', disabled: true },
-        { col: 'method', label: 'Method', type: 'select', options: () => PAYMENT_METHOD_OPTIONS },
-        { col: 'txnRef', label: 'Txn Ref' },
-        { col: 'receiptNo', label: 'Receipt #' },
-        { col: 'receivedBy', label: 'Received By', type: 'select', options: () => RECEIVED_BY_OPTIONS },
+        { col: 'code', label: 'Fee Code', type: 'select', selOpt: FEE_CODES, disabled: true },
+        { col: 'quantity', label: 'Quantity', disabled: true },
+        { col: 'amount', label: 'Total Amount', disabled: true },
+        { col: 'method', label: 'Method', type: 'select', selOpt: PAYMENT_METHOD_OPTIONS },
+        { col: 'txnRef', label: 'Reference #', type: 'text', show: ({ row }) => (row?.method || '') !== 'cash' },
+        { col: 'receiptNo', label: 'Receipt #', type: 'text' },
+        { col: 'receivedBy', label: 'Received By', type: 'select', selOpt: RECEIVED_BY_OPTIONS },
       ],
     };
 
-    // Validation & save (no persistence of registrationErrors to server)
+    function editEventFromReg(r) {
+      const ev = eventRows.value.find((e) => e.id === r.eventId);
+      if (ev) {
+        beginEditEvent(ev);
+      } else {
+        setStatus('Event not found for this registration.', 'warn', 1800);
+      }
+    }
+
+    function editFamilyFromReg(r) {
+      const fam = familyRows.value.find((f) => f.id === r.familyId);
+      if (fam) {
+        beginEditFamily(fam);
+      } else {
+        setStatus('Family not found for this registration.', 'warn', 1800);
+      }
+    }
+
+    function quickCheckRegistration() {
+      // Must have event + family
+      if (!registrationForm.eventId) return false;
+      if (!registrationForm.familyId) return false;
+
+      // If this event is per-child, require at least one child selected
+      if (selectedEventLevel.value === 'PC') {
+        if (!(registrationForm.children || []).some((c) => c.childId)) return false;
+      }
+
+      // In EDIT mode, you might want to be a bit looser. If so, uncomment:
+      if (MODE.EDIT) return true;
+
+      return true;
+    }
+
     function validateRegistration() {
       const e = { main: {}, children: [], payments: [] };
+
+      // --- main checks
       if (!registrationForm.eventId) e.main.eventId = 'required';
       if (!registrationForm.familyId) e.main.familyId = 'required';
 
-      // enforce duplicate rule
-      if (
-        registrationForm.eventId &&
-        registrationForm.familyId &&
-        excludedFamilyIds.value.has(registrationForm.familyId)
-      ) {
-        e.main.familyId = 'Family already registered for this event/year';
-      }
-
-      const pre = checkPrerequisites();
-      if (!pre.ok) e.main.prereq = pre.message;
-
+      // --- children checks (only for PC)
       if (selectedEventLevel.value === 'PC') {
-        if (!(registrationForm.children || []).some((c) => c.childId)) {
+        const children = registrationForm.children || [];
+
+        if (!children.some((c) => !!c.childId)) {
           e.childrenRoot = 'Select at least one child.';
         }
-        e.children = (registrationForm.children || []).map((c) => ({
-          childId: c.childId ? undefined : 'required',
-        }));
+
+        // IMPORTANT: use {} for "no error" rows
+        e.children = children.map((c) => (c.childId ? {} : { childId: 'required' }));
+      } else {
+        e.children = []; // clear any stale errors
+        delete e.childrenRoot;
       }
+
+      // sync UI error objects (OK to mutate here)
       registrationErrors.main = e.main;
       registrationErrors.children = e.children;
       registrationErrors.payments = e.payments;
-      return (
-        Object.keys(e.main).length === 0 &&
-        !e.childrenRoot &&
-        (e.children || []).every((x) => !x || Object.keys(x).length === 0)
-      );
+
+      // final result (pure booleans)
+      const noMainErrors = Object.keys(e.main).length === 0;
+      const noChildRowErrors = (e.children || []).every((obj) => !obj || Object.keys(obj).length === 0);
+      const noChildrenRootError = !e.childrenRoot;
+
+      return noMainErrors && noChildrenRootError && noChildRowErrors;
     }
-    const canSaveRegistration = computed(() => validateRegistration());
+
+    const canSaveRegistration = computed(() => quickCheckRegistration());
 
     function buildRegistrationPayload() {
       const nowIso = new Date().toISOString();
@@ -1545,6 +1654,7 @@ const app = createApp({
         eventId: registrationForm.eventId,
         familyId: registrationForm.familyId,
         status: registrationForm.status,
+        parishMember: registrationForm.parishMember ?? null,
         event: {
           title: ev?.title || registrationForm.event.title,
           year: ev?.year || registrationForm.event.year,
@@ -1560,6 +1670,7 @@ const app = createApp({
           .filter((c) => c.childId)
           .map((c) => ({
             childId: c.childId,
+            saintName: c.saintName,
             fullName: c.fullName,
             dob: c.dob,
             allergies: c.allergies,
@@ -1668,6 +1779,7 @@ const app = createApp({
       familyErrors,
       familyTab,
       isVisible,
+      getFieldDisabled,
       familyContactsMode,
       familyContactsIndex,
       visibleFamilyContacts,
@@ -1702,8 +1814,6 @@ const app = createApp({
       eventErrors,
       filteredEventRows,
       displayEventFees,
-      isMetaFieldVisible,
-      getFieldDisabled,
       addEventFee,
       removeEventFee,
       addEventPrerequisiteRow,
@@ -1720,7 +1830,10 @@ const app = createApp({
       // registrations
       registrationRows,
       registrationSearch,
+      registrationFilter,
       filteredRegistrationRows,
+      editEventFromReg,
+      editFamilyFromReg,
       beginCreateRegistration,
       beginCreateRegistrationForFamily,
       beginEditRegistration,
@@ -1742,10 +1855,6 @@ const app = createApp({
       removeRegChildRow,
       hydrateChildSnapshot,
       childOptionsForRow,
-
-      // meta-driven handlers
-      handleFieldChange,
-      handleFieldInput,
     };
   },
 });
