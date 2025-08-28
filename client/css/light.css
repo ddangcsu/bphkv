@@ -187,7 +187,7 @@ table.table tbody tr:nth-child(even) {
 /* optional: make inline links look like links inside tables */
 .table a.link {
   text-decoration: none;
-  cursor: crosshair;
+  cursor: pointer;
 }
 
 /* Badges */

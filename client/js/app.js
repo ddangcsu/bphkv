@@ -1210,10 +1210,68 @@ const app = createApp({
       };
     }
 
-    // Select option for eventId on Registration Form
+    // --- Helpers --------------------------------------------------------------
+
+    const isOpenEvent = ({ openDate, endDate }) => {
+      const todayPST = new Date(Date.now() - 8 * 3600 * 1000).toISOString().slice(0, 10);
+      return (!openDate || openDate <= todayPST) && (!endDate || todayPST <= endDate);
+    };
+
+    function isCurrentSchoolYear(ev) {
+      // July-start version (optional):
+      const now = new Date();
+      const julyStartYear = now.getMonth() + 1 >= 7 ? now.getFullYear() : now.getFullYear() - 1;
+      return Number(ev?.year) === julyStartYear;
+    }
+
+    // Has this family already registered for *this* event in *this* event's year?
+    function alreadyRegisteredForEvent(ev, familyId) {
+      if (!familyId) return false;
+      const yr = Number(ev.year);
+      return registrationRows.value.some(
+        (r) =>
+          r.familyId === familyId &&
+          r.eventId === ev.id &&
+          Number(r.event?.year) === yr &&
+          // ignore the current row while editing so options don't disappear
+          (MODE.CREATE || r.id !== editingRegistrationId.value),
+      );
+    }
+
+    // Does this family meet all prerequisites for the event (same year)?
+    function familyMetPrereqs(ev, familyId) {
+      const prereqIds = Array.isArray(ev?.prerequisites) ? ev.prerequisites.map((p) => (typeof p === 'string' ? p : p?.eventId)).filter(Boolean) : [];
+
+      // No prereqs → automatically OK
+      if (prereqIds.length === 0) return true;
+
+      // If no family yet, we can’t assert prereqs. Treat as not met so the UI nudges user to pick family first.
+      if (!familyId) return false;
+
+      const yr = Number(ev.year);
+      return prereqIds.every((pid) => registrationRows.value.some((r) => r.familyId === familyId && r.eventId === pid && Number(r.event?.year) === yr));
+    }
+
+    // --- Select options for eventId on Registration Form ----------------------
     const eventOptionsForRegistration = computed(() => {
-      const src = MODE.CREATE ? eventRows.value.filter(isOpenEvent) : eventRows.value;
-      return src.map((ev) => ({
+      const familyId = (registrationForm.familyId || '').trim();
+
+      // Create base from eventRows
+      const base = eventRows.value
+        // Rule 1: only show events open for registration
+        .filter(isOpenEvent)
+        // Rule 2: same (current) school year
+        .filter(isCurrentSchoolYear)
+        // Rule 3: exclude events the family already registered for (once a familyId is chosen)
+        .filter((ev) => !familyId || !alreadyRegisteredForEvent(ev, familyId))
+        // Rule 4: require the family to have registrations for all prerequisite events (once a familyId is chosen)
+        .filter((ev) => !familyId || familyMetPrereqs(ev, familyId));
+
+      // set the filtered to base if in CREATE mode else just show everything
+      const filtered = MODE.CREATE ? base : eventRows.value;
+
+      // Map to return the lookup array of objects [{value, label}]
+      return filtered.map((ev) => ({
         value: ev.id,
         label: `${ev.programId}_${ev.eventType}_${ev.year} — ${ev.title}`,
       }));
@@ -1267,7 +1325,7 @@ const app = createApp({
           (r.event?.eventType || '').toLowerCase().includes(q) ||
           (r.event?.title || '').toLowerCase().includes(q) ||
           String(r.event?.year || '').includes(q);
-        const hitContacts = (r.contacts || []).some((c) => (c.name || '').toLowerCase().includes(q) || (qDigits && normalPhone(c.phone).includes(qDigits)));
+        const hitContacts = (r.contacts || []).some((c) => (c.name || '').toLowerCase().includes(q) || (qDigits && normPhone(c.phone).includes(qDigits)));
         const byYear = !registrationFilter.year || Number(r.event?.year) === Number(registrationFilter.year);
         const byProg = !registrationFilter.programId || r.event?.programId === registrationFilter.programId;
         const byType = !registrationFilter.eventType || r.event?.eventType === registrationFilter.eventType;
@@ -1275,11 +1333,6 @@ const app = createApp({
         return (hitTop || hitContacts) && byYear && byProg && byType;
       });
     });
-
-    const isOpenEvent = ({ openDate, endDate }) => {
-      const todayPST = new Date(Date.now() - 8 * 3600 * 1000).toISOString().slice(0, 10);
-      return (!openDate || openDate <= todayPST) && (!endDate || todayPST <= endDate);
-    };
 
     function goRegistrationList() {
       switchSection(SECTION_NAMES.REGISTRATIONS, MODE_NAMES.LIST);
@@ -1438,6 +1491,7 @@ const app = createApp({
       const qty = computeQuantity(ev);
 
       const fees = Array.isArray(ev.fees) ? ev.fees : [];
+
       registrationForm.payments = fees
         .filter((f) => {
           if (registrationForm.parishMember === true) {
@@ -1445,22 +1499,28 @@ const app = createApp({
           }
           return true;
         })
-        .map((f) => ({
-          code: f.code,
-          quantity: qty,
-          amount: Number(f.amount || 0) * qty,
-          method: '',
-          txnRef: '',
-          receiptNo: '',
-          receivedBy: '',
-        }));
+        .map((f) => {
+          const unitAmount = Number(f.amount || 0);
+          return {
+            code: f.code,
+            unitAmount: unitAmount,
+            quantity: qty,
+            amount: unitAmount * qty,
+            method: '',
+            txnRef: '',
+            receiptNo: '',
+            receivedBy: '',
+          };
+        });
     }
 
-    // (Optional) Keep the old name if it's referenced elsewhere
+    // Recalculate the quantity and the total amount.
     function recomputePayments() {
-      const qty = selectedEventLevel.value === 'PC' ? Math.max(1, (registrationForm.children || []).filter((c) => c.childId).length) : 1;
-      registrationForm.payments.forEach((r) => {
-        r.qty = qty;
+      const qty = computeQuantity(selectedEvent.value);
+      (registrationForm.payments || []).forEach((p) => {
+        p.quantity = qty;
+        const unit = Number(p.unitAmount || 0);
+        p.amount = Math.round(unit * qty * 100) / 100;
       });
     }
 
@@ -1566,10 +1626,11 @@ const app = createApp({
       ],
       paymentsRow: [
         { col: 'code', label: 'Fee Code', type: 'select', selOpt: FEE_CODES, disabled: true },
+        { col: 'unitAmount', label: 'Unit Price', disabled: true, show: true },
         { col: 'quantity', label: 'Quantity', disabled: true },
         { col: 'amount', label: 'Total Amount', disabled: true },
         { col: 'method', label: 'Method', type: 'select', selOpt: PAYMENT_METHOD_OPTIONS },
-        { col: 'txnRef', label: 'Reference #', type: 'text', show: ({ row }) => (row?.method || '') !== 'cash' },
+        { col: 'txnRef', label: 'Ref/Check #', type: 'text', show: ({ row }) => (row?.method || '') !== 'cash' },
         { col: 'receiptNo', label: 'Receipt #', type: 'text' },
         { col: 'receivedBy', label: 'Received By', type: 'select', selOpt: RECEIVED_BY_OPTIONS },
       ],
@@ -1678,8 +1739,9 @@ const app = createApp({
           })),
         payments: (registrationForm.payments || []).map((p) => ({
           code: p.code,
-          amount: p.amount,
-          quantity: p.quantity,
+          unitAmount: Number(p.unitAmount || 0),
+          amount: Number(p.amount || 0),
+          quantity: Number(p.quantity || 0),
           method: p.method || null,
           txnRef: p.txnRef || null,
           receiptNo: p.receiptNo || null,

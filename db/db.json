@@ -543,6 +543,7 @@
       "payments": [
         {
           "code": "SECF",
+          "unitAmount": 30,
           "amount": 30,
           "quantity": 1,
           "method": "cash",
@@ -584,6 +585,7 @@
       "payments": [
         {
           "code": "SECF",
+          "unitAmount": 30,
           "amount": 30,
           "quantity": 1,
           "method": "check",
@@ -642,6 +644,7 @@
       "payments": [
         {
           "code": "REGF",
+          "unitAmount": 150,
           "amount": 300,
           "quantity": 2,
           "method": "zelle",
@@ -692,6 +695,7 @@
       "payments": [
         {
           "code": "EVTF",
+          "unitAmount": 55,
           "amount": 55,
           "quantity": 1,
           "method": "cash",
@@ -733,6 +737,7 @@
       "payments": [
         {
           "code": "SECF",
+          "unitAmount": 30,
           "amount": 30,
           "quantity": 1,
           "method": "cash",
@@ -774,6 +779,7 @@
       "payments": [
         {
           "code": "SECF",
+          "unitAmount": 30,
           "amount": 30,
           "quantity": 1,
           "method": "check",
@@ -784,6 +790,7 @@
         },
         {
           "code": "NPMF",
+          "unitAmount": 50,
           "amount": 50,
           "quantity": 1,
           "method": "check",
