@@ -773,7 +773,7 @@
             <section v-show="regTab==='main'" id="panel-reg-main" role="tabpanel" class="panel">
               <fieldset :disabled="regTab!=='main'">
                 <div class="item-header compact bordered">
-                  <h4 class="title">Main</h4>
+                  <h4 class="title">Event & Family</h4>
                 </div>
 
                 <div class="grid">
@@ -861,41 +861,12 @@
             <!-- Registration Tab -->
             <section v-show="regTab==='registration'" id="panel-reg-registration" role="tabpanel" class="panel">
               <fieldset :disabled="regTab!=='registration'">
-                <div class="item-header compact bordered">
-                  <h4 class="title">Registration</h4>
-                </div>
 
-                <div class="grid">
-                  <label v-for="mf in registrationFields.meta" :key="mf.col" :for="`reg-meta-${mf.col}`"
-                    v-show="isVisible(mf, {form: registrationForm})">
-                    {{ mf.label }}
-                    <small class="error" v-if="registrationErrors?.main?.[mf.col]">{{ registrationErrors?.main?.[mf.col]
-                      }}</small>
-                    <template v-if="mf.type==='select'">
-                      <select class="input" v-model="registrationForm[mf.col]" :id="`reg-meta-${mf.col}`"
-                        :name="`registration.${mf.col}`" :disabled="getFieldDisabled(mf, {form: registrationForm})"
-                        @input="onFormFieldInput(mf, {form: registrationForm }, $event)"
-                        @change="onFormFieldChange(mf, {form: registrationForm }, $event)">
-                        <option v-for="opt in getOptions(mf, { form: registrationForm })" :key="String(opt.value)"
-                          :value="opt.value">
-                          {{ formatOptionLabel(opt) }}
-                        </option>
-                      </select>
-                    </template>
-
-                    <template v-else>
-                      <input class="input" v-model.trim="registrationForm[mf.col]" :id="`reg-meta-${mf.col}`"
-                        :name="`registration.${mf.col}`" :disabled="getFieldDisabled(mf, {form: registrationForm})"
-                        @input="onFormFieldInput(mf, {form: registrationForm }, $event)"
-                        @change="onFormFieldChange(mf, {form: registrationForm }, $event)" />
-                    </template>
-                  </label>
-                </div>
 
                 <!-- Children selection for PC events -->
                 <div class="subpanel" v-if="selectedEventLevel === LEVEL.PER_CHILD">
                   <div class="item-header compact bordered">
-                    <h4 class="title">Children</h4>
+                    <h4 class="title">Children Enrollment</h4>
                     <div class="actions">
                       <button class="btn small accent" type="button" @click="addRegChildRow"
                         :disabled="availableChildOptions.length===0">
@@ -989,6 +960,40 @@
                         </label>
                       </template>
                     </div>
+                  </div>
+                </div>
+
+                <!-- Status and parent acceptance -->
+                <div class="subpanel">
+                  <div class="item-header compact bordered">
+                    <h4 class="title">Status and Acceptance</h4>
+                  </div>
+                  <div class="grid">
+                    <label v-for="mf in registrationFields.meta" :key="mf.col" :for="`reg-meta-${mf.col}`"
+                      v-show="isVisible(mf, {form: registrationForm})">
+                      {{ mf.label }}
+                      <small class="error" v-if="registrationErrors?.main?.[mf.col]">{{
+                        registrationErrors?.main?.[mf.col]
+                        }}</small>
+                      <template v-if="mf.type==='select'">
+                        <select class="input" v-model="registrationForm[mf.col]" :id="`reg-meta-${mf.col}`"
+                          :name="`registration.${mf.col}`" :disabled="getFieldDisabled(mf, {form: registrationForm})"
+                          @input="onFormFieldInput(mf, {form: registrationForm }, $event)"
+                          @change="onFormFieldChange(mf, {form: registrationForm }, $event)">
+                          <option v-for="opt in getOptions(mf, { form: registrationForm })" :key="String(opt.value)"
+                            :value="opt.value">
+                            {{ formatOptionLabel(opt) }}
+                          </option>
+                        </select>
+                      </template>
+
+                      <template v-else>
+                        <input class="input" v-model.trim="registrationForm[mf.col]" :id="`reg-meta-${mf.col}`"
+                          :name="`registration.${mf.col}`" :disabled="getFieldDisabled(mf, {form: registrationForm})"
+                          @input="onFormFieldInput(mf, {form: registrationForm }, $event)"
+                          @change="onFormFieldChange(mf, {form: registrationForm }, $event)" />
+                      </template>
+                    </label>
                   </div>
                 </div>
               </fieldset>

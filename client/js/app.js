@@ -469,7 +469,7 @@ const app = createApp({
         { col: 'middle', label: 'Middle', type: 'text', default: '' },
         { col: 'saintName', label: 'Saint Name', type: 'text', default: '' },
         { col: 'dob', label: 'Date of Birth', type: 'date', default: '' },
-        { col: 'allergiesStr', label: 'Allergies', type: 'text', default: '' },
+        { col: 'allergiesStr', label: 'Allergies (comma separated)', type: 'text', default: '' },
         { col: 'is_name_exception', label: 'Name Exception', type: 'checkbox', default: false },
         { col: 'exception_notes', label: 'Exception Notes', type: 'text', default: '' },
       ],
@@ -1199,7 +1199,7 @@ const app = createApp({
     }
 
     const REG_TABS = [
-      { key: 'main', label: 'Main' },
+      { key: 'main', label: 'Event & Family' },
       { key: 'registration', label: 'Registration' },
     ];
     const REG_STATUS_OPTIONS = [
