@@ -2005,6 +2005,7 @@ const app = createApp({
       registrationSearch,
       registrationFilter,
       filteredRegistrationRows,
+      selectedEventLevel,
       hasActiveRegFilter,
       resetRegFilters,
       editEventFromReg,
