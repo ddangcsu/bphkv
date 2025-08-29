@@ -123,28 +123,28 @@ const app = createApp({
     const PARENT_RELATIONSHIPS = new Set(RELATIONSHIP_OPTIONS.slice(0, 3).map((e) => e.value));
 
     const YES_NO_OPTIONS = [
-      { value: true, label: 'Yes' },
-      { value: false, label: 'No' },
+      { key: 'YES', value: true, label: 'Yes' },
+      { key: 'NO', value: false, label: 'No' },
     ];
 
     const PROGRAM_OPTIONS = [
-      { value: 'BPH', label: 'Ban Phu Huynh' },
-      { value: 'TNTT', label: 'Thieu Nhi' },
+      { key: 'BPH', value: 'BPH', label: 'Ban Phu Huynh' },
+      { key: 'TNTT', value: 'TNTT', label: 'Thieu Nhi Thanh The' },
     ];
     const LEVEL_OPTIONS = [
-      { value: 'PF', label: 'Per Family' },
-      { value: 'PC', label: 'Per Child' },
+      { key: 'PER_FAMILY', value: 'PF', label: 'Per Family' },
+      { key: 'PER_CHILD', value: 'PC', label: 'Per Child' },
     ];
     const EVENT_TYPES = [
-      { value: 'ADM', label: 'Security' },
-      { value: 'REG', label: 'Registration' },
-      { value: 'EVT', label: 'Event' },
+      { key: 'ADMIN', value: 'ADM', label: 'Security' },
+      { key: 'REGISTRATION', value: 'REG', label: 'Registration' },
+      { key: 'EVENT', value: 'EVT', label: 'Event' },
     ];
     const FEE_CODES = [
-      { value: 'REGF', label: 'Registration Fee' },
-      { value: 'EVTF', label: 'Event Fee' },
-      { value: 'SECF', label: 'Security Fee' },
-      { value: 'NPMF', label: 'NonParish Fee' },
+      { key: 'REG_FEE', value: 'REGF', label: 'Registration Fee' },
+      { key: 'EVT_FEE', value: 'EVTF', label: 'Event Fee' },
+      { key: 'SEC_FEE', value: 'SECF', label: 'Security Fee' },
+      { key: 'NPM_FEE', value: 'NPMF', label: 'NonParish Fee' },
     ];
 
     // Registration-specific option lists
@@ -170,6 +170,21 @@ const app = createApp({
       }
       return years;
     });
+
+    // Create ENUM for some of the OPTIONS to allow easy of value changes
+    function makeEnumFromOptions(options) {
+      // { key:'ADMIN', value:'ADM' } -> EVENT_TYPE.ADMIN === 'ADM'
+      return Object.freeze(
+        (options || []).reduce((acc, o) => {
+          if (o && o.key != null) acc[o.key] = o.value;
+          return acc;
+        }, {}),
+      );
+    }
+
+    const EVENT_TYPE = makeEnumFromOptions(EVENT_TYPES); // { ADMIN:'ADM', REGISTRATION:'REG', EVENT:'EVT' }
+    const LEVEL = makeEnumFromOptions(LEVEL_OPTIONS); // { PER_FAMILY:'PF', PER_CHILD:'PC' }
+    const PROGRAM = makeEnumFromOptions(PROGRAM_OPTIONS); // { BPH:'BPH', TNTT:'TNTT' }
 
     // --- Relative Display: source registry ------------------------------------
     const RD_SOURCES = {
@@ -676,7 +691,7 @@ const app = createApp({
     });
 
     // --- Age by year (no month/day) --------------------------------------------
-    const CURRENT_YEAR = new Date().getFullYear();
+    const CURRENT_YEAR = getCurrentSchoolYear();
 
     function getYearPart(input) {
       if (!input) return null;
@@ -837,6 +852,15 @@ const app = createApp({
     const eventErrors = reactive({});
     const editingEventId = ref(null);
 
+    const hasActiveEventFilter = computed(() => !!(eventFilter.programId || eventFilter.level || eventFilter.year));
+
+    function resetEventFilters() {
+      eventFilter.programId = '';
+      eventFilter.level = '';
+      eventFilter.year = '';
+      eventSearch.value = '';
+    }
+
     function clearEventErrors() {
       for (const k of Object.keys(eventErrors)) delete eventErrors[k];
     }
@@ -859,14 +883,14 @@ const app = createApp({
           selOpt: PROGRAM_OPTIONS,
           default: PROGRAM_OPTIONS[0].value,
         },
-        { col: 'eventType', label: 'Type', type: 'select', selOpt: EVENT_TYPES, default: 'REG' },
+        { col: 'eventType', label: 'Type', type: 'select', selOpt: EVENT_TYPES, default: '' },
         { col: 'title', label: 'Title', type: 'text', default: '', placeholder: 'TNTT Roster 2025-26' },
         {
           col: 'year',
           label: 'School Year',
           type: 'select',
           selOpt: YEAR_OPTIONS,
-          default: () => new Date().getFullYear(),
+          default: () => getCurrentSchoolYear(),
         },
         { col: 'level', label: 'Level', type: 'select', selOpt: LEVEL_OPTIONS, default: LEVEL_OPTIONS[0].value },
         { col: 'openDate', label: 'Open Date', type: 'date', default: '' },
@@ -910,11 +934,11 @@ const app = createApp({
     }
     const eventForm = reactive(newEventForm());
 
-    const showPrerequisites = computed(() => eventForm.eventType !== 'ADM');
+    const showPrerequisites = computed(() => eventForm.eventType !== EVENT_TYPE.ADMIN);
 
     function requiredPrereqType() {
-      if (eventForm.eventType === 'REG') return 'ADM';
-      if (eventForm.eventType === 'EVT') return 'REG';
+      if (eventForm.eventType === EVENT_TYPE.REGISTRATION) return EVENT_TYPE.ADMIN;
+      if (eventForm.eventType === EVENT_TYPE.EVENT) return EVENT_TYPE.REGISTRATION;
       return null; // ADM => none
     }
 
@@ -997,9 +1021,9 @@ const app = createApp({
 
       Object.assign(eventForm, newEventForm(), snap, { prerequisites, fees });
 
-      if (!EVENT_TYPES.some((t) => t.value === eventForm.eventType)) eventForm.eventType = 'REG';
+      if (!EVENT_TYPES.some((t) => t.value === eventForm.eventType)) eventForm.eventType = EVENT_TYPE.REGISTRATION;
 
-      if (eventForm.eventType === 'ADM') {
+      if (eventForm.eventType === EVENT_TYPE.ADMIN) {
         eventForm.prerequisites = [];
       } else if (!Array.isArray(eventForm.prerequisites) || eventForm.prerequisites.length === 0) {
         addEventPrerequisiteRow();
@@ -1193,12 +1217,21 @@ const app = createApp({
     const registrationErrors = reactive({ main: {}, children: [], payments: [] });
     const regTab = ref('main');
 
+    const hasActiveRegFilter = computed(() => !!(registrationFilter.programId || registrationFilter.eventType || registrationFilter.year));
+
+    function resetRegFilters() {
+      registrationFilter.year = '';
+      registrationFilter.programId = '';
+      registrationFilter.eventType = '';
+      registrationSearch.value = '';
+    }
+
     function newRegistrationForm() {
       return {
         id: makeId('R'),
         eventId: '',
         familyId: '',
-        status: REG_STATUS_OPTIONS[0].value,
+        status: '',
         acceptedBy: '',
         parishMember: null,
         event: { title: '', year: '', programId: '', eventType: '' }, // snapshot (disabled)
@@ -1212,30 +1245,34 @@ const app = createApp({
 
     // --- Helpers --------------------------------------------------------------
 
-    const isOpenEvent = ({ openDate, endDate }) => {
+    const isOpenEventFilter = (ev) => {
       const todayPST = new Date(Date.now() - 8 * 3600 * 1000).toISOString().slice(0, 10);
-      return (!openDate || openDate <= todayPST) && (!endDate || todayPST <= endDate);
+      return (!ev?.openDate || ev?.openDate <= todayPST) && (!ev?.endDate || todayPST <= ev?.endDate);
     };
 
-    function isCurrentSchoolYear(ev) {
+    function getCurrentSchoolYear() {
       // July-start version (optional):
       const now = new Date();
       const julyStartYear = now.getMonth() + 1 >= 7 ? now.getFullYear() : now.getFullYear() - 1;
-      return Number(ev?.year) === julyStartYear;
+      return julyStartYear;
     }
 
-    // Has this family already registered for *this* event in *this* event's year?
-    function alreadyRegisteredForEvent(ev, familyId) {
-      if (!familyId) return false;
-      const yr = Number(ev.year);
-      return registrationRows.value.some(
-        (r) =>
-          r.familyId === familyId &&
-          r.eventId === ev.id &&
-          Number(r.event?.year) === yr &&
-          // ignore the current row while editing so options don't disappear
-          (MODE.CREATE || r.id !== editingRegistrationId.value),
-      );
+    function isCurrentSchoolYear(ev) {
+      return Number(ev?.year) === Number(getCurrentSchoolYear());
+    }
+
+    // Check whether a given family has registered for the year
+    function alreadyRegistered({ familyId, year, eventId = null, programId = null }) {
+      if (!familyId || !Number.isFinite(Number(year))) return false;
+
+      return registrationRows.value.some((r) => {
+        if (r.familyId !== familyId) return false;
+        if (Number(r.event?.year) !== Number(year)) return false;
+        if (eventId != null && r.eventId !== eventId) return false;
+        if (programId != null && r.event?.programId !== programId) return false;
+
+        return true;
+      });
     }
 
     // Does this family meet all prerequisites for the event (same year)?
@@ -1259,11 +1296,11 @@ const app = createApp({
       // Create base from eventRows
       const base = eventRows.value
         // Rule 1: only show events open for registration
-        .filter(isOpenEvent)
+        .filter(isOpenEventFilter)
         // Rule 2: same (current) school year
         .filter(isCurrentSchoolYear)
         // Rule 3: exclude events the family already registered for (once a familyId is chosen)
-        .filter((ev) => !familyId || !alreadyRegisteredForEvent(ev, familyId))
+        .filter((ev) => !familyId || !alreadyRegistered({ familyId: familyId, year: ev.year, eventId: ev.id }))
         // Rule 4: require the family to have registrations for all prerequisite events (once a familyId is chosen)
         .filter((ev) => !familyId || familyMetPrereqs(ev, familyId));
 
@@ -1287,23 +1324,8 @@ const app = createApp({
     // Derived helpers
     const selectedEvent = computed(() => eventRows.value.find((e) => e.id === registrationForm.eventId) || null);
     const selectedEventLevel = computed(() => selectedEvent.value?.level || '');
-    const selectedEventYear = computed(() => Number(selectedEvent.value?.year || 0));
 
     const familyById = (id) => familyRows.value.find((f) => f.id === id) || null;
-
-    // Families already registered for this event/year (exclude from datalist)
-    const excludedFamilyIds = computed(() => {
-      if (!registrationForm.eventId) return new Set();
-      const yr = selectedEventYear.value;
-      const ex = new Set();
-      for (const r of registrationRows.value) {
-        if (r.eventId === registrationForm.eventId && Number(r.event?.year) === yr) {
-          if (MODE.EDIT && r.id === editingRegistrationId.value) continue;
-          ex.add(r.familyId);
-        }
-      }
-      return ex;
-    });
 
     // Full families list for Family ID (kept computed for easy future rules)
     const familyDatalistOptions = computed(() =>
@@ -1369,23 +1391,61 @@ const app = createApp({
       regTab.value = tKey;
     }
 
-    // Children selection logic
+    // Children selection logic for the "Add Child" button
+    // Reuses the same rules as `childRegistrationOptions`
+    // (no family → none, non-PC event → none, PF-only prereqs → all,
+    // any PC prereq → only kids who registered that PC prereq this year)
     const availableChildOptions = computed(() => {
-      const fam = familyById(registrationForm.familyId);
-      if (!fam) return [];
-      const selectedSet = new Set((registrationForm.children || []).map((c) => c.childId).filter(Boolean));
-      return (fam.children || []).filter((c) => !selectedSet.has(c.childId)).map((c) => ({ value: c.childId, label: `${c.lastName}, ${c.firstName}` }));
+      // pass an index that does not match any row so ALL currently
+      // selected children are excluded from options
+      return childRegistrationOptions(null, { index: -1 });
     });
 
     // selOpt for childId (understands { form: <row>, index })
-    function childOptionsForRow(_fieldMeta, ctx = {}) {
-      const idx = Number.isInteger(ctx.index) ? ctx.index : 0;
-      const fam = familyById(registrationForm.familyId);
-      if (!fam) return [];
+    function childRegistrationOptions(_fieldMeta, ctx = {}) {
+      const idx = Number.isInteger(ctx.index) ? ctx.index : -1;
 
+      // 1) no family selected → no options
+      const famId = (registrationForm.familyId || '').trim();
+      if (!famId) return [];
+
+      // 2) event not selected or not PC → no options
+      const ev = selectedEvent.value;
+      if (!ev || ev.level !== LEVEL.PER_CHILD) return [];
+
+      // Family + anti-duplication set
+      const fam = familyById(famId);
+      if (!fam) return [];
       const chosenElsewhere = new Set((registrationForm.children || []).map((c, i) => (i === idx ? null : c.childId)).filter(Boolean));
 
-      return (fam.children || []).filter((c) => !chosenElsewhere.has(c.childId)).map((c) => ({ value: c.childId, label: `${c.lastName}, ${c.firstName}` }));
+      // Collect prerequisite ids
+      const prereqIds = Array.isArray(ev?.prerequisites) ? ev.prerequisites.map((p) => (typeof p === 'string' ? p : p?.eventId)).filter(Boolean) : [];
+
+      // 3) PC event:
+      //    - No prereq OR only PF prereqs → full children for selected family
+      const prereqEvents = prereqIds.map((id) => eventRows.value.find((e) => e.id === id)).filter(Boolean);
+
+      const hasPCPrereq = prereqEvents.some((p) => p.level === LEVEL.PER_CHILD);
+
+      if (!hasPCPrereq) {
+        return (fam.children || []).filter((c) => !chosenElsewhere.has(c.childId)).map((c) => ({ value: c.childId, label: displayChildNameAndAge(c) }));
+      }
+
+      //    - Any PC prereq → only children that registered for *any* PC prereq
+      //      in the current school year for this family
+      const pcPrereqIds = new Set(prereqEvents.filter((p) => p.level === LEVEL.PER_CHILD).map((p) => p.id));
+
+      const eligibleChildIds = new Set(
+        registrationRows.value
+          .filter(
+            (r) => r.familyId === famId && pcPrereqIds.has(r.eventId) && isCurrentSchoolYear(r.event), // uses r.event.year snapshot
+          )
+          .flatMap((r) => (r.children || []).map((ch) => ch.childId).filter(Boolean)),
+      );
+
+      return (fam.children || [])
+        .filter((c) => eligibleChildIds.has(c.childId) && !chosenElsewhere.has(c.childId))
+        .map((c) => ({ value: c.childId, label: displayChildNameAndAge(c) }));
     }
 
     // onChange for childId (hydrates snapshot into that row)
@@ -1472,7 +1532,7 @@ const app = createApp({
     }
 
     function computeQuantity(ev) {
-      return ev?.level === 'PC' ? Math.max(1, (registrationForm.children || []).filter((c) => c.childId).length) : 1;
+      return ev?.level === LEVEL.PER_CHILD ? Math.max(1, (registrationForm.children || []).filter((c) => c.childId).length) : 1;
     }
 
     function hydrateRegistrationPayments() {
@@ -1533,7 +1593,7 @@ const app = createApp({
 
       // (c) If per-child event, ensure one empty row exists at start
       const ev = selectedEvent.value;
-      if (ev?.level === 'PC' && registrationForm.children.length === 0) {
+      if (ev?.level === LEVEL.PER_CHILD && registrationForm.children.length === 0) {
         addRegChildRow();
       }
     }
@@ -1549,6 +1609,39 @@ const app = createApp({
 
       // Recompute total amounts in case quantity depends on children
       hydrateRegistrationPayments();
+    }
+
+    // Pure helper: returns ONE best-fit option (or [] if none)
+    // Uses your existing computeAgeByYear(dob)
+    // Internal: produce TNTT label by exact age
+    function ageGroupLabelTNTT(age) {
+      if (age == null) return null;
+      if (age < 7) return 'Under Age';
+      if (age >= 7 && age <= 9) return `Ấu Nhi Cấp ${age - 7 + 1}`; // 7→C1, 8→C2, 9→C3
+      if (age >= 10 && age <= 12) return `Thiếu Nhi Cấp ${age - 10 + 1}`; // 10→C1, 11→C2, 12→C3
+      if (age >= 13 && age <= 15) return `Nghĩa Sĩ Cấp ${age - 13 + 1}`; // 13→C1, 14→C2, 15→C3
+      if (age >= 16) return 'Hiệp Sĩ';
+      return null;
+    }
+
+    // Public: get a single { value: dob, label } option for the given DOB + program
+    function ageGroupOptionsByProgram(dob, programId) {
+      const age = computeAgeByYear(dob);
+      if (age == null) return [];
+      // If you created PROGRAM_STABLE or similar, prefer that constant. Fallback 'TNTT'.
+      if (programId === (PROGRAM?.TNTT || 'TNTT')) {
+        const label = ageGroupLabelTNTT(age);
+        return label ? [{ value: dob, label }] : [];
+      }
+      return [];
+    }
+
+    // Meta-friendly adapter: use inside children row selOpt
+    // Signature matches your meta handlers: (fieldMeta, ctx)
+    function ageGroupOptionsForRow(_fieldMeta, ctx = {}) {
+      const dob = ctx?.form?.dob;
+      const programId = selectedEvent.value?.programId || null;
+      return ageGroupOptionsByProgram(dob, programId);
     }
 
     // REG_META
@@ -1591,7 +1684,7 @@ const app = createApp({
         { col: 'phone', label: 'Phone', disabled: true },
       ],
       meta: [
-        { col: 'status', label: 'Status', type: 'select', selOpt: () => REG_STATUS_OPTIONS },
+        { col: 'status', label: 'Status', type: 'select', selOpt: REG_STATUS_OPTIONS },
         {
           col: 'acceptedBy',
           label: 'Accepted & Signed By',
@@ -1610,12 +1703,12 @@ const app = createApp({
           col: 'childId',
           label: 'Child Name',
           type: 'select',
-          selOpt: childOptionsForRow,
+          selOpt: childRegistrationOptions,
           onChange: hydrateChildSnapshot,
         },
         { col: 'fullName', label: 'Full Name', type: 'text', disabled: true, show: false },
         { col: 'saintName', label: 'Saint Name', type: 'text', disabled: true },
-        { col: 'dob', label: 'Date of Birth', type: 'text', disabled: true, transform: (v) => (v || '').slice(0, 10) },
+        { col: 'dob', label: 'Age to Grade', type: 'select', selOpt: ageGroupOptionsForRow, disabled: true },
         {
           col: 'allergies',
           label: 'Allergies',
@@ -1660,7 +1753,7 @@ const app = createApp({
       if (!registrationForm.familyId) return false;
 
       // If this event is per-child, require at least one child selected
-      if (selectedEventLevel.value === 'PC') {
+      if (selectedEventLevel.value === LEVEL.PER_CHILD) {
         if (!(registrationForm.children || []).some((c) => c.childId)) return false;
       }
 
@@ -1676,20 +1769,34 @@ const app = createApp({
       // --- main checks
       if (!registrationForm.eventId) e.main.eventId = 'required';
       if (!registrationForm.familyId) e.main.familyId = 'required';
+      if (!registrationForm.acceptedBy) e.main.acceptedBy = 'required';
+      if (!registrationForm.status || registrationForm.status === 'pending') e.main.status = 'Status must be paid or cancelled';
 
       // --- children checks (only for PC)
-      if (selectedEventLevel.value === 'PC') {
+      if (selectedEventLevel.value === LEVEL.PER_CHILD) {
         const children = registrationForm.children || [];
 
         if (!children.some((c) => !!c.childId)) {
-          e.childrenRoot = 'Select at least one child.';
+          e.main.childrenRoot = 'Select at least one child.';
         }
 
         // IMPORTANT: use {} for "no error" rows
         e.children = children.map((c) => (c.childId ? {} : { childId: 'required' }));
       } else {
         e.children = []; // clear any stale errors
-        delete e.childrenRoot;
+        delete e.main.childrenRoot;
+      }
+
+      // payments
+      if (registrationForm.payments) {
+        e.payments = registrationForm.payments.map((p) => {
+          const pe = {};
+          if (!p.method?.trim()) pe.method = 'required';
+          if (!p.txnRef?.trim() && pe.method?.trim() !== 'cash') pe.txnRef = 'required';
+          if (!p.receiptNo?.trim()) pe.receiptNo = 'required';
+          if (!p.receivedBy?.trim()) pe.receivedBy = 'required';
+          return pe;
+        });
       }
 
       // sync UI error objects (OK to mutate here)
@@ -1700,9 +1807,10 @@ const app = createApp({
       // final result (pure booleans)
       const noMainErrors = Object.keys(e.main).length === 0;
       const noChildRowErrors = (e.children || []).every((obj) => !obj || Object.keys(obj).length === 0);
-      const noChildrenRootError = !e.childrenRoot;
+      const noPaymentRowErrors = (e.payments || []).every((obj) => !obj || Object.keys(obj).length === 0);
+      const noChildrenRootError = !e.main.childrenRoot;
 
-      return noMainErrors && noChildrenRootError && noChildRowErrors;
+      return noMainErrors && noChildrenRootError && noChildRowErrors && noPaymentRowErrors;
     }
 
     const canSaveRegistration = computed(() => quickCheckRegistration());
@@ -1820,28 +1928,30 @@ const app = createApp({
       EVENT_TYPES,
       FEE_CODES,
       YEAR_OPTIONS,
+      EVENT_TYPE,
+      LEVEL,
+      PROGRAM,
       getOptions,
       formatOptionLabel,
 
       // helpers
       codeToLabel,
       relativeDisplayValue,
+      isVisible,
+      getFieldDisabled,
       onFormFieldInput,
       onFormFieldChange,
       maskLast4,
+      getCurrentSchoolYear,
 
       // families
       FAMILY_TABS,
       familyFields,
       familySearch,
-      editingFamilyId,
-      familyRows,
       filteredFamilyRows,
       familyForm,
       familyErrors,
       familyTab,
-      isVisible,
-      getFieldDisabled,
       familyContactsMode,
       familyContactsIndex,
       visibleFamilyContacts,
@@ -1868,13 +1978,14 @@ const app = createApp({
       buildFamilyPayload,
 
       // events
-      eventRows,
       eventSearch,
       eventFilter,
+      hasActiveEventFilter,
       eventFields,
       eventForm,
       eventErrors,
       filteredEventRows,
+      resetEventFilters,
       displayEventFees,
       addEventFee,
       removeEventFee,
@@ -1894,13 +2005,15 @@ const app = createApp({
       registrationSearch,
       registrationFilter,
       filteredRegistrationRows,
+      hasActiveRegFilter,
+      resetRegFilters,
       editEventFromReg,
       editFamilyFromReg,
       beginCreateRegistration,
       beginCreateRegistrationForFamily,
       beginEditRegistration,
       goRegistrationList,
-
+      alreadyRegistered,
       registrationForm,
       registrationFields,
       registrationErrors,
@@ -1915,8 +2028,6 @@ const app = createApp({
       availableChildOptions,
       addRegChildRow,
       removeRegChildRow,
-      hydrateChildSnapshot,
-      childOptionsForRow,
     };
   },
 });
