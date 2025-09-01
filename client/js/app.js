@@ -31,7 +31,7 @@ const app = createApp({
 
     // === Enum Modes / Sections ===
     const MODE_NAMES = Object.freeze({ LIST: 'list', CREATE: 'create', EDIT: 'edit' });
-    const SECTION_NAMES = Object.freeze({ FAMILIES: 'families', EVENTS: 'events', REGISTRATIONS: 'registrations' });
+    const SECTION_NAMES = Object.freeze({ FAMILIES: 'families', EVENTS: 'events', REGISTRATIONS: 'registrations', ROSTERS: 'rosters' });
 
     const currentSection = ref(sessionStorage.getItem(STORAGE_KEYS.section) || SECTION_NAMES.FAMILIES);
     watch(currentSection, (v) => sessionStorage.setItem(STORAGE_KEYS.section, v));
@@ -69,6 +69,12 @@ const app = createApp({
         icon: 'fa-solid fa-clipboard-list',
         onClick: switchSection,
       },
+      {
+        id: SECTION_NAMES.ROSTERS,
+        label: 'Enrollment Rosters',
+        icon: 'fa-solid fa-clipboard-list',
+        onClick: switchSection,
+      },
     ];
 
     const breadcrumbs = computed(() => {
@@ -78,12 +84,22 @@ const app = createApp({
       if (SECTION.EVENTS) {
         return [{ label: 'Events', onClick: goEventList }, { label: MODE.LIST ? 'Browse Events' : MODE.CREATE ? 'Create Event' : 'Edit Event' }];
       }
-      return [
-        { label: 'Registrations', onClick: goRegistrationList },
-        {
-          label: MODE.LIST ? 'Browse Registrations' : MODE.CREATE ? 'Create Registration' : 'Edit Registration',
-        },
-      ];
+      if (SECTION.REGISTRATIONS) {
+        return [
+          { label: 'Registrations', onClick: goRegistrationList },
+          {
+            label: MODE.LIST ? 'Browse Registrations' : MODE.CREATE ? 'Create Registration' : 'Edit Registration',
+          },
+        ];
+      }
+      if (SECTION.ROSTERS) {
+        return [
+          { label: 'Rosters', onClick: goRosterList },
+          {
+            label: MODE.LIST ? 'Enrollment Rosters' : '',
+          },
+        ];
+      }
     });
 
     const status = reactive({ text: '', variant: 'info', visible: false });
@@ -129,8 +145,9 @@ const app = createApp({
 
     const PROGRAM_OPTIONS = [
       { key: 'BPH', value: 'BPH', label: 'Ban Phu Huynh' },
-      { key: 'TNTT', value: 'TNTT', label: 'Thieu Nhi Thanh The' },
+      { key: 'TNTT', value: 'TNTT', label: 'Thieu Nhi TT' },
     ];
+
     const LEVEL_OPTIONS = [
       { key: 'PER_FAMILY', value: 'PF', label: 'Per Family' },
       { key: 'PER_CHILD', value: 'PC', label: 'Per Child' },
@@ -332,7 +349,7 @@ const app = createApp({
     }
 
     function getDefaultValue(field, ctx) {
-      if ('default' in field) return typeof field.default === 'function' ? field.default(ctx) : field.default;
+      if ('default' in field) return evalMaybe(field.default, ctx);
       return field.type === 'checkbox' ? false : '';
     }
 
@@ -345,12 +362,12 @@ const app = createApp({
 
     // === Unified meta switches ===
     function isVisible(field, ctx = {}) {
-      if (!Object.prototype.hasOwnProperty.call(field, 'show')) return true;
+      if (!('show' in field)) return true;
       return !!evalMaybe(field.show, ctx);
     }
 
     function getFieldDisabled(field, ctx = {}) {
-      if (!Object.prototype.hasOwnProperty.call(field, 'disabled')) return false;
+      if (!('disabled' in field)) return false;
       return !!evalMaybe(field.disabled, ctx);
     }
 
@@ -372,12 +389,6 @@ const app = createApp({
     // =========================================================
     // FAMILIES
     // =========================================================
-    const FAMILY_TABS = [
-      { key: 'household', label: 'Household' },
-      { key: 'contacts', label: 'Contacts' },
-      { key: 'children', label: 'Children' },
-    ];
-
     const familySearch = ref('');
     const editingFamilyId = ref(null);
 
@@ -398,23 +409,34 @@ const app = createApp({
     }
 
     const contactDisplay = (f) => {
-      const arr = Array.isArray(f.contacts) ? f.contacts : [];
-      if (!arr.length) return '—';
-      const withPhone = arr.find((c) => normPhone(c.phone).length > 0 && c.isEmergency);
-      const p = withPhone || arr[0];
-      const name = p.lastName + ', ' + p.firstName + (p.middle ? ' ' + p.middle : '') || 'Contact';
-      const last4 = maskLast4(p.phone);
-      return last4 ? `${name} · ${last4}` : name;
+      const contacts = Array.isArray(f.contacts) ? f.contacts : [];
+      if (!contacts.length) return '—';
+
+      // Prioritize the first 2 among Father / Mother / Guardian
+      const prioritized = contacts.filter((c) => PARENT_RELATIONSHIPS.has((c.relationship || '').trim()));
+      const others = contacts.filter((c) => !PARENT_RELATIONSHIPS.has((c.relationship || '').trim()));
+      const pick = [...prioritized, ...others].slice(0, 2);
+      const result = pick.map((c) => {
+        return `${c.lastName}, ${c.firstName}${c.middle ? ' ' + c.middle : ''} · ${maskLast4(c.phone)}`;
+      });
+
+      return result.join(' — ');
     };
 
-    function onContactPhoneInput({ ctx, event, field }) {
+    function onContactPhoneInput(fieldMeta, ctx, event) {
       const raw = event?.target?.value ?? '';
       const formatted = formatUSPhone(raw);
       // write-back here (meta function owns mutation)
-      if (ctx?.form && field?.col) {
+      if (ctx?.form && fieldMeta?.col) {
         // setDefault supports deep paths if you ever use nested cols
-        setDefault(ctx.form, field.col, formatted);
+        setDefault(ctx.form, fieldMeta.col, formatted);
       }
+    }
+
+    const hasActiveFamilyFilter = computed(() => !!familySearch.value);
+
+    function resetFamilyFilters() {
+      familySearch.value = '';
     }
 
     // FAMILIES_META
@@ -471,7 +493,7 @@ const app = createApp({
         { col: 'dob', label: 'Date of Birth', type: 'date', default: '' },
         { col: 'allergiesStr', label: 'Allergies (comma separated)', type: 'text', default: '' },
         { col: 'is_name_exception', label: 'Name Exception', type: 'checkbox', default: false },
-        { col: 'exception_notes', label: 'Exception Notes', type: 'text', default: '' },
+        { col: 'exception_notes', label: 'Exception Notes', type: 'text', default: '', show: ({ form }) => form.is_name_exception === true },
       ],
     };
 
@@ -495,61 +517,54 @@ const app = createApp({
       familyErrors.children = familyForm.children.map(() => ({}));
     }
 
-    const familyTab = ref(FAMILY_TABS[0].key);
-
-    function validateFamilyTab(tabName = familyTab.value) {
+    function validateFamily() {
       const s = familyForm;
-      let e = null;
-      if (tabName === 'household') {
-        e = {};
-        if (!s.id?.trim()) e.id = 'required';
-        if (!s.parishNumber?.trim() && s.parishMember) e.parishNumber = 'required';
-        if (!s.address.street?.trim()) e.street = 'required';
-        if (!s.address.city?.trim()) e.city = 'required';
-        if (!/^\d{5}(-\d{4})?$/.test(s.address.zip || '')) e.zip = 'must be 5 digits.';
-        familyErrors.household = e;
-        return Object.keys(e).length === 0;
-      }
-      if (tabName === 'contacts') {
-        e = s.contacts.map((c) => {
-          const ce = {};
-          if (!c.lastName?.trim()) ce.lastName = 'required';
-          if (!c.firstName?.trim()) ce.firstName = 'required';
-          if (!c.relationship?.trim()) ce.relationship = 'required';
-          if (!c.phone?.trim() || normPhone(c.phone).length !== 10) ce.phone = 'required and must be 10 digit';
-          if ((c.email || '').trim() && !/^\S+@\S+\.\S+$/.test(c.email)) ce.email = 'blank or valid email';
-          return ce;
-        });
-        familyErrors.contacts = e;
-        return e.every((obj) => Object.keys(obj).length === 0);
-      }
-      if (tabName === 'children') {
-        e = s.children.map((c) => {
-          const ce = {};
-          if (!c.lastName?.trim()) ce.lastName = 'required';
-          if (!c.firstName?.trim()) ce.firstName = 'required';
-          if (!c.dob?.trim()) ce.dob = 'required.';
-          const matchesParent = parentLastNameList.value.some((p) => p.toLowerCase() === (c.lastName || '').toLowerCase());
-          if (!matchesParent) {
-            if (!c.is_name_exception) ce.is_name_exception = 'Check here if name exception';
-            if (!c.exception_notes?.trim()) ce.exception_notes = 'required';
-            if (!(c.is_name_exception && c.exception_notes?.trim())) ce.lastName = ce.lastName || 'mismatch w/ parents';
-          }
-          return ce;
-        });
-        familyErrors.children = e;
-        return e.every((obj) => Object.keys(obj).length === 0);
-      }
-      return true;
-    }
+      let e = { household: {}, contacts: [], children: [] };
 
-    function goFamilyTab(tKey) {
-      familyTab.value = tKey;
+      if (!s.id?.trim()) e.household.id = 'required';
+      if (!s.parishNumber?.trim() && s.parishMember) e.household.parishNumber = 'required';
+      if (!s.address.street?.trim()) e.household.street = 'required';
+      if (!s.address.city?.trim()) e.household.city = 'required';
+      if (!/^\d{5}(-\d{4})?$/.test(s.address.zip || '')) e.household.zip = 'must be 5 digits.';
+
+      e.contacts = s.contacts.map((c) => {
+        const ce = {};
+        if (!c.lastName?.trim()) ce.lastName = 'required';
+        if (!c.firstName?.trim()) ce.firstName = 'required';
+        if (!c.relationship?.trim()) ce.relationship = 'required';
+        if (!c.phone?.trim() || normPhone(c.phone).length !== 10) ce.phone = 'required and must be 10 digit';
+        if ((c.email || '').trim() && !/^\S+@\S+\.\S+$/.test(c.email)) ce.email = 'blank or valid email';
+        return ce;
+      });
+
+      e.children = s.children.map((c) => {
+        const ce = {};
+        if (!c.lastName?.trim()) ce.lastName = 'required';
+        if (!c.firstName?.trim()) ce.firstName = 'required';
+        if (!c.dob?.trim()) ce.dob = 'required.';
+        const matchesParent = parentLastNameList.value.some((p) => p.toLowerCase() === (c.lastName || '').toLowerCase());
+        if (!matchesParent) {
+          if (!c.is_name_exception) ce.is_name_exception = 'Check here if name exception';
+          if (!c.exception_notes?.trim()) ce.exception_notes = 'required';
+          if (!(c.is_name_exception && c.exception_notes?.trim())) ce.lastName = ce.lastName || 'mismatch w/ parents';
+        }
+        return ce;
+      });
+      familyErrors.household = e.household;
+      familyErrors.contacts = e.contacts;
+      familyErrors.children = e.children;
+
+      // final result (pure booleans)
+      const noHouseHoldErrors = Object.keys(e.household).length === 0;
+      const noContactsErrors = (e.contacts || []).every((obj) => !obj || Object.keys(obj).length === 0);
+      const noChildrenErrors = (e.children || []).every((obj) => !obj || Object.keys(obj).length === 0);
+
+      return noHouseHoldErrors && noContactsErrors && noChildrenErrors;
     }
 
     // paging
-    const familyContactsMode = ref('all');
-    const familyChildrenMode = ref('all');
+    const familyContactsMode = ref('single');
+    const familyChildrenMode = ref('single');
     const familyContactsIndex = ref(0);
     const familyChildrenIndex = ref(0);
 
@@ -610,7 +625,6 @@ const app = createApp({
     function beginCreateFamily() {
       Object.assign(familyForm, newFamilyForm());
       hydrateFamilyErrors();
-      familyTab.value = FAMILY_TABS[0].key;
       snapshotFamilyForm();
       switchSection(SECTION_NAMES.FAMILIES, MODE_NAMES.CREATE);
       setStatus('Creating new family…', 'info', 1200);
@@ -643,7 +657,6 @@ const app = createApp({
         exception_notes: ch.exceptionNotes || '',
       }));
       hydrateFamilyErrors();
-      familyTab.value = FAMILY_TABS[0].key;
       snapshotFamilyForm();
       switchSection(SECTION_NAMES.FAMILIES, MODE_NAMES.EDIT);
       setStatus(`Editing ${f.id}`, 'info', 1200);
@@ -690,9 +703,6 @@ const app = createApp({
       });
     });
 
-    // --- Age by year (no month/day) --------------------------------------------
-    const CURRENT_YEAR = getCurrentSchoolYear();
-
     function getYearPart(input) {
       if (!input) return null;
       if (typeof input === 'number') return input;
@@ -710,7 +720,7 @@ const app = createApp({
     function computeAgeByYear(dob) {
       const birthYear = getYearPart(dob);
       if (birthYear == null) return null;
-      const age = CURRENT_YEAR - birthYear;
+      const age = getCurrentSchoolYear() - birthYear;
       return age < 0 ? 0 : age;
     }
 
@@ -780,19 +790,16 @@ const app = createApp({
             .split(',')
             .map((s) => s.trim())
             .filter(Boolean),
-          isNameException: !!ch.isNameException,
-          exceptionNotes: ch.exceptionNotes || null,
+          isNameException: !!ch.is_name_exception,
+          exceptionNotes: ch.exception_notes || null,
         })),
       };
     }
 
     function submitFamilyForm() {
-      for (const t of FAMILY_TABS) {
-        if (!validateFamilyTab(t.key)) {
-          familyTab.value = t.key;
-          setStatus(`Please fix errors in ${t.label}.`, 'error', 2500);
-          return;
-        }
+      if (!validateFamily()) {
+        setStatus('Error found. Please fix errors before trying to save', 'error', 3500);
+        return;
       }
       if (!isFamilyDirty.value) {
         setStatus('No changes to save.', 'warn', 1500);
@@ -878,13 +885,13 @@ const app = createApp({
         },
         {
           col: 'programId',
-          label: 'Program',
+          label: 'Program Code',
           type: 'select',
           selOpt: PROGRAM_OPTIONS,
           default: PROGRAM_OPTIONS[0].value,
         },
-        { col: 'eventType', label: 'Type', type: 'select', selOpt: EVENT_TYPES, default: '' },
-        { col: 'title', label: 'Title', type: 'text', default: '', placeholder: 'TNTT Roster 2025-26' },
+        { col: 'eventType', label: 'Event Type', type: 'select', selOpt: EVENT_TYPES, default: '' },
+        { col: 'title', label: 'Description', type: 'text', default: '', placeholder: 'TNTT Roster 2025-26' },
         {
           col: 'year',
           label: 'School Year',
@@ -892,24 +899,26 @@ const app = createApp({
           selOpt: YEAR_OPTIONS,
           default: () => getCurrentSchoolYear(),
         },
-        { col: 'level', label: 'Level', type: 'select', selOpt: LEVEL_OPTIONS, default: LEVEL_OPTIONS[0].value },
+        { col: 'level', label: 'Apply Level', type: 'select', selOpt: LEVEL_OPTIONS, default: LEVEL_OPTIONS[0].value },
         { col: 'openDate', label: 'Open Date', type: 'date', default: '' },
         { col: 'endDate', label: 'End Date', type: 'date', default: '' },
       ],
       feeRow: [
-        { col: 'code', label: 'Code', type: 'select', selOpt: FEE_CODES, default: FEE_CODES[0].value },
-        { col: 'amount', label: 'Amount', type: 'number', default: 0, attrs: { min: 0, step: 1 } },
+        { col: 'code', label: 'Fee Type', type: 'select', selOpt: FEE_CODES, default: FEE_CODES[0].value },
+        { col: 'amount', label: 'Fee Amount', type: 'number', default: 0, attrs: { min: 0, step: 1 } },
       ],
       prerequisiteRow: [
         {
           col: 'eventId',
-          label: 'Prerequisite Event ID',
+          label: 'Prerequisite Event',
           type: 'select',
-          selOpt: ({ index }) =>
-            availablePrerequisiteOptions(index).map((e) => ({
+          selOpt: (fieldMeta, ctx) => {
+            const index = Number.isInteger(ctx?.index) ? ctx.index : -1;
+            return availablePrerequisiteOptions(index).map((e) => ({
               value: e.id,
               label: `${e.programId}_${e.eventType}_${e.year}`,
-            })),
+            }));
+          },
           default: '',
           relativeDisplay: [
             { label: 'Type', rdSource: 'eventRows', rdKey: 'id', rdCol: 'eventType', map: EVENT_TYPES },
@@ -1198,12 +1207,7 @@ const app = createApp({
       }
     }
 
-    const REG_TABS = [
-      { key: 'main', label: 'Event & Family' },
-      { key: 'registration', label: 'Registration' },
-    ];
     const REG_STATUS_OPTIONS = [
-      { value: 'pending', label: 'Pending' },
       { value: 'paid', label: 'Paid' },
       { value: 'cancelled', label: 'Cancelled' },
     ];
@@ -1215,7 +1219,6 @@ const app = createApp({
 
     const registrationForm = reactive(newRegistrationForm());
     const registrationErrors = reactive({ main: {}, children: [], payments: [] });
-    const regTab = ref('main');
 
     const hasActiveRegFilter = computed(() => !!(registrationFilter.programId || registrationFilter.eventType || registrationFilter.year));
 
@@ -1262,15 +1265,14 @@ const app = createApp({
     }
 
     // Check whether a given family has registered for the year
-    function alreadyRegistered({ familyId, year, eventId = null, programId = null }) {
+    function alreadyRegistered({ familyId, year, eventId = null, programId = null, eventType = null }) {
       if (!familyId || !Number.isFinite(Number(year))) return false;
-
       return registrationRows.value.some((r) => {
         if (r.familyId !== familyId) return false;
         if (Number(r.event?.year) !== Number(year)) return false;
         if (eventId != null && r.eventId !== eventId) return false;
         if (programId != null && r.event?.programId !== programId) return false;
-
+        if (eventType != null && r.event?.eventType !== eventType) return false;
         return true;
       });
     }
@@ -1293,6 +1295,8 @@ const app = createApp({
     const eventOptionsForRegistration = computed(() => {
       const familyId = (registrationForm.familyId || '').trim();
 
+      if (!familyId && MODE.CREATE) return [];
+
       // Create base from eventRows
       const base = eventRows.value
         // Rule 1: only show events open for registration
@@ -1300,9 +1304,9 @@ const app = createApp({
         // Rule 2: same (current) school year
         .filter(isCurrentSchoolYear)
         // Rule 3: exclude events the family already registered for (once a familyId is chosen)
-        .filter((ev) => !familyId || !alreadyRegistered({ familyId: familyId, year: ev.year, eventId: ev.id }))
+        .filter((ev) => !alreadyRegistered({ familyId: familyId, year: ev.year, eventId: ev.id }))
         // Rule 4: require the family to have registrations for all prerequisite events (once a familyId is chosen)
-        .filter((ev) => !familyId || familyMetPrereqs(ev, familyId));
+        .filter((ev) => familyMetPrereqs(ev, familyId));
 
       // set the filtered to base if in CREATE mode else just show everything
       const filtered = MODE.CREATE ? base : eventRows.value;
@@ -1310,7 +1314,8 @@ const app = createApp({
       // Map to return the lookup array of objects [{value, label}]
       return filtered.map((ev) => ({
         value: ev.id,
-        label: `${ev.programId}_${ev.eventType}_${ev.year} — ${ev.title}`,
+        //label: `${ev.programId}_${ev.eventType}_${ev.year} — ${ev.title}`,
+        label: ev.title,
       }));
     });
 
@@ -1365,30 +1370,55 @@ const app = createApp({
       registrationErrors.main = {};
       registrationErrors.children = [];
       registrationErrors.payments = [];
-      regTab.value = 'main';
       editingRegistrationId.value = null;
       switchSection(SECTION_NAMES.REGISTRATIONS, MODE_NAMES.CREATE);
       setStatus('Creating new registration…', 'info', 1200);
     }
 
-    function beginCreateRegistrationForFamily(f) {
-      beginCreateRegistration();
-      registrationForm.familyId = f?.id || '';
-      hydrateRegistrationContacts();
-      recomputePayments();
-      switchSection(SECTION_NAMES.REGISTRATIONS, MODE_NAMES.CREATE);
+    const adminRegistration = computed(
+      () => eventRows.value.find((e) => e.programId === PROGRAM.BPH && e.eventType === EVENT_TYPE.ADMIN && isOpenEventFilter(e)) || null,
+    );
+
+    const tnttRegistration = computed(
+      () => eventRows.value.find((e) => e.programId === PROGRAM.TNTT && e.eventType === EVENT_TYPE.REGISTRATION && isOpenEventFilter(e)) || null,
+    );
+
+    function getRegistrationFor(familyId, eventId) {
+      const reg = registrationRows.value.find((r) => r.familyId === familyId && r.eventId === eventId) || null;
+      return reg;
+    }
+
+    function registerAdminForFamily(f) {
+      if (alreadyRegistered({ familyId: f.id, year: getCurrentSchoolYear(), programId: PROGRAM.BPH, eventType: EVENT_TYPE.ADMIN })) {
+        beginEditRegistration(getRegistrationFor(f.id, adminRegistration.value.id));
+      } else {
+        beginCreateRegistration();
+        registrationForm.familyId = f?.id || '';
+        registrationForm.eventId = adminRegistration.value.id || '';
+        onRegFamilyChange();
+        onRegEventChange();
+      }
+    }
+
+    function registerTNTTForFamily(f) {
+      if (alreadyRegistered({ familyId: f.id, year: getCurrentSchoolYear(), programId: PROGRAM.TNTT, eventType: EVENT_TYPE.REGISTRATION })) {
+        beginEditRegistration(getRegistrationFor(f.id, tnttRegistration.value.id));
+      } else if (alreadyRegistered({ familyId: f.id, year: getCurrentSchoolYear(), programId: PROGRAM.BPH, eventType: EVENT_TYPE.ADMIN })) {
+        beginCreateRegistration();
+        registrationForm.familyId = f?.id || '';
+        registrationForm.eventId = tnttRegistration.value.id || '';
+        onRegFamilyChange();
+        onRegEventChange();
+      } else {
+        setStatus('Must already register for ADMIN event first', 'error', 3000);
+      }
     }
 
     function beginEditRegistration(r) {
       Object.assign(registrationForm, newRegistrationForm(), r);
       editingRegistrationId.value = r.id;
-      regTab.value = 'main';
       switchSection(SECTION_NAMES.REGISTRATIONS, MODE_NAMES.EDIT);
       setStatus(`Editing ${r.id}`, 'info', 1200);
-    }
-
-    function goRegTab(tKey) {
-      regTab.value = tKey;
     }
 
     // Children selection logic for the "Add Child" button
@@ -1644,6 +1674,18 @@ const app = createApp({
       return ageGroupOptionsByProgram(dob, programId);
     }
 
+    watch(
+      () => registrationForm.familyId,
+      () => {
+        const opts = eventOptionsForRegistration.value;
+        if (!opts.some((o) => o.value === registrationForm.eventId)) {
+          registrationForm.eventId = '';
+          registrationForm.children = [];
+          registrationForm.payments = [];
+        }
+      },
+    );
+
     // REG_META
     const registrationFields = {
       main: [
@@ -1655,13 +1697,15 @@ const app = createApp({
           placeholder: 'Start typing ID or name…',
           onChange: onRegFamilyChange,
           onInput: () => {},
+          disabled: () => MODE.EDIT,
         },
         {
           col: 'eventId',
-          label: 'Event',
+          label: 'Registration Event',
           type: 'select',
           selOpt: eventOptionsForRegistration,
           onChange: onRegEventChange,
+          disabled: ({ form }) => (MODE.CREATE && !form.familyId) || MODE.EDIT,
         },
         {
           col: 'parishMember',
@@ -1718,7 +1762,7 @@ const app = createApp({
         },
       ],
       paymentsRow: [
-        { col: 'code', label: 'Fee Code', type: 'select', selOpt: FEE_CODES, disabled: true },
+        { col: 'code', label: 'Fee Type', type: 'select', selOpt: FEE_CODES, disabled: true },
         { col: 'unitAmount', label: 'Unit Price', disabled: true, show: true },
         { col: 'quantity', label: 'Quantity', disabled: true },
         { col: 'amount', label: 'Total Amount', disabled: true },
@@ -1792,7 +1836,7 @@ const app = createApp({
         e.payments = registrationForm.payments.map((p) => {
           const pe = {};
           if (!p.method?.trim()) pe.method = 'required';
-          if (!p.txnRef?.trim() && pe.method?.trim() !== 'cash') pe.txnRef = 'required';
+          if (!p.txnRef?.trim() && p.method?.trim() !== 'cash') pe.txnRef = 'required';
           if (!p.receiptNo?.trim()) pe.receiptNo = 'required';
           if (!p.receivedBy?.trim()) pe.receivedBy = 'required';
           return pe;
@@ -1894,6 +1938,90 @@ const app = createApp({
     }
 
     // =========================================================
+    // Roster TNTT
+    // =========================================================
+
+    const rosterSearch = ref('');
+    const rosterFilter = reactive({ programId: '', eventType: '', eventId: '', year: '', age: '' });
+
+    const hasActiveRosterFilter = computed(
+      () => !!(rosterSearch.value || rosterFilter.programId || rosterFilter.eventType || rosterFilter.eventId || rosterFilter.year || rosterFilter.age),
+    );
+
+    function resetRosterFilters() {
+      rosterFilter.programId = '';
+      rosterFilter.eventType = '';
+      rosterFilter.eventId = '';
+      rosterFilter.year = '';
+      rosterFilter.age = '';
+      rosterSearch.value = '';
+    }
+
+    function goRosterList() {
+      switchSection(SECTION_NAMES.ROSTERS, MODE_NAMES.LIST);
+    }
+
+    const eventOptionsForRoster = computed(() => {
+      // Create base from eventRows
+      return eventRows.value
+        .filter((f) => {
+          const byYear = !rosterFilter.year || Number(f.year) === Number(rosterFilter.year);
+          const byType = !rosterFilter.eventType || f.eventType === rosterFilter.eventType;
+          return byYear && byType;
+        })
+        .map((ev) => ({
+          value: ev.id,
+          label: ev.title,
+        }));
+    });
+
+    const rosterRows = computed(() =>
+      registrationRows.value
+        .filter((r) => r.status === 'paid')
+        .flatMap((r) =>
+          (r.children || []).map((ch) => ({
+            registrationId: r.id,
+            eventId: r.eventId,
+            eventType: r.event?.eventType,
+            eventTitle: r.event?.title,
+            programId: r.event?.programId,
+            year: r.event?.year,
+            familyId: r.familyId,
+            childId: ch.childId,
+            saintName: ch.saintName,
+            fullName: ch.fullName,
+            dob: ch.dob,
+            age: computeAgeByYear(ch.dob),
+            allergies: ch.allergies.join(', '),
+          })),
+        ),
+    );
+
+    const filteredRosterRows = computed(() => {
+      const q = rosterSearch.value.toLowerCase();
+      return rosterRows.value.filter((c) => {
+        const hits = (c.fullName || '').toLowerCase().includes(q);
+        const byProg = !rosterFilter.programId || c.programId === rosterFilter.programId;
+        const byYear = !rosterFilter.year || Number(c.year) === Number(rosterFilter.year);
+        const byType = !rosterFilter.eventType || c.eventType === rosterFilter.eventType;
+        const byEvent = !rosterFilter.eventId || c.eventId === rosterFilter.eventId;
+        const byAge = !rosterFilter.age || Number(c.age) === Number(rosterFilter.age);
+
+        return hits && byProg && byYear && byType && byEvent && byAge;
+      });
+    });
+
+    const ageOptions = computed(() => {
+      const arr = [];
+      for (let i = 7; i < 20; i++) {
+        arr.push(i);
+      }
+      return arr.map((i) => ({
+        value: i,
+        label: i,
+      }));
+    });
+    // =========================================================
     // INITIAL LOAD (quiet)
     // =========================================================
     onMounted(() => {
@@ -1945,16 +2073,16 @@ const app = createApp({
       getCurrentSchoolYear,
 
       // families
-      FAMILY_TABS,
       familyFields,
       familySearch,
       filteredFamilyRows,
       familyForm,
       familyErrors,
-      familyTab,
       familyContactsMode,
       familyContactsIndex,
       visibleFamilyContacts,
+      resetFamilyFilters,
+      hasActiveFamilyFilter,
       nextFamilyContact,
       prevFamilyContact,
       displayChildNameAndAge,
@@ -1968,7 +2096,6 @@ const app = createApp({
       beginEditFamily,
       submitFamilyForm,
       goFamilyList,
-      goFamilyTab,
       resetFamilyForm,
       addFamilyContact,
       removeFamilyContact,
@@ -2011,24 +2138,31 @@ const app = createApp({
       editEventFromReg,
       editFamilyFromReg,
       beginCreateRegistration,
-      beginCreateRegistrationForFamily,
+      registerAdminForFamily,
+      registerTNTTForFamily,
       beginEditRegistration,
       goRegistrationList,
       alreadyRegistered,
       registrationForm,
       registrationFields,
       registrationErrors,
-      REG_TABS,
-      regTab,
-      goRegTab,
       canSaveRegistration,
       submitRegistrationForm,
-
-      selectedEventLevel,
       familyDatalistOptions,
       availableChildOptions,
       addRegChildRow,
       removeRegChildRow,
+
+      // rosters
+      rosterSearch,
+      rosterFilter,
+      filteredRosterRows,
+      hasActiveRosterFilter,
+      eventOptionsForRoster,
+      ageOptions,
+      ageGroupLabelTNTT,
+      resetRosterFilters,
+      goRosterList,
     };
   },
 });

@@ -11,8 +11,8 @@
   --border: #e5e7eb;
   --border-strong: #d1d5db;
   --primary: #2563eb;
-  --accent: #059669;
-  --danger: #ef4444;
+  --accent: #017a54;
+  --danger: #aa0202;
   --focus: #93c5fd;
 }
 
@@ -108,7 +108,7 @@ body {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 5px;
-  padding: 16px;
+  padding: 4px 16px 40px 16px;
   box-shadow: 0 6px 20px rgba(15, 23, 42, 0.06);
 }
 .toolbar {
@@ -118,7 +118,7 @@ body {
 }
 
 .toolbar > .input {
-  flex: 1 1 320px;
+  flex: 1 1 200px;
   width: auto;
   min-width: 200px;
 }
@@ -126,7 +126,7 @@ body {
 /* Inputs */
 .input {
   width: 100%;
-  padding: 6px 6px;
+  padding: 4px 4px;
   border: 1px solid var(--border-strong);
   color: var(--text);
   border-radius: 5px;
@@ -184,10 +184,10 @@ body {
 
 /* zebra striping */
 table.table tbody tr:nth-child(odd) {
-  background: #f7f7fb;
+  background: #ffffff;
 }
 table.table tbody tr:nth-child(even) {
-  background: #ffffff;
+  background: #edf2fb;
 }
 
 /* optional: make inline links look like links inside tables */
@@ -333,6 +333,9 @@ table.table tbody tr:nth-child(even) {
 .grid.col5 {
   --cols: 5;
 }
+.grid.col8 {
+  --cols: 8;
+}
 
 @media (max-width: 920px) {
   .grid {
@@ -371,10 +374,22 @@ table.table tbody tr:nth-child(even) {
 
 /* zebra striping */
 .row:nth-child(odd) {
-  background: #f7f7fb;
+  background: #edf2fb;
 }
 .row:nth-child(even) {
   background: #ffffff;
+}
+
+.row-actions {
+  position: absolute;
+  top: 0rem;
+  right: 0rem;
+  padding: 0.1rem 0.1rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
 }
 
 /* formtabs bar: tabs (left) + actions (right) */
@@ -718,11 +733,13 @@ textarea.input:disabled:focus {
 }
 
 /* Optional: dim the label when its control is disabled */
+/*
 label:has(> .input:disabled),
 label:has(> select.input:disabled),
 label:has(> .check-lg:disabled) {
-  color: #6b7280;
+  color: #545963;
 }
+*/
 
 /* Optional: treat read-only similar to disabled but slightly brighter */
 .input[readonly],
@@ -731,4 +748,293 @@ textarea.input[readonly] {
   border-color: #e5e7eb;
   color: #475569;
   cursor: default;
+}
+
+/* ===== Dark theme: 1:1 with your light.css ===== */
+/* Enable with: <html data-theme="dark"> */
+
+:root[data-theme='dark'] {
+  /* variables only — everything else below just overrides your hard-coded light colors */
+  --bg: #0b1220;
+  --card: #0f172a;
+  --muted: #94a3b8;
+  --text: #e5e7eb;
+  --border: #1f2937;
+  --border-strong: #334155;
+  --primary: #60a5fa;
+  --accent: #34d399;
+  --danger: #ef4444;
+  --focus: rgba(96, 165, 250, 0.35);
+}
+
+/* Global surfaces already use vars, just ensure body/card look right */
+:root[data-theme='dark'] body {
+  background: var(--bg);
+  color: var(--text);
+}
+:root[data-theme='dark'] .card,
+:root[data-theme='dark'] .subpanel,
+:root[data-theme='dark'] .row,
+:root[data-theme='dark'] .menu-panel,
+:root[data-theme='dark'] .form .panel,
+:root[data-theme='dark'] .topbar {
+  background: var(--card);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+/* Softer shadow on dark */
+:root[data-theme='dark'] .card {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+/* TABLE header (light hard-code: #dceaf8) */
+:root[data-theme='dark'] .table thead th {
+  background: #111827;
+  color: var(--text);
+  border-color: var(--border);
+}
+
+/* TABLE zebra rows (light hard-codes: #ffffff / #edf2fb) */
+:root[data-theme='dark'] table.table tbody tr:nth-child(odd) {
+  background: #0f172a;
+}
+:root[data-theme='dark'] table.table tbody tr:nth-child(even) {
+  background: #0b1220;
+}
+
+/* ROW zebra (light hard-codes: #edf2fb / #ffffff) */
+:root[data-theme='dark'] .row:nth-child(odd) {
+  background: #0f172a;
+}
+:root[data-theme='dark'] .row:nth-child(even) {
+  background: #0b1220;
+}
+
+/* STATUS (light hard-codes) */
+:root[data-theme='dark'] .status {
+  background: #0f172a; /* instead of #f8fafc */
+  color: #cbd5e1; /* was #334155 */
+  border-color: transparent;
+}
+:root[data-theme='dark'] .status[data-variant='success'] {
+  background: #052e2a;
+  color: #34d399;
+}
+:root[data-theme='dark'] .status[data-variant='warn'] {
+  background: #2a2105;
+  color: #fbbf24;
+}
+:root[data-theme='dark'] .status[data-variant='error'] {
+  background: #2a0b0b;
+  color: #f87171;
+}
+:root[data-theme='dark'] .status[data-variant='info'] {
+  background: #0a1b36;
+  color: #93c5fd;
+}
+
+/* ITEM HEADER (light hard-code: #e6e6f8) */
+:root[data-theme='dark'] .item-header,
+:root[data-theme='dark'] .subpanel > .item-header,
+:root[data-theme='dark'] .row > .item-header,
+:root[data-theme='dark'] .form .panel > fieldset > .item-header {
+  background: #1f2937;
+  color: var(--text);
+  border-color: var(--border);
+}
+
+/* FORMTABS (light hard-codes: #f8fafc, #d9dcf6, #a8b2f6) */
+:root[data-theme='dark'] .formtabs {
+  border-bottom-color: var(--border);
+}
+:root[data-theme='dark'] .formtabs button {
+  background: #111827; /* base */
+  color: var(--muted);
+  border-color: var(--border-strong);
+}
+:root[data-theme='dark'] .formtabs button:hover {
+  background: #1b2330; /* hover (was #d9dcf6) */
+  color: var(--text);
+}
+:root[data-theme='dark'] .formtabs .active {
+  background: #27314a; /* active (was #a8b2f6) */
+  color: var(--text);
+  border-color: var(--border-strong);
+  box-shadow: 0 1px 0 var(--card), 0 -1px 0 rgba(255, 255, 255, 0.02) inset;
+}
+:root[data-theme='dark'] .formtabs .active::after {
+  background: var(--card);
+}
+
+/* INPUTS (borders already from vars; placeholder contrast) */
+:root[data-theme='dark'] .input {
+  background: #0b1220;
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+:root[data-theme='dark'] .input::placeholder,
+:root[data-theme='dark'] textarea.input::placeholder {
+  color: #74839a;
+}
+
+/* DISABLED/READONLY inputs parity on dark */
+:root[data-theme='dark'] .input:disabled,
+:root[data-theme='dark'] select.input:disabled,
+:root[data-theme='dark'] textarea.input:disabled {
+  background: #111827;
+  border-color: #2b3340;
+  color: #9aa0a6;
+  -webkit-text-fill-color: #9aa0a6;
+}
+:root[data-theme='dark'] .input:disabled::placeholder,
+:root[data-theme='dark'] textarea.input:disabled::placeholder {
+  color: #6b7280;
+}
+:root[data-theme='dark'] .input[readonly],
+:root[data-theme='dark'] textarea.input[readonly] {
+  background: #0e1626;
+  border-color: #233046;
+  color: #c0cad6;
+}
+
+/* BUTTONS (your system uses CSS vars; only adjust disabled hard-code #cecfcf) */
+:root[data-theme='dark'] .btn:is(:disabled, [aria-disabled='true'], .is-disabled) {
+  background: #2b2f36;
+  color: #9aa0a6;
+  border-color: #2b2f36;
+}
+
+/* SEGMENTED control (light hard-codes: white base + #9fb4fa active) */
+:root[data-theme='dark'] .seg {
+  border-color: var(--border-strong);
+}
+:root[data-theme='dark'] .seg > button {
+  background: #111827;
+  color: var(--text);
+}
+:root[data-theme='dark'] .seg > button.seg-active {
+  background: #27314a;
+  color: #e5e7eb;
+}
+
+/* TABLE inline links maintain brand */
+:root[data-theme='dark'] .table a.link {
+  color: var(--primary);
+}
+
+/* Checkboxes (keep accent, just tweak when disabled) */
+:root[data-theme='dark'] .check-lg {
+  accent-color: #7aa2ff;
+}
+:root[data-theme='dark'] .check-lg:disabled {
+  filter: none;
+  opacity: 0.6;
+}
+
+/* Menu panel shadow reads nicer on dark */
+:root[data-theme='dark'] .menu-panel {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+}
+:root[data-theme='dark'] .btn {
+  --btn-bg: #1e293b; /* slate background */
+  --btn-fg: var(--text); /* light text */
+  --btn-border: #475569; /* brighter slate border for visibility */
+}
+
+/* Primary */
+:root[data-theme='dark'] .btn.primary {
+  --btn-bg: var(--primary);
+  --btn-fg: #fff;
+  --btn-border: var(--primary);
+}
+
+/* Secondary */
+:root[data-theme='dark'] .btn.secondary {
+  --btn-bg: #0f172a; /* deep background */
+  --btn-fg: var(--text);
+  --btn-border: #475569; /* slightly lighter than base for contrast */
+}
+:root[data-theme='dark'] .btn.secondary:hover,
+:root[data-theme='dark'] .btn.secondary:focus-visible {
+  --btn-bg: #1e293b;
+  --btn-border: #64748b; /* hover → even more visible border */
+}
+
+/* Accent */
+:root[data-theme='dark'] .btn.accent {
+  --btn-bg: var(--accent);
+  --btn-fg: #fff;
+  --btn-border: var(--accent);
+}
+
+/* Danger */
+:root[data-theme='dark'] .btn.danger {
+  --btn-bg: var(--danger);
+  --btn-fg: #fff;
+  --btn-border: var(--danger);
+}
+
+/* Disabled */
+:root[data-theme='dark'] .btn:is(:disabled, [aria-disabled='true'], .is-disabled) {
+  --btn-bg: #2b2f36;
+  --btn-fg: #9aa0a6;
+  --btn-border: #4b5563; /* visible muted border */
+}
+
+/* ==== Dark mode: native control fixes ==== */
+:root[data-theme='dark'] .input,
+:root[data-theme='dark'] select.input,
+:root[data-theme='dark'] textarea.input,
+:root[data-theme='dark'] input.input {
+  /* let the browser draw date pickers, spinners, etc. for dark */
+  color-scheme: dark;
+}
+
+/* DATE PICKER (Chromium/WebKit) ------------------------- */
+/* make the calendar icon visible on dark backgrounds */
+:root[data-theme='dark'] input[type='date']::-webkit-calendar-picker-indicator {
+  filter: invert(0.9) brightness(1.2) saturate(1.1);
+  opacity: 0.95;
+}
+
+/* keep the text segments readable */
+:root[data-theme='dark'] input[type='date']::-webkit-datetime-edit,
+:root[data-theme='dark'] input[type='date']::-webkit-datetime-edit-fields-wrapper,
+:root[data-theme='dark'] input[type='date']::-webkit-datetime-edit-text,
+:root[data-theme='dark'] input[type='date']::-webkit-datetime-edit-year-field,
+:root[data-theme='dark'] input[type='date']::-webkit-datetime-edit-month-field,
+:root[data-theme='dark'] input[type='date']::-webkit-datetime-edit-day-field {
+  color: var(--text);
+  background: transparent;
+}
+
+/* optional: clearer hover on the calendar icon */
+:root[data-theme='dark'] input[type='date']::-webkit-calendar-picker-indicator:hover {
+  filter: invert(1) brightness(1.3);
+}
+
+/* NUMBER STEPPERS (Chromium/WebKit) --------------------- */
+:root[data-theme='dark'] input[type='number']::-webkit-outer-spin-button,
+:root[data-theme='dark'] input[type='number']::-webkit-inner-spin-button {
+  /* lighten the arrows so they don't disappear */
+  filter: invert(0.9) brightness(1.2);
+}
+
+/* FIREFOX tweaks --------------------------------------- */
+/* (FF hides steppers by default; if you *want* that, keep this.
+   If you want steppers, REMOVE this block.) */
+@-moz-document url-prefix() {
+  :root[data-theme='dark'] input[type='number'] {
+    /* default FF look is already readable with color-scheme: dark */
+    /* uncomment to hide steppers:
+    -moz-appearance: textfield;
+    */
+  }
+}
+
+/* DISABLED PLACEHOLDER contrast (optional tidy-up) */
+:root[data-theme='dark'] .input:disabled::placeholder,
+:root[data-theme='dark'] textarea.input:disabled::placeholder {
+  color: #7a8699;
 }
