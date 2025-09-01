@@ -50238,6 +50238,48 @@
       "acceptedBy": "Pham, Linh Thanh",
       "createdAt": "2025-08-27T10:52:41Z",
       "updatedAt": "2025-08-28T17:47:15Z"
+    },
+    {
+      "id": "R:2010-2086-2962",
+      "eventId": "E:4258-2776-0359",
+      "familyId": "F:8969-0294-6755",
+      "status": "paid",
+      "parishMember": true,
+      "event": {
+        "title": "Admin/Security (2025-26)",
+        "year": 2025,
+        "programId": "BPH",
+        "eventType": "ADM"
+      },
+      "contacts": [
+        {
+          "name": "Green, Laura",
+          "relationship": "Mother",
+          "phone": "(714) 555-1010"
+        },
+        {
+          "name": "Green, Mark",
+          "relationship": "Father",
+          "phone": "(949) 555-2020"
+        }
+      ],
+      "children": [],
+      "payments": [
+        {
+          "code": "SECF",
+          "unitAmount": 30,
+          "amount": 30,
+          "quantity": 1,
+          "method": "check",
+          "txnRef": "CHK-4193",
+          "receiptNo": "A13412431",
+          "receivedBy": "Bob",
+          "paidAt": "2025-09-01T22:54:50.013Z"
+        }
+      ],
+      "acceptedBy": "Green, Laura",
+      "createdAt": "2025-09-01T22:54:50.013Z",
+      "updatedAt": "2025-09-01T22:54:50.013Z"
     }
   ]
 }

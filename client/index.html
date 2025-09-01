@@ -107,26 +107,30 @@
                     <td>{{ f.address.city }}</td>
                     <td>{{ f.children.length }}</td>
                     <td>
-                      <button tabindex="-1" class="btn secondary" type="button" @click="beginEditFamily(f)">
-                        <i class="fa-solid fa-pen-to-square"></i><span>Edit</span>
+                      <button tabindex="-1" class="btn" type="button" @click="beginEditFamily(f)">
+                        <i class="fa-solid fa-pen-to-square"></i><span> Edit</span>
                       </button>
                     </td>
                     <td>
                       <button tabindex="-1" class="btn" type="button" @click="registerAdminForFamily(f)">
-                        <i class="fa-solid fa-clipboard-list"></i>
-                        <span>{{alreadyRegistered({familyId: f.id, year:getCurrentSchoolYear(),
-                          programId: PROGRAM.BPH
-                          }) ? 'Paid': 'Register'}}</span>
+                        <template v-if="alreadyRegistered({familyId: f.id, programId: PROGRAM.BPH})">
+                          <i class="fa-solid fa-dollar-sign"></i> <span> Paid </span>
+                        </template>
+                        <template v-else>
+                          <i class="fa-solid fa-clipboard-list"></i><span> Enroll</span>
+                        </template>
                       </button>
                     </td>
                     <td>
-                      <button tabindex="-1"
-                        v-if="alreadyRegistered({familyId: f.id, year:getCurrentSchoolYear(), programId: PROGRAM.BPH })"
+                      <button tabindex="-1" v-if="alreadyRegistered({familyId: f.id, programId: PROGRAM.BPH })"
                         class="btn" type="button" @click="registerTNTTForFamily(f)">
-                        <i class="fa-solid fa-clipboard-list"></i>
-                        <span><span>{{alreadyRegistered({familyId: f.id, year:getCurrentSchoolYear(),
-                            programId: PROGRAM.TNTT, eventType: EVENT_TYPE.REGISTRATION
-                            }) ? 'Paid': 'Register'}}</span></span>
+                        <template v-if="alreadyRegistered({familyId: f.id, programId: PROGRAM.TNTT, eventType: EVENT.REGISTRATION
+                          })">
+                          <i class="fa-solid fa-dollar-sign"></i> <span> Paid </span>
+                        </template>
+                        <template v-else>
+                          <i class="fa-solid fa-clipboard-list"></i><span> Enroll</span>
+                        </template>
                       </button>
                     </td>
                   </tr>
@@ -150,7 +154,7 @@
                 <button tabindex="-1" type="button" class="btn primary" @click="submitFamilyForm">
                   {{ MODE.CREATE ? 'Create' : 'Update' }} <i class="fa-solid fa-floppy-disk"></i>
                 </button>
-                <button tabindex="-1" type="button" class="btn" @click="goFamilyList">
+                <button tabindex="-1" type="button" class="btn" @click="goBackSection">
                   Cancel <i class="fa-solid fa-xmark"></i>
                 </button>
               </div>
@@ -502,7 +506,7 @@
                   @click="submitEventForm">
                   {{ MODE.CREATE ? 'Create' : 'Update' }} <i class="fa-solid fa-floppy-disk"></i>
                 </button>
-                <button tabindex="-1" type="button" class="btn secondary" @click="goEventList">
+                <button tabindex="-1" type="button" class="btn secondary" @click="goBackSection">
                   Cancel <i class="fa-solid fa-xmark"></i>
                 </button>
               </div>
@@ -763,7 +767,7 @@
                   @click="submitRegistrationForm">
                   {{ MODE.CREATE ? 'Create' : 'Update' }} <i class="fa-solid fa-floppy-disk"></i>
                 </button>
-                <button tabindex="-1" type="button" class="btn" @click="goRegistrationList">
+                <button tabindex="-1" type="button" class="btn" @click="goBackSection">
                   Cancel <i class="fa-solid fa-xmark"></i>
                 </button>
               </div>

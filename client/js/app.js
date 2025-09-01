@@ -21,6 +21,7 @@ const api = axios.create({
 const STORAGE_KEYS = {
   section: 'ui.currentSection',
   mode: 'ui.currentMode',
+  fromSection: 'ui.fromSection',
 };
 
 const app = createApp({
@@ -39,6 +40,9 @@ const app = createApp({
     const currentMode = ref(sessionStorage.getItem(STORAGE_KEYS.mode) || MODE_NAMES.LIST);
     watch(currentMode, (v) => sessionStorage.setItem(STORAGE_KEYS.mode, v));
 
+    const fromSection = ref(sessionStorage.getItem(STORAGE_KEYS.fromSection) || SECTION_NAMES.FAMILIES);
+    watch(fromSection, (v) => sessionStorage.setItem(STORAGE_KEYS.fromSection, v));
+
     function mapFlags(enumObj, sourceRef) {
       const map = {};
       for (const [key, val] of Object.entries(enumObj)) {
@@ -53,11 +57,25 @@ const app = createApp({
 
     const menuOpen = ref(false);
 
+    function isKnownSection(s) {
+      return typeof s === 'string' && Object.values(SECTION_NAMES).includes(s);
+    }
     // Update your existing switchSection so it *optionally* takes a mode
-    function switchSection(s, mode = MODE_NAMES.LIST) {
+    function switchSection(s, mode = MODE_NAMES.LIST, { rememberFrom = true } = {}) {
+      if (rememberFrom && isKnownSection(s) && currentSection.value !== fromSection.value) {
+        fromSection.value = currentSection.value;
+      }
       currentSection.value = s;
       currentMode.value = mode;
-      menuOpen.value = false; // auto-close burger menu
+      menuOpen.value = false;
+    }
+
+    function goBackSection(overrideSection = null) {
+      const override = isKnownSection(overrideSection) ? overrideSection : null;
+      const target = override || (isKnownSection(fromSection.value) ? fromSection.value : SECTION_NAMES.FAMILIES);
+
+      // don’t overwrite fromSection while going “back”
+      switchSection(target, MODE_NAMES.LIST, { rememberFrom: false });
     }
 
     const BURGER_MENU = [
@@ -190,7 +208,7 @@ const app = createApp({
 
     // Create ENUM for some of the OPTIONS to allow easy of value changes
     function makeEnumFromOptions(options) {
-      // { key:'ADMIN', value:'ADM' } -> EVENT_TYPE.ADMIN === 'ADM'
+      // { key:'ADMIN', value:'ADM' } -> EVENT.ADMIN === 'ADM'
       return Object.freeze(
         (options || []).reduce((acc, o) => {
           if (o && o.key != null) acc[o.key] = o.value;
@@ -199,7 +217,7 @@ const app = createApp({
       );
     }
 
-    const EVENT_TYPE = makeEnumFromOptions(EVENT_TYPES); // { ADMIN:'ADM', REGISTRATION:'REG', EVENT:'EVT' }
+    const EVENT = makeEnumFromOptions(EVENT_TYPES); // { ADMIN:'ADM', REGISTRATION:'REG', EVENT:'EVT' }
     const LEVEL = makeEnumFromOptions(LEVEL_OPTIONS); // { PER_FAMILY:'PF', PER_CHILD:'PC' }
     const PROGRAM = makeEnumFromOptions(PROGRAM_OPTIONS); // { BPH:'BPH', TNTT:'TNTT' }
 
@@ -360,6 +378,10 @@ const app = createApp({
       return out;
     }
 
+    function capitalize(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
     // === Unified meta switches ===
     function isVisible(field, ctx = {}) {
       if (!('show' in field)) return true;
@@ -439,6 +461,13 @@ const app = createApp({
       familySearch.value = '';
     }
 
+    const needsNameException = (row) => {
+      const last = String(row?.lastName ?? '')
+        .trim()
+        .toLowerCase();
+      return !!last && !parentLastNameSet.value.has(last);
+    };
+
     // FAMILIES_META
     const familyFields = {
       household: {
@@ -492,8 +521,14 @@ const app = createApp({
         { col: 'saintName', label: 'Saint Name', type: 'text', default: '' },
         { col: 'dob', label: 'Date of Birth', type: 'date', default: '' },
         { col: 'allergiesStr', label: 'Allergies (comma separated)', type: 'text', default: '' },
-        { col: 'is_name_exception', label: 'Name Exception', type: 'checkbox', default: false },
-        { col: 'exception_notes', label: 'Exception Notes', type: 'text', default: '', show: ({ form }) => form.is_name_exception === true },
+        {
+          col: 'is_name_exception',
+          label: 'Name Exception',
+          type: 'checkbox',
+          default: false,
+          show: ({ form }) => needsNameException(form),
+        },
+        { col: 'exception_notes', label: 'Exception Notes', type: 'text', default: '', show: ({ form }) => needsNameException(form) },
       ],
     };
 
@@ -542,7 +577,7 @@ const app = createApp({
         if (!c.lastName?.trim()) ce.lastName = 'required';
         if (!c.firstName?.trim()) ce.firstName = 'required';
         if (!c.dob?.trim()) ce.dob = 'required.';
-        const matchesParent = parentLastNameList.value.some((p) => p.toLowerCase() === (c.lastName || '').toLowerCase());
+        const matchesParent = parentLastNameSet.value.has((c.lastName || '').toLowerCase());
         if (!matchesParent) {
           if (!c.is_name_exception) ce.is_name_exception = 'Check here if name exception';
           if (!c.exception_notes?.trim()) ce.exception_notes = 'required';
@@ -609,6 +644,19 @@ const app = createApp({
       },
     );
 
+    watch(
+      () => familyForm.children,
+      () => {
+        for (const ch of familyForm.children || []) {
+          if (!needsNameException(ch)) {
+            ch.is_name_exception = false;
+            ch.exception_notes = '';
+          }
+        }
+      },
+      { deep: true },
+    );
+
     // dirty tracking
     const familyOriginalSnapshot = ref('');
     const isFamilyDirty = computed(() => JSON.stringify(familyForm) !== familyOriginalSnapshot.value);
@@ -662,26 +710,22 @@ const app = createApp({
       setStatus(`Editing ${f.id}`, 'info', 1200);
     }
 
-    // Array of unique parent last names (preserves first-seen casing/order)
-    const parentLastNameList = computed(() => {
-      const seen = new Set();
-      const out = [];
-      for (const c of familyForm.contacts || []) {
-        const rel = (c?.relationship || '').trim();
+    const parentLastNameSet = computed(() => {
+      const s = new Set();
+      for (const c of familyForm.contacts ?? []) {
+        const rel = String(c?.relationship ?? '').trim();
         if (!PARENT_RELATIONSHIPS.has(rel)) continue;
-        const ln = (c?.lastName || '').trim();
-        if (!ln) continue;
-        const key = ln.toLowerCase();
-        if (!seen.has(key)) {
-          seen.add(key);
-          out.push(ln);
-        }
+
+        const ln = String(c?.lastName ?? '')
+          .trim()
+          .toLowerCase();
+        if (ln) s.add(ln);
       }
-      return out;
+      return s; // Set<string> of lowercase names
     });
 
     // Display-friendly string
-    const parentLastNamesDisplay = computed(() => parentLastNameList.value.join(' / '));
+    const parentLastNamesDisplay = computed(() => [...parentLastNameSet.value].map((e) => capitalize(e)).join(' / '));
 
     const filteredFamilyRows = computed(() => {
       if (!familySearch.value) return familyRows.value;
@@ -821,7 +865,7 @@ const app = createApp({
           await loadFamilies();
           setStatus('Family created.', 'success', 1500);
           await nextTick();
-          goFamilyList();
+          goBackSection();
         } catch (e) {
           setStatus('Create failed.', 'error', 3000);
           console.error(e);
@@ -836,7 +880,7 @@ const app = createApp({
         await loadFamilies();
         setStatus('Family updated.', 'success', 1500);
         await nextTick();
-        goFamilyList();
+        goBackSection();
       } catch (e) {
         setStatus('Update failed.', 'error', 3000);
         console.error(e);
@@ -943,11 +987,11 @@ const app = createApp({
     }
     const eventForm = reactive(newEventForm());
 
-    const showPrerequisites = computed(() => eventForm.eventType !== EVENT_TYPE.ADMIN);
+    const showPrerequisites = computed(() => eventForm.eventType !== EVENT.ADMIN);
 
     function requiredPrereqType() {
-      if (eventForm.eventType === EVENT_TYPE.REGISTRATION) return EVENT_TYPE.ADMIN;
-      if (eventForm.eventType === EVENT_TYPE.EVENT) return EVENT_TYPE.REGISTRATION;
+      if (eventForm.eventType === EVENT.REGISTRATION) return EVENT.ADMIN;
+      if (eventForm.eventType === EVENT.EVENT) return EVENT.REGISTRATION;
       return null; // ADM => none
     }
 
@@ -1030,9 +1074,9 @@ const app = createApp({
 
       Object.assign(eventForm, newEventForm(), snap, { prerequisites, fees });
 
-      if (!EVENT_TYPES.some((t) => t.value === eventForm.eventType)) eventForm.eventType = EVENT_TYPE.REGISTRATION;
+      if (!EVENT_TYPES.some((t) => t.value === eventForm.eventType)) eventForm.eventType = EVENT.REGISTRATION;
 
-      if (eventForm.eventType === EVENT_TYPE.ADMIN) {
+      if (eventForm.eventType === EVENT.ADMIN) {
         eventForm.prerequisites = [];
       } else if (!Array.isArray(eventForm.prerequisites) || eventForm.prerequisites.length === 0) {
         addEventPrerequisiteRow();
@@ -1171,7 +1215,7 @@ const app = createApp({
           await api.post('/events', payload);
           await loadEvents();
           setStatus('Event created.', 'success', 1500);
-          goEventList();
+          goBackSection();
         } catch (err) {
           console.error(err);
           setStatus('Create failed.', 'error', 3000);
@@ -1184,7 +1228,7 @@ const app = createApp({
           await api.patch(`/events/${id}`, patchPayload);
           await loadEvents();
           setStatus('Event updated.', 'success', 1500);
-          goEventList();
+          goBackSection();
         } catch (err) {
           console.error(err);
           setStatus('Update failed.', 'error', 3000);
@@ -1265,7 +1309,7 @@ const app = createApp({
     }
 
     // Check whether a given family has registered for the year
-    function alreadyRegistered({ familyId, year, eventId = null, programId = null, eventType = null }) {
+    function alreadyRegistered({ familyId, year = getCurrentSchoolYear(), eventId = null, programId = null, eventType = null }) {
       if (!familyId || !Number.isFinite(Number(year))) return false;
       return registrationRows.value.some((r) => {
         if (r.familyId !== familyId) return false;
@@ -1376,11 +1420,11 @@ const app = createApp({
     }
 
     const adminRegistration = computed(
-      () => eventRows.value.find((e) => e.programId === PROGRAM.BPH && e.eventType === EVENT_TYPE.ADMIN && isOpenEventFilter(e)) || null,
+      () => eventRows.value.find((e) => e.programId === PROGRAM.BPH && e.eventType === EVENT.ADMIN && isOpenEventFilter(e)) || null,
     );
 
     const tnttRegistration = computed(
-      () => eventRows.value.find((e) => e.programId === PROGRAM.TNTT && e.eventType === EVENT_TYPE.REGISTRATION && isOpenEventFilter(e)) || null,
+      () => eventRows.value.find((e) => e.programId === PROGRAM.TNTT && e.eventType === EVENT.REGISTRATION && isOpenEventFilter(e)) || null,
     );
 
     function getRegistrationFor(familyId, eventId) {
@@ -1389,7 +1433,7 @@ const app = createApp({
     }
 
     function registerAdminForFamily(f) {
-      if (alreadyRegistered({ familyId: f.id, year: getCurrentSchoolYear(), programId: PROGRAM.BPH, eventType: EVENT_TYPE.ADMIN })) {
+      if (alreadyRegistered({ familyId: f.id, programId: PROGRAM.BPH, eventType: EVENT.ADMIN })) {
         beginEditRegistration(getRegistrationFor(f.id, adminRegistration.value.id));
       } else {
         beginCreateRegistration();
@@ -1401,9 +1445,9 @@ const app = createApp({
     }
 
     function registerTNTTForFamily(f) {
-      if (alreadyRegistered({ familyId: f.id, year: getCurrentSchoolYear(), programId: PROGRAM.TNTT, eventType: EVENT_TYPE.REGISTRATION })) {
+      if (alreadyRegistered({ familyId: f.id, programId: PROGRAM.TNTT, eventType: EVENT.REGISTRATION })) {
         beginEditRegistration(getRegistrationFor(f.id, tnttRegistration.value.id));
-      } else if (alreadyRegistered({ familyId: f.id, year: getCurrentSchoolYear(), programId: PROGRAM.BPH, eventType: EVENT_TYPE.ADMIN })) {
+      } else if (alreadyRegistered({ familyId: f.id, programId: PROGRAM.BPH, eventType: EVENT.ADMIN })) {
         beginCreateRegistration();
         registrationForm.familyId = f?.id || '';
         registrationForm.eventId = tnttRegistration.value.id || '';
@@ -1916,7 +1960,7 @@ const app = createApp({
           await api.post('/registrations', payload);
           await loadRegistrations();
           setStatus('Registration created.', 'success', 1500);
-          goRegistrationList();
+          goBackSection();
         } catch (e) {
           console.error(e);
           setStatus('Create failed.', 'error', 3000);
@@ -1929,7 +1973,7 @@ const app = createApp({
           await api.patch(`/registrations/${id}`, patch);
           await loadRegistrations();
           setStatus('Registration updated.', 'success', 1500);
-          goRegistrationList();
+          goBackSection();
         } catch (e) {
           console.error(e);
           setStatus('Update failed.', 'error', 3000);
@@ -2036,6 +2080,7 @@ const app = createApp({
     return {
       // layout
       currentSection,
+      fromSection,
       currentMode,
       menuOpen,
       BURGER_MENU,
@@ -2047,6 +2092,7 @@ const app = createApp({
       MODE_NAMES,
       MODE,
       switchSection,
+      goBackSection,
 
       // options
       RELATIONSHIP_OPTIONS,
@@ -2056,7 +2102,7 @@ const app = createApp({
       EVENT_TYPES,
       FEE_CODES,
       YEAR_OPTIONS,
-      EVENT_TYPE,
+      EVENT,
       LEVEL,
       PROGRAM,
       getOptions,
@@ -2095,7 +2141,6 @@ const app = createApp({
       beginCreateFamily,
       beginEditFamily,
       submitFamilyForm,
-      goFamilyList,
       resetFamilyForm,
       addFamilyContact,
       removeFamilyContact,
@@ -2124,7 +2169,6 @@ const app = createApp({
       submitEventForm,
       beginCreateEvent,
       beginEditEvent,
-      goEventList,
       buildEventPayload,
 
       // registrations
@@ -2141,7 +2185,6 @@ const app = createApp({
       registerAdminForFamily,
       registerTNTTForFamily,
       beginEditRegistration,
-      goRegistrationList,
       alreadyRegistered,
       registrationForm,
       registrationFields,
