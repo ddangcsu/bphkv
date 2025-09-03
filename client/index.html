@@ -738,17 +738,10 @@
               <tbody>
                 <tr v-for="r in filteredRegistrationRows" :key="r.id">
                   <td>{{ r.id }}</td>
-                  <!--
-                  <td> <a href="#" class="link" title="Edit this event" @click.prevent="editEventFromReg(r)">
-                      {{ r.eventId }}
-                    </a></td>
-                  -->
                   <td>{{ codeToLabel(r.event?.eventType, EVENT_TYPES) }}</td>
                   <td>{{ codeToLabel(r.event?.year, YEAR_OPTIONS) }} </td>
                   <td>{{ r.event?.programId }}</td>
-                  <td><a href="#" class="link" title="Edit this family" @click.prevent="editFamilyFromReg(r)">
-                      {{ contactDisplay(r) }}
-                    </a></td>
+                  <td>{{ contactDisplay(r) }}</td>
                   <td class="badge" :data-variant="r.status">{{ r.status }}</td>
                   <td>{{ (r.payments||[]).map(p=>p.code+':$'+p.amount).join(' / ') }}</td>
                   <td>{{ (r.updatedAt||r.createdAt||'').slice(0,10) }}</td>
