@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 
 <head>
   <meta charset="utf-8" />
@@ -151,7 +151,11 @@
               </nav>
 
               <div class="formtabs-actions">
-                <button tabindex="-1" type="button" class="btn primary" @click="submitFamilyForm">
+                <button v-show="MODE.EDIT" type="button" class="btn" @click="READONLY = !READONLY">
+                  <i :class="READONLY ? 'fa-solid fa-lock' : 'fa-solid fa-lock-open'"></i>
+                </button>
+                <button tabindex="-1" type="button" class="btn primary" :disabled="isReadOnly || !isFamilyDirty"
+                  @click="submitFamilyForm">
                   {{ MODE.CREATE ? 'Create' : 'Update' }} <i class="fa-solid fa-floppy-disk"></i>
                 </button>
                 <button tabindex="-1" type="button" class="btn" @click="goBackSection">
@@ -270,15 +274,15 @@
                     @click="familyContactsMode='all'">All</button>
                 </div>
                 <div class="actions">
-                  <button tabindex="-1" type="button" class="btn small accent" @click="addFamilyContact"><i
-                      class="fa-solid fa-plus"></i></button>
+                  <button tabindex="-1" type="button" class="btn small accent" :disabled="isReadOnly"
+                    @click="addFamilyContact"><i class="fa-solid fa-plus"></i></button>
                 </div>
               </div>
               <!-- Contacts Row -->
               <div v-for="row in visibleFamilyContacts" :key="'c'+row.i" class="row">
                 <div class="row-actions">
-                  <button tabindex="-1" type="button" class="btn small danger" @click="removeFamilyContact(row.i)"
-                    v-if="familyForm.contacts.length>1">
+                  <button tabindex="-1" type="button" class="btn small danger" :disabled="isReadOnly"
+                    @click="removeFamilyContact(row.i)" v-if="familyForm.contacts.length>1">
                     <i class="fa-solid fa-minus"></i>
                   </button>
                 </div>
@@ -345,7 +349,8 @@
                     @click="familyChildrenMode='all'">All</button>
                 </div>
                 <div class="actions">
-                  <button tabindex="-1" type="button" class="btn small accent" @click="addFamilyChild">
+                  <button tabindex="-1" type="button" class="btn small accent" :disabled="isReadOnly"
+                    @click="addFamilyChild">
                     <i class="fa-solid fa-plus"></i>
                   </button>
                 </div>
@@ -357,8 +362,8 @@
                     <span>ID: {{row.c.childId}} - {{displayChildNameAndAge(row.c)}}</span>
                   </div>
                   <div class="row-actions">
-                    <button tabindex="-1" type="button" class="btn small danger" @click="removeFamilyChild(row.i)"
-                      v-if="familyForm.children.length>1">
+                    <button tabindex="-1" type="button" class="btn small danger" :disabled="isReadOnly"
+                      @click="removeFamilyChild(row.i)" v-if="familyForm.children.length>1">
                       <i class="fa-solid fa-minus"></i>
                     </button>
                   </div>
@@ -502,7 +507,10 @@
               </nav>
 
               <div class="formtabs-actions">
-                <button tabindex="-1" type="button" class="btn primary" :disabled="!canSaveEvent"
+                <button v-show="MODE.EDIT" type="button" class="btn" @click="READONLY = !READONLY">
+                  <i :class="READONLY ? 'fa-solid fa-lock' : 'fa-solid fa-lock-open'"></i>
+                </button>
+                <button tabindex="-1" type="button" class="btn primary" :disabled="isReadOnly || !canSaveEvent"
                   @click="submitEventForm">
                   {{ MODE.CREATE ? 'Create' : 'Update' }} <i class="fa-solid fa-floppy-disk"></i>
                 </button>
@@ -562,7 +570,8 @@
                 <h4 class="title">Event Fees</h4>
                 <div class="spacer"></div>
                 <div class="actions">
-                  <button tabindex="-1" class="btn small accent" type="button" @click="addEventFee">
+                  <button tabindex="-1" class="btn small accent" type="button" :disabled="isReadOnly"
+                    @click="addEventFee">
                     <i class="fa-solid fa-plus"></i>
                   </button>
                 </div>
@@ -570,7 +579,7 @@
 
               <div class="row" v-for="(row,i) in eventForm.fees" :key="'fee'+i">
                 <div tabindex="-1" class="row-actions" style="align-self:end">
-                  <button class="btn small danger" type="button" @click="removeEventFee(i)"
+                  <button class="btn small danger" type="button" :disabled="isReadOnly" @click="removeEventFee(i)"
                     v-if="eventForm.fees.length>1">
                     <i class="fa-solid fa-minus"></i>
                   </button>
@@ -612,7 +621,8 @@
                 <h4 class="title">Event Prerequisites</h4>
                 <div class="spacer"></div>
                 <div class="actions">
-                  <button tabindex="-1" class="btn small accent" type="button" @click="addEventPrerequisiteRow">
+                  <button tabindex="-1" class="btn small accent" type="button" :disabled="isReadOnly"
+                    @click="addEventPrerequisiteRow">
                     <i class="fa-solid fa-plus"></i>
                   </button>
                 </div>
@@ -621,8 +631,8 @@
               <div class="row" v-for="(p, i) in eventForm.prerequisites" :key="'pre'+i">
                 <!-- Actions -->
                 <div class="row-actions" style="align-self:end">
-                  <button tabindex="-1" class="btn small danger" type="button" @click="removeEventPrerequisiteRow(i)"
-                    v-if="eventForm.prerequisites.length>1">
+                  <button tabindex="-1" class="btn small danger" type="button" :disabled="isReadOnly"
+                    @click="removeEventPrerequisiteRow(i)" v-if="eventForm.prerequisites.length>1">
                     <i class="fa-solid fa-minus"></i>
                   </button>
                 </div>
@@ -715,7 +725,6 @@
               <thead>
                 <tr>
                   <th>Reg ID</th>
-                  <th>Event</th>
                   <th>Event Type</th>
                   <th>School Year</th>
                   <th>Program</th>
@@ -729,15 +738,16 @@
               <tbody>
                 <tr v-for="r in filteredRegistrationRows" :key="r.id">
                   <td>{{ r.id }}</td>
+                  <!--
                   <td> <a href="#" class="link" title="Edit this event" @click.prevent="editEventFromReg(r)">
-                      {{ r.event?.title }}
+                      {{ r.eventId }}
                     </a></td>
+                  -->
                   <td>{{ codeToLabel(r.event?.eventType, EVENT_TYPES) }}</td>
                   <td>{{ codeToLabel(r.event?.year, YEAR_OPTIONS) }} </td>
                   <td>{{ r.event?.programId }}</td>
                   <td><a href="#" class="link" title="Edit this family" @click.prevent="editFamilyFromReg(r)">
-                      {{ r.contacts[0]?.name || r.familyId }} {{ maskLast4(r.contacts[0]?.phone)
-                      }}
+                      {{ contactDisplay(r) }}
                     </a></td>
                   <td class="badge" :data-variant="r.status">{{ r.status }}</td>
                   <td>{{ (r.payments||[]).map(p=>p.code+':$'+p.amount).join(' / ') }}</td>
@@ -763,7 +773,10 @@
                 </button>
               </nav>
               <div class="formtabs-actions">
-                <button tabindex="-1" type="button" class="btn primary" :disabled="!canSaveRegistration"
+                <button v-show="MODE.EDIT" type="button" class="btn" @click="READONLY = !READONLY">
+                  <i :class="READONLY ? 'fa-solid fa-lock' : 'fa-solid fa-lock-open'"></i>
+                </button>
+                <button tabindex="-1" type="button" class="btn primary" :disabled="isReadOnly || !canSaveRegistration"
                   @click="submitRegistrationForm">
                   {{ MODE.CREATE ? 'Create' : 'Update' }} <i class="fa-solid fa-floppy-disk"></i>
                 </button>
@@ -872,7 +885,7 @@
                   }}</small>
                 <div class="actions">
                   <button tabindex="-1" class="btn small accent" type="button" @click="addRegChildRow"
-                    :disabled="availableChildOptions.length===0">
+                    :disabled="isReadonly || availableChildOptions.length===0">
                     <i class="fa-solid fa-plus"></i>
                   </button>
                 </div>
@@ -880,7 +893,8 @@
 
               <div class="row" v-for="(row,i) in registrationForm.children" :key="'ch'+i">
                 <div class="row-actions">
-                  <button tabindex="-1" class="btn small danger" type="button" @click="removeRegChildRow(i)">
+                  <button tabindex="-1" class="btn small danger" type="button" :disabled="isReadOnly"
+                    @click="removeRegChildRow(i)">
                     <i class="fa-solid fa-minus"></i>
                   </button>
                 </div>
@@ -1023,7 +1037,7 @@
                   <span>Program</span>
                   <select class="input" v-model="rosterFilter.programId">
                     <option value="">All programs</option>
-                    <option v-for="opt in PROGRAM_OPTIONS" :key="String(opt.value)" :value="opt.value">
+                    <option v-for="opt in programOptionsForRoster" :key="String(opt.value)" :value="opt.value">
                       {{ formatOptionLabel(opt) }}
                     </option>
                   </select>
@@ -1034,7 +1048,7 @@
                   <span>Type</span>
                   <select class="input" v-model="rosterFilter.eventType">
                     <option value="">All types</option>
-                    <option v-for="opt in EVENT_TYPES" :key="String(opt.value)" :value="opt.value">
+                    <option v-for="opt in eventTypeOptionsForRoster" :key="String(opt.value)" :value="opt.value">
                       {{ formatOptionLabel(opt) }}
                     </option>
                   </select>
@@ -1078,21 +1092,23 @@
                   <th>Event</th>
                   <th>Saint Name</th>
                   <th>Full Name</th>
-                  <th>Age</th>
-                  <th>Tag</th>
+                  <th>Grade/Group</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="r in filteredRosterRows" :key="r.id">
+                <tr v-for="r in filteredRosterRows" :key="r.registrationId + '-' + r.childId">
                   <td>{{ r.programId }}</td>
                   <td>{{ codeToLabel(r.year, YEAR_OPTIONS) }} </td>
                   <td>{{ codeToLabel(r.eventType, EVENT_TYPES) }}</td>
                   <td>{{ r.eventTitle }}</td>
                   <td>{{ r.saintName }}</td>
-                  <td>{{ r.fullName }}</td>
-                  <td>{{ r.age }}</td>
-                  <td>{{ r.programId === PROGRAM.TNTT? ageGroupLabelTNTT(r.age): '-' }} </td>
+                  <td>
+                    <a href="#" class="link" title="Child's Contacts" @click.prevent="openChildContactsModal(r)">
+                      {{ r.fullName }}
+                    </a>
+                  </td>
+                  <td>{{ r.grade }} </td>
                   <td class="actions">
                     <button tabindex="-1" class="btn secondary" type="button" @click="">
                       <i class="fa-solid fa-pen-to-square"></i> Some Action
@@ -1103,7 +1119,362 @@
             </table>
           </div>
         </section>
+
+        <!-- Roster Contacts Modal -->
+        <section v-if="showContactsModal" class="modal-overlay" @click.self="closeChildContactsModal">
+          <div class="card modal subpanel">
+            <div class="item-header compact bordered">
+              <h4 class="title">Family Contacts - ID: <span v-text="contactsModal.familyId"></span></h4>
+              <div class="spacer"></div>
+              <button class="btn small" type="button" @click="closeChildContactsModal">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+
+            <div class="grid">
+              <label>
+                Child Name
+                <input class="input" :value="contactsModal.childName" disabled />
+              </label>
+              <label>
+                Age
+                <input class="input" :value="contactsModal.age" disabled />
+              </label>
+              <label v-if="contactsModal.allergies">
+                Allergies
+                <input class="input" :value="contactsModal.allergies" disabled />
+              </label>
+            </div>
+
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Contact Name</th>
+                  <th>Relationship</th>
+                  <th>Phone</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(c,i) in contactsModal.contacts" :key="i">
+                  <td>{{ c.name }}</td>
+                  <td>{{ c.relationship }}</td>
+                  <td>{{ c.phone }}</td>
+                </tr>
+                <tr v-if="contactsModal.contacts.length===0">
+                  <td colspan="3" class="muted">No contacts found.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
       </main>
+
+      <!-- ==================== SETTINGS (no list; table layout) ==================== -->
+      <main v-else-if="SECTION.SETTINGS">
+        <section class="page">
+          <form class="card form" @submit.prevent.stop="saveSetup" novalidate autocomplete="off">
+            <div class="formtabs-bar">
+              <nav class="formtabs" role="tablist" aria-label="Application Settings">
+                <button tabindex="-1" type="button" class="active" role="tab" aria-controls="panel-settings">
+                  Application Setup
+                </button>
+              </nav>
+              <div class="formtabs-actions">
+                <button v-show="MODE.EDIT" type="button" class="btn" @click="READONLY = !READONLY">
+                  <i :class="READONLY ? 'fa-solid fa-lock' : 'fa-solid fa-lock-open'"></i>
+                </button>
+                <button tabindex="-1" type="button" class="btn primary" :disabled="isReadOnly" @click="saveSetup">
+                  Save <i class="fa-solid fa-floppy-disk"></i>
+                </button>
+                <button tabindex="-1" type="button" class="btn" @click="goBackSection(SECTION_NAMES.FAMILIES)">
+                  Canel <i class="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+            </div>
+
+            <section id="panel-settings" role="tabpanel" class="panel">
+              <!-- Received By -->
+              <section class="subpanel">
+                <div class="item-header compact bordered">
+                  <h4 class="title">Received By</h4>
+                  <div class="spacer"></div>
+                  <div class="actions">
+                    <button class="btn small accent" type="button" :disabled="isReadOnly"
+                      @click="setup.receivedBy.push({ value:'', label:'' })">
+                      <i class="fa-solid fa-plus"></i>
+                    </button>
+                  </div>
+                </div>
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Value</th>
+                      <th>Label</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="(u,i) in setup.receivedBy" :key="'rb'+i">
+                      <td><input class="input" v-model.trim="u.value" :disabled="isReadOnly" /></td>
+                      <td><input class="input" v-model.trim="u.label" :disabled="isReadOnly" /></td>
+                      <td class="actions">
+                        <button class="btn small danger" type="button" :disabled="isReadOnly"
+                          @click="setup.receivedBy.splice(i,1)" v-if="setup.receivedBy.length>1">
+                          <i class="fa-solid fa-minus"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </section>
+
+              <!-- Relationships -->
+              <section class="subpanel">
+                <div class="item-header compact bordered">
+                  <h4 class="title">Relationships</h4>
+                  <div class="spacer"></div>
+                  <div class="actions">
+                    <button class="btn small accent" type="button" :disabled="isReadOnly"
+                      @click="setup.relationships.push({ value:'', label:'', isParent:false })">
+                      <i class="fa-solid fa-plus"></i>
+                    </button>
+                  </div>
+                </div>
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Value</th>
+                      <th>Label</th>
+                      <th>Is Parent?</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="(r,i) in setup.relationships" :key="'rel'+i">
+                      <td><input class="input" v-model.trim="r.value" :disabled="isReadOnly" /></td>
+                      <td><input class="input" v-model.trim="r.label" :disabled="isReadOnly" /></td>
+                      <td class="center"><input type="checkbox" class="check-lg" v-model="r.isParent"
+                          :disabled="isReadOnly" /></td>
+                      <td class="actions">
+                        <button class="btn small danger" type="button" :disabled="isReadOnly"
+                          @click="setup.relationships.splice(i,1)" v-if="setup.relationships.length>1">
+                          <i class="fa-solid fa-minus"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </section>
+
+              <!-- Programs -->
+              <section class="subpanel">
+                <div class="item-header compact bordered">
+                  <h4 class="title">Programs</h4>
+                  <div class="spacer"></div>
+                  <div class="actions">
+                    <button class="btn small accent" type="button" :disabled="isReadOnly"
+                      @click="setup.programs.push({ key:'', value:'', label:'', locked:false })">
+                      <i class="fa-solid fa-plus"></i>
+                    </button>
+                  </div>
+                </div>
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Key</th>
+                      <th>Code</th>
+                      <th>Label</th>
+                      <th>Locked</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="(p,i) in setup.programs" :key="'prog'+i">
+                      <td><input class="input" v-model.trim="p.key" :disabled="isReadOnly || p.locked" /></td>
+                      <td><input class="input" v-model.trim="p.value" :disabled="isReadOnly || p.locked" /></td>
+                      <td><input class="input" v-model.trim="p.label" :disabled="isReadOnly" /></td>
+                      <td class="center"><input type="checkbox" class="check-lg" v-model="p.locked"
+                          :disabled="isReadOnly" /></td>
+                      <td class="actions">
+                        <button class="btn small danger" type="button" :disabled="isReadOnly"
+                          @click="setup.programs.splice(i,1)" v-if="setup.programs.length>1">
+                          <i class="fa-solid fa-minus"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </section>
+
+              <!-- Event Types -->
+              <section class="subpanel">
+                <div class="item-header compact bordered">
+                  <h4 class="title">Event Types</h4>
+                  <div class="spacer"></div>
+                  <div class="actions">
+                    <button class="btn small accent" type="button" :disabled="isReadOnly"
+                      @click="setup.eventTypes.push({ key:'', value:'', label:'', locked:false })">
+                      <i class="fa-solid fa-plus"></i>
+                    </button>
+                  </div>
+                </div>
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Key</th>
+                      <th>Code</th>
+                      <th>Label</th>
+                      <th>Locked</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="(e,i) in setup.eventTypes" :key="'etype'+i">
+                      <td><input class="input" v-model.trim="e.key" :disabled="isReadOnly || e.locked" /></td>
+                      <td><input class="input" v-model.trim="e.value" :disabled="isReadOnly|| e.locked" /></td>
+                      <td><input class="input" v-model.trim="e.label" :disabled="isReadOnly" /></td>
+                      <td class="center"><input type="checkbox" class="check-lg" v-model="e.locked"
+                          :disabled="isReadOnly" /></td>
+                      <td class="actions">
+                        <button class="btn small danger" type="button" :disabled="isReadOnly"
+                          @click="setup.eventTypes.splice(i,1)" v-if="setup.eventTypes.length>1">
+                          <i class="fa-solid fa-minus"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </section>
+
+              <!-- Levels -->
+              <section class="subpanel">
+                <div class="item-header compact bordered">
+                  <h4 class="title">Levels</h4>
+                  <div class="spacer"></div>
+                  <div class="actions">
+                    <button class="btn small accent" type="button" :disabled="isReadOnly"
+                      @click="setup.levels.push({ value:'', label:'', locked:false })">
+                      <i class="fa-solid fa-plus"></i>
+                    </button>
+                  </div>
+                </div>
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Key</th>
+                      <th>Code</th>
+                      <th>Label</th>
+                      <th>Locked</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="(lv,i) in setup.levels" :key="'lvl'+i">
+                      <td><input class="input" v-model.trim="lv.key" :disabled="isReadOnly || lv.locked" /></td>
+                      <td><input class="input" v-model.trim="lv.value" :disabled="isReadOnly || lv.locked" /></td>
+                      <td><input class="input" v-model.trim="lv.label" :disabled="isReadOnly" /></td>
+                      <td class="center"><input type="checkbox" class="check-lg" v-model="lv.locked"
+                          :disabled="isReadOnly" /></td>
+                      <td class="actions">
+                        <button class="btn small danger" type="button" :disabled="isReadOnly"
+                          @click="setup.levels.splice(i,1)" v-if="setup.levels.length>1">
+                          <i class="fa-solid fa-minus"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </section>
+
+              <!-- Fee Codes -->
+              <section class="subpanel">
+                <div class="item-header compact bordered">
+                  <h4 class="title">Fee Codes</h4>
+                  <div class="spacer"></div>
+                  <div class="actions">
+                    <button class="btn small accent" type="button" :disabled="isReadOnly"
+                      @click="setup.feeCodes.push({ key:'', value:'', label:'', locked:false })">
+                      <i class="fa-solid fa-plus"></i>
+                    </button>
+                  </div>
+                </div>
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Key</th>
+                      <th>Code</th>
+                      <th>Label</th>
+                      <th>Locked</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="(f,i) in setup.feeCodes" :key="'fee'+i">
+                      <td><input class="input" v-model.trim="f.key" :disabled="isReadOnly || f.locked" /></td>
+                      <td><input class="input" v-model.trim="f.value" :disabled="isReadOnly || f.locked" /></td>
+                      <td><input class="input" v-model.trim="f.label" :disabled="isReadOnly" /></td>
+                      <td class="center"><input type="checkbox" class="check-lg" v-model="f.locked"
+                          :disabled="isReadOnly" /></td>
+                      <td class="actions">
+                        <button class="btn small danger" type="button" :disabled="isReadOnly"
+                          @click="setup.feeCodes.splice(i,1)" v-if="setup.feeCodes.length>1">
+                          <i class="fa-solid fa-minus"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </section>
+
+              <!-- Payment Methods -->
+              <section class="subpanel">
+                <div class="item-header compact bordered">
+                  <h4 class="title">Payment Methods</h4>
+                  <div class="spacer"></div>
+                  <div class="actions">
+                    <button class="btn small accent" type="button" :disabled="isReadOnly"
+                      @click="setup.paymentMethods.push({ key: '', value:'', label:'', locked: false })">
+                      <i class="fa-solid fa-plus"></i>
+                    </button>
+                  </div>
+                </div>
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Key</th>
+                      <th>Value</th>
+                      <th>Label</th>
+                      <th>Locked</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="(m,i) in setup.paymentMethods" :key="'pm'+i">
+                      <td><input class="input" v-model.trim="m.key" :disabled="isReadOnly || m.locked" /></td>
+                      <td><input class="input" v-model.trim="m.value" :disabled="isReadOnly || m.locked" /></td>
+                      <td><input class="input" v-model.trim="m.label" :disabled="isReadOnly" /></td>
+                      <td class="center"><input type="checkbox" class="check-lg" v-model="m.locked"
+                          :disabled="isReadOnly" /></td>
+
+                      <td class="actions">
+                        <button class="btn small danger" type="button" :disabled="isReadOnly"
+                          @click="setup.paymentMethods.splice(i,1)" v-if="setup.paymentMethods.length>1">
+                          <i class="fa-solid fa-minus"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </section>
+
+              <small class="muted">Codes marked “Locked” are used by business rules and existing data; edit labels
+                freely.</small>
+            </section>
+          </form>
+        </section>
+      </main>
+
     </transition>
   </div>
 

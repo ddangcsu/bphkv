@@ -1,4 +1,150 @@
 {
+  "settings": [
+    {
+      "id": "app",
+      "programs": [
+        {
+          "key": "BPH",
+          "value": "BPH",
+          "label": "Ban Phu Huynh",
+          "locked": true
+        },
+        {
+          "key": "TNTT",
+          "value": "TNTT",
+          "label": "Thieu Nhi Thanh The",
+          "locked": true
+        }
+      ],
+      "relationships": [
+        {
+          "value": "Mother",
+          "label": "Mother",
+          "isParent": true
+        },
+        {
+          "value": "Father",
+          "label": "Father",
+          "isParent": true
+        },
+        {
+          "value": "Guardian",
+          "label": "Guardian",
+          "isParent": true
+        },
+        {
+          "value": "Grandparent",
+          "label": "Grandparent"
+        },
+        {
+          "value": "Aunt",
+          "label": "Aunt"
+        },
+        {
+          "value": "Uncle",
+          "label": "Uncle"
+        },
+        {
+          "value": "Sibling",
+          "label": "Sibling"
+        }
+      ],
+      "feeCodes": [
+        {
+          "key": "REG_FEE",
+          "value": "REGF",
+          "label": "Registration Fee",
+          "locked": true
+        },
+        {
+          "key": "EVT_FEE",
+          "value": "EVTF",
+          "label": "Event Fee",
+          "locked": true
+        },
+        {
+          "key": "SEC_FEE",
+          "value": "SECF",
+          "label": "Security Fee",
+          "locked": true
+        },
+        {
+          "key": "NPM_FEE",
+          "value": "NPMF",
+          "label": "NonParish Fee",
+          "locked": true
+        }
+      ],
+      "eventTypes": [
+        {
+          "key": "ADMIN",
+          "value": "ADM",
+          "label": "Security",
+          "locked": true
+        },
+        {
+          "key": "REGISTRATION",
+          "value": "REG",
+          "label": "Registration",
+          "locked": true
+        },
+        {
+          "key": "EVENT",
+          "value": "EVT",
+          "label": "Event",
+          "locked": true
+        }
+      ],
+      "levels": [
+        {
+          "key": "PER_FAMILY",
+          "value": "PF",
+          "label": "Per Family",
+          "locked": true
+        },
+        {
+          "key": "PER_CHILD",
+          "value": "PC",
+          "label": "Per Child",
+          "locked": true
+        }
+      ],
+      "paymentMethods": [
+        {
+          "key": "CASH",
+          "value": "cash",
+          "label": "Cash",
+          "locked": true
+        },
+        {
+          "key": "CHECK",
+          "value": "check",
+          "label": "Check",
+          "locked": true
+        },
+        {
+          "key": "ZELLE",
+          "value": "zelle",
+          "label": "Zelle",
+          "locked": true
+        }
+      ],
+      "receivedBy": [
+        {
+          "value": "Alice",
+          "label": "Alice"
+        },
+        {
+          "value": "Bob",
+          "label": "Bob"
+        },
+        {
+          "value": "Timothy",
+          "label": "Timothy"
+        }
+      ]
+    }
+  ],
   "families": [
     {
       "id": "F:8969-0294-6755",
@@ -20603,7 +20749,7 @@
           "fullName": "Vuong, Evelyn",
           "dob": "2014-07-10T00:00:00.000Z",
           "allergies": [
-            "shellfish"
+            "shellfishes"
           ],
           "status": "pending"
         }
@@ -20618,12 +20764,12 @@
           "txnRef": "A1290BE123",
           "receiptNo": "A123908890",
           "receivedBy": "Alice",
-          "paidAt": "2025-08-28T00:23:14.443Z"
+          "paidAt": "2025-09-03T00:06:57.162Z"
         }
       ],
       "acceptedBy": "Vu, Emily Thanh",
       "createdAt": "2025-08-20T10:28:50.000Z",
-      "updatedAt": "2025-08-28T00:23:14.443Z"
+      "updatedAt": "2025-09-03T00:06:57.162Z"
     },
     {
       "id": "R:4331-0291-5157",
@@ -50280,6 +50426,67 @@
       "acceptedBy": "Green, Laura",
       "createdAt": "2025-09-01T22:54:50.013Z",
       "updatedAt": "2025-09-01T22:54:50.013Z"
+    },
+    {
+      "id": "R:3602-9522-1508",
+      "eventId": "E:5216-9373-5181",
+      "familyId": "F:8969-0294-6755",
+      "status": "paid",
+      "parishMember": true,
+      "event": {
+        "title": "TNTT Registration 2025-26",
+        "year": 2025,
+        "programId": "TNTT",
+        "eventType": "REG"
+      },
+      "contacts": [
+        {
+          "name": "Green, Laura",
+          "relationship": "Mother",
+          "phone": "(714) 555-1010"
+        },
+        {
+          "name": "Green, Mark",
+          "relationship": "Father",
+          "phone": "(949) 555-2020"
+        }
+      ],
+      "children": [
+        {
+          "childId": "S:1076-2594-1597",
+          "saintName": "Bernadet",
+          "fullName": "Green, Anna ",
+          "dob": "2012-04-15T00:00:00.000Z",
+          "allergies": [],
+          "status": "pending"
+        },
+        {
+          "childId": "S:3370-9286-2450",
+          "saintName": "Jacob",
+          "fullName": "Green, Ben  William",
+          "dob": "2014-09-10T00:00:00.000Z",
+          "allergies": [
+            "peanuts"
+          ],
+          "status": "pending"
+        }
+      ],
+      "payments": [
+        {
+          "code": "REGF",
+          "unitAmount": 150,
+          "amount": 300,
+          "quantity": 2,
+          "method": "check",
+          "txnRef": "CHK-538",
+          "receiptNo": "A123154",
+          "receivedBy": "Bob",
+          "paidAt": "2025-09-03T00:11:28.111Z"
+        }
+      ],
+      "acceptedBy": "Green, Laura",
+      "createdAt": "2025-09-03T00:11:28.111Z",
+      "updatedAt": "2025-09-03T00:11:28.111Z"
     }
   ]
 }

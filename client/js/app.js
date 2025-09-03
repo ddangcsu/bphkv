@@ -18,6 +18,48 @@ const api = axios.create({
   timeout: 5000,
 });
 
+// Only used if /settings/app is missing on first run.
+const FALLBACK_SETUP = {
+  programs: [
+    { key: 'BPH', value: 'BPH', label: 'Ban Phu Huynh' },
+    { key: 'TNTT', value: 'TNTT', label: 'Thieu Nhi Thanh The' },
+  ],
+  relationships: [
+    { value: 'Mother', label: 'Mother' },
+    { value: 'Father', label: 'Father' },
+    { value: 'Guardian', label: 'Guardian' },
+    { value: 'Grandparent', label: 'Grandparent' },
+    { value: 'Aunt', label: 'Aunt' },
+    { value: 'Uncle', label: 'Uncle' },
+    { value: 'Sibling', label: 'Sibling' },
+  ],
+  feeCodes: [
+    { key: 'REG_FEE', value: 'REGF', label: 'Registration Fee' },
+    { key: 'EVT_FEE', value: 'EVTF', label: 'Event Fee' },
+    { key: 'SEC_FEE', value: 'SECF', label: 'Security Fee' },
+    { key: 'NPM_FEE', value: 'NPMF', label: 'NonParish Fee' },
+  ],
+  eventTypes: [
+    { key: 'ADMIN', value: 'ADM', label: 'Security' },
+    { key: 'REGISTRATION', value: 'REG', label: 'Registration' },
+    { key: 'EVENT', value: 'EVT', label: 'Event' },
+  ],
+  levels: [
+    { key: 'PER_FAMILY', value: 'PF', label: 'Per Family' },
+    { key: 'PER_CHILD', value: 'PC', label: 'Per Child' },
+  ],
+  paymentMethods: [
+    { key: 'CASH', value: 'cash', label: 'Cash' },
+    { key: 'CHECK', value: 'check', label: 'Check' },
+    { key: 'ZELLE', value: 'zelle', label: 'Zelle' },
+  ],
+  receivedBy: [
+    { value: 'Alice', label: 'Alice' },
+    { value: 'Bob', label: 'Bob' },
+    { value: 'Timothy', label: 'Timothy' },
+  ],
+};
+
 const STORAGE_KEYS = {
   section: 'ui.currentSection',
   mode: 'ui.currentMode',
@@ -26,13 +68,83 @@ const STORAGE_KEYS = {
 
 const app = createApp({
   setup() {
+    //
+    // Settings OPTIONS
+    //
+    const setup = reactive({
+      programs: [],
+      relationships: [],
+      feeCodes: [],
+      eventTypes: [],
+      levels: [],
+      paymentMethods: [],
+      receivedBy: [],
+    });
+
+    async function loadSetup({ showStatusIfActive = false } = {}) {
+      try {
+        // GET /settings/app
+        const { data } = await api.get(`settings/${encodeURIComponent('app')}`, {
+          params: { _: Date.now() },
+        });
+        // write into reactive setup (don’t keep id inside it)
+        const { id: _ignore, ...rest } = data || {};
+        Object.assign(setup, FALLBACK_SETUP, rest);
+        if (showStatusIfActive) setStatus('Setup loaded.', 'info', 1200);
+      } catch (e) {
+        if (e?.response?.status === 404) {
+          // Seed DB on first run, then adopt it
+          const seed = { id: 'app', ...FALLBACK_SETUP };
+          await api.post('/settings', seed);
+          Object.assign(setup, FALLBACK_SETUP);
+          if (showStatusIfActive) setStatus('Setup initialized with defaults.', 'info', 1500);
+        } else {
+          console.error('loadSetup failed:', e);
+          // As a last resort, use fallback in-memory so app still works
+          Object.assign(setup, FALLBACK_SETUP);
+          setStatus('Using default setup (load failed).', 'warn', 1500);
+        }
+      }
+    }
+
+    async function saveSetup() {
+      // PUT full document to /settings/app (json-server-friendly)
+      const payload = { id: 'app', ...JSON.parse(JSON.stringify(setup)) };
+      try {
+        await api.put(`settings/${encodeURIComponent('app')}`, payload);
+        setStatus('Settings saved.', 'success', 1200);
+        // not strictly needed, but safe if server normalizes data
+        await loadSetup({ showStatusIfActive: false });
+      } catch (e) {
+        if (e?.response?.status === 404) {
+          await api.post('/settings', payload);
+          setStatus('Settings saved (created).', 'success', 1200);
+          await loadSetup({ showStatusIfActive: false });
+        } else {
+          console.error('saveSetup failed:', e);
+          setStatus('Save failed.', 'error', 2000);
+        }
+      }
+    }
+
     // =========================================================
     // GLOBAL UI / STATUS
     // =========================================================
 
     // === Enum Modes / Sections ===
-    const MODE_NAMES = Object.freeze({ LIST: 'list', CREATE: 'create', EDIT: 'edit' });
-    const SECTION_NAMES = Object.freeze({ FAMILIES: 'families', EVENTS: 'events', REGISTRATIONS: 'registrations', ROSTERS: 'rosters' });
+    const MODE_NAMES = Object.freeze({
+      LIST: 'list',
+      CREATE: 'create',
+      EDIT: 'edit',
+    });
+
+    const SECTION_NAMES = Object.freeze({
+      FAMILIES: 'families',
+      EVENTS: 'events',
+      REGISTRATIONS: 'registrations',
+      ROSTERS: 'rosters',
+      SETTINGS: 'settings',
+    });
 
     const currentSection = ref(sessionStorage.getItem(STORAGE_KEYS.section) || SECTION_NAMES.FAMILIES);
     watch(currentSection, (v) => sessionStorage.setItem(STORAGE_KEYS.section, v));
@@ -42,6 +154,9 @@ const app = createApp({
 
     const fromSection = ref(sessionStorage.getItem(STORAGE_KEYS.fromSection) || SECTION_NAMES.FAMILIES);
     watch(fromSection, (v) => sessionStorage.setItem(STORAGE_KEYS.fromSection, v));
+
+    const READONLY = ref(JSON.parse(sessionStorage.getItem('ui.readonly') || 'false'));
+    watch(READONLY, (v) => sessionStorage.setItem('ui.readonly', JSON.stringify(!!v)));
 
     function mapFlags(enumObj, sourceRef) {
       const map = {};
@@ -57,6 +172,9 @@ const app = createApp({
 
     const menuOpen = ref(false);
 
+    // Only applies in EDIT mode (as requested)
+    const isReadOnly = computed(() => READONLY.value && currentMode.value === MODE_NAMES.EDIT);
+
     function isKnownSection(s) {
       return typeof s === 'string' && Object.values(SECTION_NAMES).includes(s);
     }
@@ -67,6 +185,7 @@ const app = createApp({
       }
       currentSection.value = s;
       currentMode.value = mode;
+      READONLY.value = MODE.EDIT ? true : false;
       menuOpen.value = false;
     }
 
@@ -91,6 +210,12 @@ const app = createApp({
         id: SECTION_NAMES.ROSTERS,
         label: 'Enrollment Rosters',
         icon: 'fa-solid fa-clipboard-list',
+        onClick: switchSection,
+      },
+      {
+        id: SECTION_NAMES.SETTINGS,
+        label: 'Settings',
+        icon: 'fa-solid fa-sliders',
         onClick: switchSection,
       },
     ];
@@ -118,6 +243,9 @@ const app = createApp({
           },
         ];
       }
+      if (SECTION.SETTINGS) {
+        return [{ label: 'Settings', onClick: () => switchSection(SECTION_NAMES.SETTINGS, MODE_NAMES.EDIT) }, { label: 'Edit Options' }];
+      }
     });
 
     const status = reactive({ text: '', variant: 'info', visible: false });
@@ -143,56 +271,20 @@ const app = createApp({
     // OPTIONS ({ value, label }) — codes/labels centralized
     // =========================================================
 
-    const RELATIONSHIP_OPTIONS = [
-      { value: 'Mother', label: 'Mother' },
-      { value: 'Father', label: 'Father' },
-      { value: 'Guardian', label: 'Guardian' },
-      { value: 'Grandparent', label: 'Grandparent' },
-      { value: 'Aunt', label: 'Aunt' },
-      { value: 'Uncle', label: 'Uncle' },
-      { value: 'Sibling', label: 'Sibling' },
-    ];
-
-    // The first 3 object.value of RELATIONSHIP_OPTIONS
-    const PARENT_RELATIONSHIPS = new Set(RELATIONSHIP_OPTIONS.slice(0, 3).map((e) => e.value));
-
+    // Instead of fixed arrays, use settings (DB-backed)
     const YES_NO_OPTIONS = [
       { key: 'YES', value: true, label: 'Yes' },
       { key: 'NO', value: false, label: 'No' },
     ];
 
-    const PROGRAM_OPTIONS = [
-      { key: 'BPH', value: 'BPH', label: 'Ban Phu Huynh' },
-      { key: 'TNTT', value: 'TNTT', label: 'Thieu Nhi TT' },
-    ];
-
-    const LEVEL_OPTIONS = [
-      { key: 'PER_FAMILY', value: 'PF', label: 'Per Family' },
-      { key: 'PER_CHILD', value: 'PC', label: 'Per Child' },
-    ];
-    const EVENT_TYPES = [
-      { key: 'ADMIN', value: 'ADM', label: 'Security' },
-      { key: 'REGISTRATION', value: 'REG', label: 'Registration' },
-      { key: 'EVENT', value: 'EVT', label: 'Event' },
-    ];
-    const FEE_CODES = [
-      { key: 'REG_FEE', value: 'REGF', label: 'Registration Fee' },
-      { key: 'EVT_FEE', value: 'EVTF', label: 'Event Fee' },
-      { key: 'SEC_FEE', value: 'SECF', label: 'Security Fee' },
-      { key: 'NPM_FEE', value: 'NPMF', label: 'NonParish Fee' },
-    ];
-
-    // Registration-specific option lists
-    const PAYMENT_METHOD_OPTIONS = [
-      { value: 'cash', label: 'Cash' },
-      { value: 'check', label: 'Check' },
-      { value: 'zelle', label: 'Zelle' },
-    ];
-    const RECEIVED_BY_OPTIONS = [
-      { value: 'Alice', label: 'Alice' },
-      { value: 'Bob', label: 'Bob' },
-      { value: 'Timothy', label: 'Timothy' },
-    ];
+    // ===== Option lists as COMPUTED (no manual rehydrate needed) =====
+    const PROGRAM_OPTIONS = computed(() => (Array.isArray(setup.programs) ? setup.programs : []));
+    const RELATIONSHIP_OPTIONS = computed(() => (Array.isArray(setup.relationships) ? setup.relationships : []));
+    const FEE_CODES = computed(() => (Array.isArray(setup.feeCodes) ? setup.feeCodes : []));
+    const EVENT_TYPES = computed(() => (Array.isArray(setup.eventTypes) ? setup.eventTypes : []));
+    const LEVEL_OPTIONS = computed(() => (Array.isArray(setup.levels) ? setup.levels : []));
+    const PAYMENT_METHOD_OPTIONS = computed(() => (Array.isArray(setup.paymentMethods) ? setup.paymentMethods : []));
+    const RECEIVED_BY_OPTIONS = computed(() => (Array.isArray(setup.receivedBy) ? setup.receivedBy : []));
 
     const YEAR_OPTIONS = computed(() => {
       const y = new Date().getFullYear();
@@ -206,20 +298,46 @@ const app = createApp({
       return years;
     });
 
-    // Create ENUM for some of the OPTIONS to allow easy of value changes
-    function makeEnumFromOptions(options) {
-      // { key:'ADMIN', value:'ADM' } -> EVENT.ADMIN === 'ADM'
-      return Object.freeze(
-        (options || []).reduce((acc, o) => {
-          if (o && o.key != null) acc[o.key] = o.value;
-          return acc;
-        }, {}),
-      );
+    // Keep using these exactly as before (not refs)
+    // The first 3 object.value of RELATIONSHIP_OPTIONS
+    /*
+    const PARENT_RELATIONSHIPS = computed(() => {
+      const rows = setup.relationships || [];
+      const parents = rows.filter((r) => r?.isParent).map((r) => String(r.value || '').trim());
+      const chosen = parents.length ? parents : rows.slice(0, 3).map((r) => String(r.value || '').trim());
+      return new Set(chosen);
+    });
+    */
+
+    // Plain objects / Set so the rest of your code stays unchanged
+    const PROGRAM = {}; // e.g. { BPH:'BPH', TNTT:'TNTT' }
+    const EVENT = {}; // e.g. { ADMIN:'ADM', REGISTRATION:'REG', EVENT:'EVT' }
+    const LEVEL = {}; // e.g. { PER_FAMILY:'PF', PER_CHILD:'PC' }
+    const METHOD = {};
+    const PARENT_RELATIONSHIPS = new Set(); // first 3 relationships
+
+    function syncEnum(target, options = []) {
+      // reset and refill
+      for (const k of Object.keys(target)) delete target[k];
+      for (const o of options) if (o && o.key != null) target[o.key] = o.value;
     }
 
-    const EVENT = makeEnumFromOptions(EVENT_TYPES); // { ADMIN:'ADM', REGISTRATION:'REG', EVENT:'EVT' }
-    const LEVEL = makeEnumFromOptions(LEVEL_OPTIONS); // { PER_FAMILY:'PF', PER_CHILD:'PC' }
-    const PROGRAM = makeEnumFromOptions(PROGRAM_OPTIONS); // { BPH:'BPH', TNTT:'TNTT' }
+    // One watcher to rebuild everything whenever setup changes
+    watch(
+      setup,
+      () => {
+        // first 3 entries in relationships are parents
+        PARENT_RELATIONSHIPS.clear();
+        for (const r of (RELATIONSHIP_OPTIONS.value || []).slice(0, 3)) {
+          if (r?.value) PARENT_RELATIONSHIPS.add(String(r.value).trim());
+        }
+        syncEnum(PROGRAM, PROGRAM_OPTIONS.value || []);
+        syncEnum(EVENT, EVENT_TYPES.value || []);
+        syncEnum(LEVEL, LEVEL_OPTIONS.value || []);
+        syncEnum(METHOD, PAYMENT_METHOD_OPTIONS.value || []);
+      },
+      { deep: true, immediate: true },
+    );
 
     // --- Relative Display: source registry ------------------------------------
     const RD_SOURCES = {
@@ -389,6 +507,9 @@ const app = createApp({
     }
 
     function getFieldDisabled(field, ctx = {}) {
+      // Global readonly flag
+      if (isReadOnly.value) return true;
+
       if (!('disabled' in field)) return false;
       return !!evalMaybe(field.disabled, ctx);
     }
@@ -439,7 +560,11 @@ const app = createApp({
       const others = contacts.filter((c) => !PARENT_RELATIONSHIPS.has((c.relationship || '').trim()));
       const pick = [...prioritized, ...others].slice(0, 2);
       const result = pick.map((c) => {
-        return `${c.lastName}, ${c.firstName}${c.middle ? ' ' + c.middle : ''} · ${maskLast4(c.phone)}`;
+        if ('lastName' in c) {
+          return `${c.lastName}, ${c.firstName}${c.middle ? ' ' + c.middle : ''} · ${maskLast4(c.phone)}`;
+        } else {
+          return `${c.name} · ${maskLast4(c.phone)}`;
+        }
       });
 
       return result.join(' — ');
@@ -777,22 +902,26 @@ const app = createApp({
     }
 
     async function addFamilyContact() {
+      if (isReadOnly.value) return;
       familyForm.contacts.push(newFamilyContact());
       familyErrors.contacts.push({});
       if (familyContactsMode.value === 'single') familyContactsIndex.value = familyForm.contacts.length - 1;
       await nextTick();
     }
     function removeFamilyContact(i) {
+      if (isReadOnly.value) return;
       familyForm.contacts.splice(i, 1);
       familyErrors.contacts.splice(i, 1);
     }
     async function addFamilyChild() {
+      if (isReadOnly.value) return;
       familyForm.children.push(newFamilyChild());
       familyErrors.children.push({});
       if (familyChildrenMode.value === 'single') familyChildrenIndex.value = familyForm.children.length - 1;
       await nextTick();
     }
     function removeFamilyChild(i) {
+      if (isReadOnly.value) return;
       familyForm.children.splice(i, 1);
       familyErrors.children.splice(i, 1);
     }
@@ -841,6 +970,11 @@ const app = createApp({
     }
 
     function submitFamilyForm() {
+      if (isReadOnly.value) {
+        setStatus('Read-only mode: cannot save.', 'warn', 1800);
+        return;
+      }
+
       if (!validateFamily()) {
         setStatus('Error found. Please fix errors before trying to save', 'error', 3500);
         return;
@@ -932,7 +1066,7 @@ const app = createApp({
           label: 'Program Code',
           type: 'select',
           selOpt: PROGRAM_OPTIONS,
-          default: PROGRAM_OPTIONS[0].value,
+          default: '',
         },
         { col: 'eventType', label: 'Event Type', type: 'select', selOpt: EVENT_TYPES, default: '' },
         { col: 'title', label: 'Description', type: 'text', default: '', placeholder: 'TNTT Roster 2025-26' },
@@ -943,12 +1077,12 @@ const app = createApp({
           selOpt: YEAR_OPTIONS,
           default: () => getCurrentSchoolYear(),
         },
-        { col: 'level', label: 'Apply Level', type: 'select', selOpt: LEVEL_OPTIONS, default: LEVEL_OPTIONS[0].value },
+        { col: 'level', label: 'Apply Level', type: 'select', selOpt: LEVEL_OPTIONS, default: '' },
         { col: 'openDate', label: 'Open Date', type: 'date', default: '' },
         { col: 'endDate', label: 'End Date', type: 'date', default: '' },
       ],
       feeRow: [
-        { col: 'code', label: 'Fee Type', type: 'select', selOpt: FEE_CODES, default: FEE_CODES[0].value },
+        { col: 'code', label: 'Fee Type', type: 'select', selOpt: FEE_CODES, default: '' },
         { col: 'amount', label: 'Fee Amount', type: 'number', default: 0, attrs: { min: 0, step: 1 } },
       ],
       prerequisiteRow: [
@@ -960,7 +1094,7 @@ const app = createApp({
             const index = Number.isInteger(ctx?.index) ? ctx.index : -1;
             return availablePrerequisiteOptions(index).map((e) => ({
               value: e.id,
-              label: `${e.programId}_${e.eventType}_${e.year}`,
+              label: `${e.programId}_${e.eventType}_${e.year} ${e.title}`,
             }));
           },
           default: '',
@@ -1017,16 +1151,20 @@ const app = createApp({
     );
 
     function addEventFee() {
+      if (isReadOnly.value) return;
       eventForm.fees.push(buildFromFields(eventFields.feeRow));
     }
     function removeEventFee(i) {
+      if (isReadOnly.value) return;
       eventForm.fees.splice(i, 1);
     }
 
     function addEventPrerequisiteRow() {
+      if (isReadOnly.value) return;
       eventForm.prerequisites.push(buildFromFields(eventFields.prerequisiteRow, { ctx: { index: 0, form: eventForm } }));
     }
     function removeEventPrerequisiteRow(i) {
+      if (isReadOnly.value) return;
       eventForm.prerequisites.splice(i, 1);
       if (showPrerequisites.value && eventForm.prerequisites.length === 0) addEventPrerequisiteRow();
     }
@@ -1074,7 +1212,7 @@ const app = createApp({
 
       Object.assign(eventForm, newEventForm(), snap, { prerequisites, fees });
 
-      if (!EVENT_TYPES.some((t) => t.value === eventForm.eventType)) eventForm.eventType = EVENT.REGISTRATION;
+      if (!EVENT_TYPES.value.some((t) => t.value === eventForm.eventType)) eventForm.eventType = EVENT.REGISTRATION;
 
       if (eventForm.eventType === EVENT.ADMIN) {
         eventForm.prerequisites = [];
@@ -1097,11 +1235,11 @@ const app = createApp({
       const e = {};
       if (MODE.CREATE && !eventForm.id?.trim()) e.id = 'required';
 
-      if (!PROGRAM_OPTIONS.some((o) => o.value === eventForm.programId)) e.programId = 'required';
-      if (!EVENT_TYPES.some((o) => o.value === eventForm.eventType)) e.eventType = 'required';
+      if (!PROGRAM_OPTIONS.value.some((o) => o.value === eventForm.programId)) e.programId = 'required';
+      if (!EVENT_TYPES.value.some((o) => o.value === eventForm.eventType)) e.eventType = 'required';
       if (!eventForm.title?.trim()) e.title = 'required';
       if (!YEAR_OPTIONS.value.some((o) => Number(o.value) === Number(eventForm.year))) e.year = 'year required';
-      if (!LEVEL_OPTIONS.some((o) => o.value === eventForm.level)) e.level = 'invalid';
+      if (!LEVEL_OPTIONS.value.some((o) => o.value === eventForm.level)) e.level = 'invalid';
       if (!eventForm.openDate) e.openDate = 'required';
       if (!eventForm.endDate) e.endDate = 'required';
 
@@ -1109,7 +1247,7 @@ const app = createApp({
         e.fees = 'at least one fee';
       } else {
         for (const f of eventForm.fees) {
-          if (!FEE_CODES.some((o) => o.value === f.code)) {
+          if (!FEE_CODES.value.some((o) => o.value === f.code)) {
             e.fees = 'invalid fee code';
             break;
           }
@@ -1166,14 +1304,14 @@ const app = createApp({
 
     function quickCheckEventForm() {
       if (MODE.CREATE && !eventForm.id?.trim()) return false;
-      if (!PROGRAM_OPTIONS.some((o) => o.value === eventForm.programId)) return false;
-      if (!EVENT_TYPES.some((o) => o.value === eventForm.eventType)) return false;
+      if (!PROGRAM_OPTIONS.value.some((o) => o.value === eventForm.programId)) return false;
+      if (!EVENT_TYPES.value.some((o) => o.value === eventForm.eventType)) return false;
       if (!eventForm.title?.trim()) return false;
       if (!YEAR_OPTIONS.value.some((o) => Number(o.value) === Number(eventForm.year))) return false;
-      if (!LEVEL_OPTIONS.some((o) => o.value === eventForm.level)) return false;
+      if (!LEVEL_OPTIONS.value.some((o) => o.value === eventForm.level)) return false;
       if (!eventForm.openDate || !eventForm.endDate) return false;
       if (!Array.isArray(eventForm.fees) || eventForm.fees.length === 0) return false;
-      if (!eventForm.fees.every((f) => FEE_CODES.some((o) => o.value === f.code) && Number(f.amount) >= 0)) return false;
+      if (!eventForm.fees.every((f) => FEE_CODES.value.some((o) => o.value === f.code) && Number(f.amount) >= 0)) return false;
 
       const reqType = requiredPrereqType();
       if (reqType) {
@@ -1204,6 +1342,11 @@ const app = createApp({
     }
 
     async function submitEventForm() {
+      if (isReadOnly.value) {
+        setStatus('Read-only mode: cannot save.', 'warn', 1800);
+        return;
+      }
+
       if (!validateEventForm()) {
         setStatus('Please fix errors before saving.', 'error', 2500);
         return;
@@ -1531,7 +1674,7 @@ const app = createApp({
       const ch = (fam?.children || []).find((c) => c.childId === row.childId);
       if (!ch) return;
 
-      row.fullName = `${ch.lastName}, ${ch.firstName}`;
+      row.fullName = `${ch.lastName}, ${ch.firstName}${ch.middle ? ' ' + ch.middle : ''}`;
       row.saintName = ch.saintName;
       row.dob = ch.dob;
       row.allergies = Array.isArray(ch.allergies) ? ch.allergies.slice() : [];
@@ -1542,6 +1685,7 @@ const app = createApp({
     }
 
     function addRegChildRow() {
+      if (isReadOnly.value) return;
       registrationForm.children.push({
         childId: '',
         fullName: '',
@@ -1553,6 +1697,7 @@ const app = createApp({
       registrationErrors.children.push({});
     }
     function removeRegChildRow(i) {
+      if (isReadOnly.value) return;
       registrationForm.children.splice(i, 1);
       registrationErrors.children.splice(i, 1);
       recomputePayments();
@@ -1762,9 +1907,9 @@ const app = createApp({
       ],
       eventSnapshot: [
         { col: 'title', label: 'Event Description', disabled: true },
-        { col: 'year', label: 'School Year', disabled: true, transform: (v) => codeToLabel(v, YEAR_OPTIONS) },
-        { col: 'programId', label: 'Program', disabled: true, transform: (v) => codeToLabel(v, PROGRAM_OPTIONS) },
-        { col: 'eventType', label: 'Event Type', disabled: true, transform: (v) => codeToLabel(v, EVENT_TYPES) },
+        { col: 'year', label: 'School Year', disabled: true, transform: (v) => codeToLabel(v, YEAR_OPTIONS.value) },
+        { col: 'programId', label: 'Program', disabled: true, transform: (v) => codeToLabel(v, PROGRAM_OPTIONS.value) },
+        { col: 'eventType', label: 'Event Type', disabled: true, transform: (v) => codeToLabel(v, EVENT_TYPES.value) },
       ],
       contactSnapshot: [
         { col: 'name', label: 'Contact Name', disabled: true },
@@ -1811,7 +1956,7 @@ const app = createApp({
         { col: 'quantity', label: 'Quantity', disabled: true },
         { col: 'amount', label: 'Total Amount', disabled: true },
         { col: 'method', label: 'Method', type: 'select', selOpt: PAYMENT_METHOD_OPTIONS },
-        { col: 'txnRef', label: 'Ref/Check #', type: 'text', show: ({ row }) => (row?.method || '') !== 'cash' },
+        { col: 'txnRef', label: 'Ref/Check #', type: 'text', show: ({ row }) => (row?.method || '') !== METHOD?.CASH },
         { col: 'receiptNo', label: 'Receipt #', type: 'text' },
         { col: 'receivedBy', label: 'Received By', type: 'select', selOpt: RECEIVED_BY_OPTIONS },
       ],
@@ -1880,7 +2025,7 @@ const app = createApp({
         e.payments = registrationForm.payments.map((p) => {
           const pe = {};
           if (!p.method?.trim()) pe.method = 'required';
-          if (!p.txnRef?.trim() && p.method?.trim() !== 'cash') pe.txnRef = 'required';
+          if (!p.txnRef?.trim() && p.method?.trim() !== METHOD?.CASH) pe.txnRef = 'required';
           if (!p.receiptNo?.trim()) pe.receiptNo = 'required';
           if (!p.receivedBy?.trim()) pe.receivedBy = 'required';
           return pe;
@@ -1950,6 +2095,11 @@ const app = createApp({
       };
     }
     async function submitRegistrationForm() {
+      if (isReadOnly.value) {
+        setStatus('Read-only mode: cannot save.', 'warn', 1800);
+        return;
+      }
+
       if (!validateRegistration()) {
         setStatus('Please fix errors before saving.', 'error', 2500);
         return;
@@ -2011,12 +2161,21 @@ const app = createApp({
         .filter((f) => {
           const byYear = !rosterFilter.year || Number(f.year) === Number(rosterFilter.year);
           const byType = !rosterFilter.eventType || f.eventType === rosterFilter.eventType;
-          return byYear && byType;
+          const childEvent = f.level === LEVEL.PER_CHILD;
+          return byYear && byType && childEvent;
         })
         .map((ev) => ({
           value: ev.id,
           label: ev.title,
         }));
+    });
+
+    const programOptionsForRoster = computed(() => {
+      return PROGRAM_OPTIONS.value?.filter((p) => p.value !== PROGRAM.BPH);
+    });
+
+    const eventTypeOptionsForRoster = computed(() => {
+      return EVENT_TYPES.value?.filter((t) => t.value !== EVENT.ADMIN);
     });
 
     const rosterRows = computed(() =>
@@ -2036,6 +2195,7 @@ const app = createApp({
             fullName: ch.fullName,
             dob: ch.dob,
             age: computeAgeByYear(ch.dob),
+            grade: r.event?.programId === PROGRAM.TNTT ? ageGroupLabelTNTT(computeAgeByYear(ch.dob)) : '-',
             allergies: ch.allergies.join(', '),
           })),
         ),
@@ -2057,7 +2217,7 @@ const app = createApp({
 
     const ageOptions = computed(() => {
       const arr = [];
-      for (let i = 7; i < 20; i++) {
+      for (let i = 7; i < 18; i++) {
         arr.push(i);
       }
       return arr.map((i) => ({
@@ -2065,10 +2225,48 @@ const app = createApp({
         label: i,
       }));
     });
+
+    // ---- Roster "Contacts" modal ----
+    const showContactsModal = ref(false);
+    const contactsModal = reactive({
+      familyId: '',
+      childName: '',
+      age: '',
+      allergies: '',
+      contacts: [], // [{ name, relationship, phone }]
+    });
+
+    function getPrimaryContactsForFamily(f) {
+      const contacts = Array.isArray(f?.contacts) ? f.contacts : [];
+      const prioritized = contacts.filter((c) => PARENT_RELATIONSHIPS.has((c.relationship || '').trim()));
+      const others = contacts.filter((c) => !PARENT_RELATIONSHIPS.has((c.relationship || '').trim()));
+      const pick = [...prioritized, ...others].slice(0, 3); // show up to 3
+      return pick.map((c) => ({
+        name: `${c.lastName}, ${c.firstName}${c.middle ? ' ' + c.middle : ''}`,
+        relationship: c.relationship || '',
+        phone: formatUSPhone(c.phone || ''),
+      }));
+    }
+
+    function openChildContactsModal(row) {
+      const fam = familyById(row.familyId);
+      contactsModal.familyId = row.familyId || '';
+      contactsModal.childName = row.fullName || '';
+      contactsModal.allergies = row.allergies || '';
+      contactsModal.age = row.age || '';
+      contactsModal.contacts = fam ? getPrimaryContactsForFamily(fam) : [];
+      showContactsModal.value = true;
+    }
+
+    function closeChildContactsModal() {
+      showContactsModal.value = false;
+    }
+
     // =========================================================
     // INITIAL LOAD (quiet)
     // =========================================================
-    onMounted(() => {
+    onMounted(async () => {
+      await loadSetup({ showStatusIfActive: false });
       loadFamilies({ showStatusIfActive: false });
       loadEvents({ showStatusIfActive: false });
       loadRegistrations({ showStatusIfActive: false });
@@ -2202,10 +2400,24 @@ const app = createApp({
       filteredRosterRows,
       hasActiveRosterFilter,
       eventOptionsForRoster,
+      programOptionsForRoster,
+      eventTypeOptionsForRoster,
       ageOptions,
       ageGroupLabelTNTT,
       resetRosterFilters,
       goRosterList,
+
+      showContactsModal,
+      contactsModal,
+      openChildContactsModal,
+      closeChildContactsModal,
+
+      // settings
+      setup,
+      loadSetup,
+      saveSetup,
+      READONLY,
+      isReadOnly,
     };
   },
 });
