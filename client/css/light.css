@@ -163,6 +163,8 @@ body {
 .table {
   width: 100%;
   border-collapse: collapse;
+  margin-top: 5px;
+  margin-bottom: 5px;
 }
 
 .table th {
@@ -315,38 +317,54 @@ table.table tbody tr:nth-child(even) {
   font-size: 0.9em;
 }
 
-/* Grid */
+/* Base grid */
 .grid {
-  --cols: 4;
   --gap: 0.75rem;
+
+  /* per-breakpoint column plan (defaults) */
+  --cols-xl: 4;  /* ≥1200px */
+  --cols-lg: 4;  /* 900-1199px */
+  --cols-md: 2;  /* 600-899px */
+  --cols-sm: 1;  /* <600px */
+
   display: grid;
-  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
   gap: var(--gap);
   padding-top: 8px;
   padding-bottom: 8px;
+
+  /* default at widest */
+  grid-template-columns: repeat(var(--cols-xl), minmax(0, 1fr));
 }
 
-/* new variants just change the variable */
+/* pick the plan at each breakpoint */
+@media (max-width: 1199px) {
+  .grid { grid-template-columns: repeat(var(--cols-lg), minmax(0, 1fr)); }
+}
+@media (max-width: 899px) {
+  .grid { grid-template-columns: repeat(var(--cols-md), minmax(0, 1fr)); }
+}
+@media (max-width: 599px) {
+  .grid { grid-template-columns: repeat(var(--cols-sm), minmax(0, 1fr)); }
+}
+
+/* Variants: define the plan (no direct grid-template here) */
 .grid.col3 {
-  --cols: 3;
+  --cols-xl: 3;
+  --cols-lg: 3;
+  --cols-md: 3;
+  --cols-sm: 1;
 }
 .grid.col5 {
-  --cols: 5;
+  --cols-xl: 5;
+  --cols-lg: 4;
+  --cols-md: 2;
+  --cols-sm: 1;
 }
 .grid.col8 {
-  --cols: 8;
-}
-
-@media (max-width: 920px) {
-  .grid {
-    --cols: 2;
-  }
-}
-
-@media (max-width: 560px) {
-  .grid {
-    --cols: 1;
-  }
+  --cols-xl: 8; /* full width: 8 cols */
+  --cols-lg: 4; /* then 2 rows × 4 cols */
+  --cols-md: 2; /* then 4 rows × 2 cols */
+  --cols-sm: 1; /* then 8 rows × 1 col  */
 }
 
 /* Rows */
@@ -1051,4 +1069,8 @@ textarea.input[readonly] {
 .modal {
   width: min(90vw, 700px);
   max-width: 700px;
+}
+
+.footer {
+  padding: 5px;
 }

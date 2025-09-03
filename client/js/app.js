@@ -216,7 +216,7 @@ const app = createApp({
         id: SECTION_NAMES.SETTINGS,
         label: 'Settings',
         icon: 'fa-solid fa-sliders',
-        onClick: switchSection,
+        onClick: () => switchSection(SECTION_NAMES.SETTINGS, MODE_NAMES.EDIT)
       },
     ];
 
@@ -529,6 +529,10 @@ const app = createApp({
       return d ? `•${d.slice(-4)}` : '';
     };
 
+    function deepClone(obj) {
+      return obj == null ? obj: JSON.parse(JSON.stringify(obj));
+    }
+
     // =========================================================
     // FAMILIES
     // =========================================================
@@ -561,13 +565,13 @@ const app = createApp({
       const pick = [...prioritized, ...others].slice(0, 2);
       const result = pick.map((c) => {
         if ('lastName' in c) {
-          return `${c.lastName}, ${c.firstName}${c.middle ? ' ' + c.middle : ''} · ${maskLast4(c.phone)}`;
+          return `${c.lastName}, ${c.firstName}${c.middle ? ' ' + c.middle : ''} ${maskLast4(c.phone)}`;
         } else {
-          return `${c.name} · ${maskLast4(c.phone)}`;
+          return `${c.name} ${maskLast4(c.phone)}`;
         }
       });
 
-      return result.join(' — ');
+      return result.join(' / ');
     };
 
     function onContactPhoneInput(fieldMeta, ctx, event) {
@@ -783,6 +787,18 @@ const app = createApp({
     );
 
     // dirty tracking
+    const eventOriginalSnapshot = ref('');
+    const isEventDirty = computed(() => JSON.stringify(eventForm) !== eventOriginalSnapshot.value);
+    function snapshotEventForm() {
+      eventOriginalSnapshot.value = JSON.stringify(eventForm);
+    }
+
+    const registrationOriginalSnapshot = ref('');
+    const isRegistrationDirty = computed(()=> JSON.stringify(registrationForm) !== registrationOriginalSnapshot.value);
+    function snapshotRegistrationForm() {
+      registrationOriginalSnapshot.value = JSON.stringify(registrationForm);
+    }
+
     const familyOriginalSnapshot = ref('');
     const isFamilyDirty = computed(() => JSON.stringify(familyForm) !== familyOriginalSnapshot.value);
     function snapshotFamilyForm() {
@@ -808,7 +824,7 @@ const app = createApp({
       familyForm.id = f.id;
       familyForm.parishMember = f.parishMember;
       familyForm.parishNumber = f.parishNumber || '';
-      familyForm.address = { ...f.address };
+      familyForm.address = { ...(f.address || {}) };
       familyForm.contacts = (f.contacts || []).map((c) => ({
         lastName: c.lastName,
         firstName: c.firstName,
@@ -819,7 +835,7 @@ const app = createApp({
         isEmergency: !!c.isEmergency,
       }));
       familyForm.children = (f.children || []).map((ch, i) => ({
-        childId: ch.childId || `C${i + 1}`,
+        childId: ch.childId || makeId('C'),
         lastName: ch.lastName,
         firstName: ch.firstName,
         middle: ch.middle,
@@ -894,9 +910,11 @@ const app = createApp({
     }
 
     function displayChildNameAndAge(child) {
-      const ln = (child?.lastName || '').trim();
-      const fn = (child?.firstName || '').trim();
-      const name = ln && fn ? `${ln}, ${fn}` : ln || fn || 'Child';
+      const ln = (child?.lastName ?? '').trim();
+      const fn = (child?.firstName ?? '').trim();
+      const mn = (child?.middle ?? '').trim();
+      // Use array to join it
+      const name = [ln, [fn, mn].filter(Boolean).join(' ')].filter(Boolean).join(', ');
       const age = computeAgeByYear(child?.dob);
       return age == null ? name : `${name} - ${age} yo`;
     }
@@ -1197,12 +1215,13 @@ const app = createApp({
 
       if (eventForm.fees.length === 0) addEventFee();
       if (showPrerequisites.value && eventForm.prerequisites.length === 0) addEventPrerequisiteRow();
+      snapshotEventForm();
       switchSection(SECTION_NAMES.EVENTS, MODE_NAMES.CREATE);
       setStatus('Creating new event…', 'info', 1200);
     }
 
     function beginEditEvent(e) {
-      const snap = JSON.parse(JSON.stringify(e));
+      const snap = deepClone(e);
 
       const prerequisites = (Array.isArray(snap.prerequisites) ? snap.prerequisites : []).map((p) =>
         typeof p === 'string' ? { eventId: p } : { eventId: p?.eventId || '' },
@@ -1225,8 +1244,8 @@ const app = createApp({
       clearEventErrors();
 
       editingEventId.value = e.id;
+      snapshotEventForm();
       switchSection(SECTION_NAMES.EVENTS, MODE_NAMES.EDIT);
-
       setStatus(`Editing ${e.id}`, 'info', 1200);
     }
 
@@ -1344,6 +1363,11 @@ const app = createApp({
     async function submitEventForm() {
       if (isReadOnly.value) {
         setStatus('Read-only mode: cannot save.', 'warn', 1800);
+        return;
+      }
+
+      if (!isEventDirty.value) {
+        setStatus('No changes to save.', 'warn', 1800);
         return;
       }
 
@@ -1540,11 +1564,13 @@ const app = createApp({
           (r.event?.title || '').toLowerCase().includes(q) ||
           String(r.event?.year || '').includes(q);
         const hitContacts = (r.contacts || []).some((c) => (c.name || '').toLowerCase().includes(q) || (qDigits && normPhone(c.phone).includes(qDigits)));
+        const hitReceipts = (r.payments || []).some((p) => (p.receiptNo || '').toLowerCase().includes(q));
+
         const byYear = !registrationFilter.year || Number(r.event?.year) === Number(registrationFilter.year);
         const byProg = !registrationFilter.programId || r.event?.programId === registrationFilter.programId;
         const byType = !registrationFilter.eventType || r.event?.eventType === registrationFilter.eventType;
 
-        return (hitTop || hitContacts) && byYear && byProg && byType;
+        return (hitTop || hitContacts || hitReceipts) && byYear && byProg && byType;
       });
     });
 
@@ -1558,6 +1584,7 @@ const app = createApp({
       registrationErrors.children = [];
       registrationErrors.payments = [];
       editingRegistrationId.value = null;
+      snapshotRegistrationForm();
       switchSection(SECTION_NAMES.REGISTRATIONS, MODE_NAMES.CREATE);
       setStatus('Creating new registration…', 'info', 1200);
     }
@@ -1602,8 +1629,11 @@ const app = createApp({
     }
 
     function beginEditRegistration(r) {
-      Object.assign(registrationForm, newRegistrationForm(), r);
-      editingRegistrationId.value = r.id;
+      const snap = deepClone(r);
+      editingRegistrationId.value = snap.id;
+
+      Object.assign(registrationForm, newRegistrationForm(), snap);
+      snapshotRegistrationForm();
       switchSection(SECTION_NAMES.REGISTRATIONS, MODE_NAMES.EDIT);
       setStatus(`Editing ${r.id}`, 'info', 1200);
     }
@@ -2100,6 +2130,11 @@ const app = createApp({
         return;
       }
 
+      if (!isRegistrationDirty.value) {
+        setStatus('No changes to save.', 'warn', 1800);
+        return;
+      }
+
       if (!validateRegistration()) {
         setStatus('Please fix errors before saving.', 'error', 2500);
         return;
@@ -2355,6 +2390,7 @@ const app = createApp({
       eventForm,
       eventErrors,
       filteredEventRows,
+      isEventDirty,
       resetEventFilters,
       displayEventFees,
       addEventFee,
@@ -2376,6 +2412,7 @@ const app = createApp({
       filteredRegistrationRows,
       selectedEventLevel,
       hasActiveRegFilter,
+      isRegistrationDirty,
       resetRegFilters,
       editEventFromReg,
       editFamilyFromReg,
