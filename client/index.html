@@ -1376,11 +1376,11 @@
               <!-- Received By -->
               <section class="subpanel">
                 <div class="item-header compact bordered">
-                  <h4 class="title">Received By</h4>
+                  <h4 class="title">Volunteers</h4>
                   <div class="spacer"></div>
                   <div class="actions">
                     <button class="btn small accent" type="button" :disabled="isReadOnly"
-                      @click="setup.receivedBy.push({ value:'', label:'' })">
+                      @click="setup.volunteers.push({ value:'', label:'' })">
                       <i class="fa-solid fa-plus"></i>
                     </button>
                   </div>
@@ -1388,18 +1388,27 @@
                 <table class="table">
                   <thead>
                     <tr>
+                      <th>Program</th>
                       <th>Value</th>
                       <th>Label</th>
                       <th></th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr v-for="(u,i) in setup.receivedBy" :key="'rb'+i">
+                    <tr v-for="(u,i) in setup.volunteers" :key="'rb'+i">
+                      <td>
+                        <select class="input" v-model="u.program" :disabled="isReadOnly">
+                          <option value="">All</option>
+                          <option v-for="opt in PROGRAM_OPTIONS" :key="String(opt.value)" :value="opt.value">
+                            {{ formatOptionLabel(opt) }}
+                          </option>
+                        </select>
+                      </td>
                       <td><input class="input" v-model.trim="u.value" :disabled="isReadOnly" /></td>
                       <td><input class="input" v-model.trim="u.label" :disabled="isReadOnly" /></td>
                       <td class="actions">
                         <button class="btn small danger" type="button" :disabled="isReadOnly"
-                          @click="setup.receivedBy.splice(i,1)" v-if="setup.receivedBy.length>1">
+                          @click="setup.volunteers.splice(i,1)" v-if="setup.volunteers.length>1">
                           <i class="fa-solid fa-minus"></i>
                         </button>
                       </td>

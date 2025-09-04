@@ -187,7 +187,7 @@ body {
 
 /* zebra striping */
 table.table tbody tr:nth-child(odd) {
-  background: #ffffff;
+  background: #f9f9f9;
 }
 table.table tbody tr:nth-child(even) {
   background: #edf2fb;

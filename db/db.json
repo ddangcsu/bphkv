@@ -129,18 +129,36 @@
           "locked": true
         }
       ],
-      "receivedBy": [
+      "volunteers": [
         {
+          "program": "",
           "value": "Alice",
           "label": "Alice"
         },
         {
+          "program": "",
           "value": "Bob",
           "label": "Bob"
         },
         {
+          "program": "",
           "value": "Timothy",
           "label": "Timothy"
+        },
+        {
+          "program": "BPH",
+          "value": "Lan",
+          "label": "Lan"
+        },
+        {
+          "program": "BPH",
+          "value": "Huy",
+          "label": "Huy"
+        },
+        {
+          "value": "Steven",
+          "label": "Steven",
+          "program": "TNTT"
         }
       ]
     }
@@ -195,9 +213,7 @@
           "middle": "William",
           "saintName": "Jacob",
           "dob": "2014-09-10T00:00:00.000Z",
-          "allergies": [
-            "peanuts"
-          ],
+          "allergies": ["peanuts"],
           "is_name_exception": false,
           "exception_notes": ""
         }
@@ -261,9 +277,7 @@
           "middle": null,
           "saintName": "Maria",
           "dob": "2014-07-10T00:00:00.000Z",
-          "allergies": [
-            "shellfishes"
-          ],
+          "allergies": ["shellfishes"],
           "isNameException": true,
           "exceptionNotes": "stepdaughter"
         }
@@ -307,9 +321,7 @@
           "middle": null,
           "saintName": "Madeline",
           "dob": "2018-02-10T00:00:00.000Z",
-          "allergies": [
-            "milk"
-          ],
+          "allergies": ["milk"],
           "isNameException": true,
           "exceptionNotes": "Niece, full guardianship"
         }
@@ -353,9 +365,7 @@
           "middle": "Tuan",
           "saintName": "Paul",
           "dob": "2015-03-14T00:00:00.000Z",
-          "allergies": [
-            "milk"
-          ],
+          "allergies": ["milk"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -377,9 +387,7 @@
           "middle": "Nhi",
           "saintName": "Maria",
           "dob": "2018-09-15T00:00:00.000Z",
-          "allergies": [
-            "cheese"
-          ],
+          "allergies": ["cheese"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -434,11 +442,7 @@
           "middle": "Thuc Nhi",
           "saintName": "Anna",
           "dob": "2018-05-23T00:00:00.000Z",
-          "allergies": [
-            "milk",
-            "cheese",
-            "peanuts"
-          ],
+          "allergies": ["milk", "cheese", "peanuts"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -493,9 +497,7 @@
           "middle": "Thuy",
           "saintName": "Cecilia",
           "dob": "2015-07-15T00:00:00.000Z",
-          "allergies": [
-            "grass"
-          ],
+          "allergies": ["grass"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -583,9 +585,7 @@
           "middle": "Thanh",
           "saintName": "Evelyn",
           "dob": "2010-03-15T00:00:00.000Z",
-          "allergies": [
-            "fish"
-          ],
+          "allergies": ["fish"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -629,9 +629,7 @@
           "middle": "Thanh",
           "saintName": "Maria",
           "dob": "2016-02-19T00:00:00.000Z",
-          "allergies": [
-            "eggs"
-          ],
+          "allergies": ["eggs"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -642,9 +640,7 @@
           "middle": "Minh",
           "saintName": "Paul",
           "dob": "2013-01-15T00:00:00.000Z",
-          "allergies": [
-            "eggs"
-          ],
+          "allergies": ["eggs"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -655,9 +651,7 @@
           "middle": null,
           "saintName": "John",
           "dob": "2010-11-05T00:00:00.000Z",
-          "allergies": [
-            "peanuts"
-          ],
+          "allergies": ["peanuts"],
           "isNameException": true,
           "exceptionNotes": "name exception"
         }
@@ -712,10 +706,7 @@
           "middle": "Thanh",
           "saintName": "Emily",
           "dob": "2012-09-13T00:00:00.000Z",
-          "allergies": [
-            "eggs",
-            "shellfish"
-          ],
+          "allergies": ["eggs", "shellfish"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -814,10 +805,7 @@
           "middle": "",
           "saintName": "Giuse",
           "dob": "2011-09-08T00:00:00.000Z",
-          "allergies": [
-            "shellfish",
-            "gluten"
-          ],
+          "allergies": ["shellfish", "gluten"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -883,9 +871,7 @@
           "middle": "Minh",
           "saintName": "Barbara",
           "dob": "2010-06-10T00:00:00.000Z",
-          "allergies": [
-            "grass"
-          ],
+          "allergies": ["grass"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -929,9 +915,7 @@
           "middle": "Thanh",
           "saintName": "John",
           "dob": "2013-10-21T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "isNameException": true,
           "exceptionNotes": "name exception"
         },
@@ -1041,9 +1025,7 @@
           "middle": "Thanh",
           "saintName": "John",
           "dob": "2016-07-28T00:00:00.000Z",
-          "allergies": [
-            "peanuts"
-          ],
+          "allergies": ["peanuts"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -1439,10 +1421,7 @@
           "middle": "An",
           "saintName": "Giuse",
           "dob": "2011-12-23T00:00:00.000Z",
-          "allergies": [
-            "shellfish",
-            "eggs"
-          ],
+          "allergies": ["shellfish", "eggs"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -1453,10 +1432,7 @@
           "middle": "An",
           "saintName": "Bernadet",
           "dob": "2017-08-10T00:00:00.000Z",
-          "allergies": [
-            "peanuts",
-            "milk"
-          ],
+          "allergies": ["peanuts", "milk"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -1511,9 +1487,7 @@
           "middle": null,
           "saintName": "Teresa",
           "dob": "2014-02-01T00:00:00.000Z",
-          "allergies": [
-            "milk"
-          ],
+          "allergies": ["milk"],
           "isNameException": true,
           "exceptionNotes": "name exception"
         }
@@ -1920,9 +1894,7 @@
           "middle": "",
           "saintName": "Cecilia",
           "dob": "2014-10-11T00:00:00.000Z",
-          "allergies": [
-            "cheese"
-          ],
+          "allergies": ["cheese"],
           "isNameException": true,
           "exceptionNotes": "name exception"
         },
@@ -1933,9 +1905,7 @@
           "middle": "An",
           "saintName": "Phero",
           "dob": "2017-03-03T00:00:00.000Z",
-          "allergies": [
-            "grass"
-          ],
+          "allergies": ["grass"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -2111,10 +2081,7 @@
           "middle": "An",
           "saintName": "Phanxico",
           "dob": "2018-03-06T00:00:00.000Z",
-          "allergies": [
-            "gluten",
-            "milk"
-          ],
+          "allergies": ["gluten", "milk"],
           "isNameException": true,
           "exceptionNotes": "name exception"
         },
@@ -2125,9 +2092,7 @@
           "middle": "",
           "saintName": "Jacob",
           "dob": "2010-12-15T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -2171,9 +2136,7 @@
           "middle": "An",
           "saintName": "John",
           "dob": "2014-05-20T00:00:00.000Z",
-          "allergies": [
-            "cheese"
-          ],
+          "allergies": ["cheese"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -2327,10 +2290,7 @@
           "middle": "",
           "saintName": "John",
           "dob": "2016-05-02T00:00:00.000Z",
-          "allergies": [
-            "shellfish",
-            "peanuts"
-          ],
+          "allergies": ["shellfish", "peanuts"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -2396,10 +2356,7 @@
           "middle": "",
           "saintName": "Phanxico",
           "dob": "2013-12-11T00:00:00.000Z",
-          "allergies": [
-            "milk",
-            "eggs"
-          ],
+          "allergies": ["milk", "eggs"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -2465,9 +2422,7 @@
           "middle": null,
           "saintName": "Cecilia",
           "dob": "2014-11-10T00:00:00.000Z",
-          "allergies": [
-            "peanuts"
-          ],
+          "allergies": ["peanuts"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -2511,9 +2466,7 @@
           "middle": "Minh",
           "saintName": "Cecilia",
           "dob": "2011-03-07T00:00:00.000Z",
-          "allergies": [
-            "cheese"
-          ],
+          "allergies": ["cheese"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -2612,9 +2565,7 @@
           "middle": "Minh",
           "saintName": "John",
           "dob": "2016-02-18T00:00:00.000Z",
-          "allergies": [
-            "cheese"
-          ],
+          "allergies": ["cheese"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -2658,9 +2609,7 @@
           "middle": "An",
           "saintName": "Emily",
           "dob": "2016-08-14T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "isNameException": true,
           "exceptionNotes": "name exception"
         },
@@ -2781,9 +2730,7 @@
           "middle": "",
           "saintName": "Giuse",
           "dob": "2018-08-21T00:00:00.000Z",
-          "allergies": [
-            "cheese"
-          ],
+          "allergies": ["cheese"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -2838,10 +2785,7 @@
           "middle": "Thanh",
           "saintName": "Barbara",
           "dob": "2016-08-16T00:00:00.000Z",
-          "allergies": [
-            "gluten",
-            "cheese"
-          ],
+          "allergies": ["gluten", "cheese"],
           "isNameException": true,
           "exceptionNotes": "name exception"
         },
@@ -2896,9 +2840,7 @@
           "middle": "An",
           "saintName": "Madeline",
           "dob": "2015-02-01T00:00:00.000Z",
-          "allergies": [
-            "peanuts"
-          ],
+          "allergies": ["peanuts"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -3140,10 +3082,7 @@
           "middle": "Minh",
           "saintName": "Emily",
           "dob": "2012-10-06T00:00:00.000Z",
-          "allergies": [
-            "cheese",
-            "gluten"
-          ],
+          "allergies": ["cheese", "gluten"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -3253,9 +3192,7 @@
           "middle": "An",
           "saintName": "Barbara",
           "dob": "2011-01-13T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -3299,9 +3236,7 @@
           "middle": null,
           "saintName": "Phero",
           "dob": "2015-12-21T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "isNameException": true,
           "exceptionNotes": "name exception"
         },
@@ -3433,9 +3368,7 @@
           "middle": "Thanh",
           "saintName": "Cecilia",
           "dob": "2012-04-13T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -3446,9 +3379,7 @@
           "middle": null,
           "saintName": "Maria",
           "dob": "2015-10-05T00:00:00.000Z",
-          "allergies": [
-            "peanuts"
-          ],
+          "allergies": ["peanuts"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -3514,9 +3445,7 @@
           "middle": null,
           "saintName": "Barbara",
           "dob": "2014-02-12T00:00:00.000Z",
-          "allergies": [
-            "eggs"
-          ],
+          "allergies": ["eggs"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -3560,9 +3489,7 @@
           "middle": "",
           "saintName": "Barbara",
           "dob": "2018-10-16T00:00:00.000Z",
-          "allergies": [
-            "grass"
-          ],
+          "allergies": ["grass"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -3683,9 +3610,7 @@
           "middle": "An",
           "saintName": "Madeline",
           "dob": "2017-03-13T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -3696,10 +3621,7 @@
           "middle": "Minh",
           "saintName": "Barbara",
           "dob": "2013-06-15T00:00:00.000Z",
-          "allergies": [
-            "milk",
-            "eggs"
-          ],
+          "allergies": ["milk", "eggs"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -3809,9 +3731,7 @@
           "middle": "Thanh",
           "saintName": "Bernadet",
           "dob": "2010-07-02T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -3866,9 +3786,7 @@
           "middle": "",
           "saintName": "Bernadet",
           "dob": "2016-10-14T00:00:00.000Z",
-          "allergies": [
-            "shellfish"
-          ],
+          "allergies": ["shellfish"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -3879,10 +3797,7 @@
           "middle": "Minh",
           "saintName": "John",
           "dob": "2014-05-25T00:00:00.000Z",
-          "allergies": [
-            "cheese",
-            "eggs"
-          ],
+          "allergies": ["cheese", "eggs"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -4069,9 +3984,7 @@
           "middle": "An",
           "saintName": "Barbara",
           "dob": "2015-03-13T00:00:00.000Z",
-          "allergies": [
-            "eggs"
-          ],
+          "allergies": ["eggs"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -4082,9 +3995,7 @@
           "middle": "",
           "saintName": "Phanxico",
           "dob": "2014-03-11T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -4095,9 +4006,7 @@
           "middle": "An",
           "saintName": "Bernadet",
           "dob": "2012-04-14T00:00:00.000Z",
-          "allergies": [
-            "milk"
-          ],
+          "allergies": ["milk"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -4196,9 +4105,7 @@
           "middle": "Thanh",
           "saintName": "Phero",
           "dob": "2017-06-10T00:00:00.000Z",
-          "allergies": [
-            "eggs"
-          ],
+          "allergies": ["eggs"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -4220,10 +4127,7 @@
           "middle": "An",
           "saintName": "Paul",
           "dob": "2018-03-13T00:00:00.000Z",
-          "allergies": [
-            "peanuts",
-            "milk"
-          ],
+          "allergies": ["peanuts", "milk"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -4267,9 +4171,7 @@
           "middle": "Thanh",
           "saintName": "Bernadet",
           "dob": "2015-12-16T00:00:00.000Z",
-          "allergies": [
-            "cheese"
-          ],
+          "allergies": ["cheese"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -4324,10 +4226,7 @@
           "middle": "Minh",
           "saintName": "Jacob",
           "dob": "2014-04-04T00:00:00.000Z",
-          "allergies": [
-            "shellfish",
-            "grass"
-          ],
+          "allergies": ["shellfish", "grass"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -4393,9 +4292,7 @@
           "middle": null,
           "saintName": "Bernadet",
           "dob": "2017-07-21T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -4571,9 +4468,7 @@
           "middle": "",
           "saintName": "Madeline",
           "dob": "2011-12-21T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -4617,9 +4512,7 @@
           "middle": "Minh",
           "saintName": "Bernadet",
           "dob": "2018-11-27T00:00:00.000Z",
-          "allergies": [
-            "cheese"
-          ],
+          "allergies": ["cheese"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -4630,9 +4523,7 @@
           "middle": "Minh",
           "saintName": "Maria",
           "dob": "2010-04-13T00:00:00.000Z",
-          "allergies": [
-            "cheese"
-          ],
+          "allergies": ["cheese"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -4907,10 +4798,7 @@
           "middle": "An",
           "saintName": "Maria",
           "dob": "2016-01-11T00:00:00.000Z",
-          "allergies": [
-            "eggs",
-            "shellfish"
-          ],
+          "allergies": ["eggs", "shellfish"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -4987,9 +4875,7 @@
           "middle": null,
           "saintName": "Giuse",
           "dob": "2013-04-14T00:00:00.000Z",
-          "allergies": [
-            "cheese"
-          ],
+          "allergies": ["cheese"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -5066,9 +4952,7 @@
           "middle": "An",
           "saintName": "Barbara",
           "dob": "2015-03-18T00:00:00.000Z",
-          "allergies": [
-            "cheese"
-          ],
+          "allergies": ["cheese"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -5112,9 +4996,7 @@
           "middle": "",
           "saintName": "Giuse",
           "dob": "2010-07-09T00:00:00.000Z",
-          "allergies": [
-            "grass"
-          ],
+          "allergies": ["grass"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -5378,10 +5260,7 @@
           "middle": "Thanh",
           "saintName": "Teresa",
           "dob": "2015-01-22T00:00:00.000Z",
-          "allergies": [
-            "cheese",
-            "eggs"
-          ],
+          "allergies": ["cheese", "eggs"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -5392,9 +5271,7 @@
           "middle": null,
           "saintName": "Giuse",
           "dob": "2017-04-07T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -5482,9 +5359,7 @@
           "middle": "An",
           "saintName": "Phanxico",
           "dob": "2012-03-26T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -5649,9 +5524,7 @@
           "middle": "An",
           "saintName": "Maria",
           "dob": "2012-04-06T00:00:00.000Z",
-          "allergies": [
-            "eggs"
-          ],
+          "allergies": ["eggs"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -5816,9 +5689,7 @@
           "middle": "An",
           "saintName": "Phero",
           "dob": "2016-03-25T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "isNameException": true,
           "exceptionNotes": "name exception"
         },
@@ -5983,9 +5854,7 @@
           "middle": null,
           "saintName": "Emily",
           "dob": "2010-01-19T00:00:00.000Z",
-          "allergies": [
-            "milk"
-          ],
+          "allergies": ["milk"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -6194,9 +6063,7 @@
           "middle": null,
           "saintName": "Phanxico",
           "dob": "2016-05-01T00:00:00.000Z",
-          "allergies": [
-            "milk"
-          ],
+          "allergies": ["milk"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -6350,9 +6217,7 @@
           "middle": "Minh",
           "saintName": "Maria",
           "dob": "2014-09-01T00:00:00.000Z",
-          "allergies": [
-            "cheese"
-          ],
+          "allergies": ["cheese"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -6363,9 +6228,7 @@
           "middle": "Thanh",
           "saintName": "Phanxico",
           "dob": "2013-04-07T00:00:00.000Z",
-          "allergies": [
-            "shellfish"
-          ],
+          "allergies": ["shellfish"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -6376,9 +6239,7 @@
           "middle": null,
           "saintName": "Paul",
           "dob": "2011-04-23T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "isNameException": true,
           "exceptionNotes": "name exception"
         }
@@ -6752,10 +6613,7 @@
           "middle": "An",
           "saintName": "Giuse",
           "dob": "2012-07-19T00:00:00.000Z",
-          "allergies": [
-            "cheese",
-            "milk"
-          ],
+          "allergies": ["cheese", "milk"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -6986,9 +6844,7 @@
           "middle": null,
           "saintName": "Jacob",
           "dob": "2014-07-09T00:00:00.000Z",
-          "allergies": [
-            "shellfish"
-          ],
+          "allergies": ["shellfish"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -7098,9 +6954,7 @@
           "middle": null,
           "saintName": "Barbara",
           "dob": "2017-12-09T00:00:00.000Z",
-          "allergies": [
-            "peanuts"
-          ],
+          "allergies": ["peanuts"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -7144,10 +6998,7 @@
           "middle": "",
           "saintName": "Cecilia",
           "dob": "2016-09-20T00:00:00.000Z",
-          "allergies": [
-            "peanuts",
-            "grass"
-          ],
+          "allergies": ["peanuts", "grass"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -7213,9 +7064,7 @@
           "middle": "Minh",
           "saintName": "Teresa",
           "dob": "2015-10-27T00:00:00.000Z",
-          "allergies": [
-            "shellfish"
-          ],
+          "allergies": ["shellfish"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -7226,9 +7075,7 @@
           "middle": "Thanh",
           "saintName": "Phero",
           "dob": "2016-01-13T00:00:00.000Z",
-          "allergies": [
-            "grass"
-          ],
+          "allergies": ["grass"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -7316,9 +7163,7 @@
           "middle": "Minh",
           "saintName": "Jacob",
           "dob": "2015-11-13T00:00:00.000Z",
-          "allergies": [
-            "shellfish"
-          ],
+          "allergies": ["shellfish"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -7461,9 +7306,7 @@
           "middle": "",
           "saintName": "Maria",
           "dob": "2012-01-11T00:00:00.000Z",
-          "allergies": [
-            "milk"
-          ],
+          "allergies": ["milk"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -7562,9 +7405,7 @@
           "middle": "Thanh",
           "saintName": "Maria",
           "dob": "2018-02-20T00:00:00.000Z",
-          "allergies": [
-            "cheese"
-          ],
+          "allergies": ["cheese"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -7762,9 +7603,7 @@
           "middle": "An",
           "saintName": "Bernadet",
           "dob": "2017-05-28T00:00:00.000Z",
-          "allergies": [
-            "cheese"
-          ],
+          "allergies": ["cheese"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -7896,10 +7735,7 @@
           "middle": "Minh",
           "saintName": "Maria",
           "dob": "2011-07-26T00:00:00.000Z",
-          "allergies": [
-            "shellfish",
-            "gluten"
-          ],
+          "allergies": ["shellfish", "gluten"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -8075,9 +7911,7 @@
           "middle": "",
           "saintName": "Jacob",
           "dob": "2010-04-03T00:00:00.000Z",
-          "allergies": [
-            "milk"
-          ],
+          "allergies": ["milk"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -8275,10 +8109,7 @@
           "middle": "Thanh",
           "saintName": "Columban",
           "dob": "2015-03-02T00:00:00.000Z",
-          "allergies": [
-            "shellfish",
-            "cheese"
-          ],
+          "allergies": ["shellfish", "cheese"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -8586,9 +8417,7 @@
           "middle": "Minh",
           "saintName": "Phanxico",
           "dob": "2012-12-11T00:00:00.000Z",
-          "allergies": [
-            "eggs"
-          ],
+          "allergies": ["eggs"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -8654,9 +8483,7 @@
           "middle": "Thanh",
           "saintName": "Maria",
           "dob": "2013-08-15T00:00:00.000Z",
-          "allergies": [
-            "peanuts"
-          ],
+          "allergies": ["peanuts"],
           "isNameException": true,
           "exceptionNotes": "name exception"
         }
@@ -8909,9 +8736,7 @@
           "middle": "Thanh",
           "saintName": "Paul",
           "dob": "2016-12-15T00:00:00.000Z",
-          "allergies": [
-            "eggs"
-          ],
+          "allergies": ["eggs"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -8922,9 +8747,7 @@
           "middle": null,
           "saintName": "Teresa",
           "dob": "2015-04-02T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -8979,9 +8802,7 @@
           "middle": "",
           "saintName": "Madeline",
           "dob": "2012-12-20T00:00:00.000Z",
-          "allergies": [
-            "peanuts"
-          ],
+          "allergies": ["peanuts"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -9102,10 +8923,7 @@
           "middle": null,
           "saintName": "Cecilia",
           "dob": "2018-09-02T00:00:00.000Z",
-          "allergies": [
-            "eggs",
-            "milk"
-          ],
+          "allergies": ["eggs", "milk"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -9215,9 +9033,7 @@
           "middle": "Minh",
           "saintName": "Giuse",
           "dob": "2016-12-10T00:00:00.000Z",
-          "allergies": [
-            "milk"
-          ],
+          "allergies": ["milk"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -9327,9 +9143,7 @@
           "middle": "",
           "saintName": "Paul",
           "dob": "2018-05-21T00:00:00.000Z",
-          "allergies": [
-            "shellfish"
-          ],
+          "allergies": ["shellfish"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -9538,9 +9352,7 @@
           "middle": "Minh",
           "saintName": "Giuse",
           "dob": "2015-09-22T00:00:00.000Z",
-          "allergies": [
-            "peanuts"
-          ],
+          "allergies": ["peanuts"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -9584,10 +9396,7 @@
           "middle": null,
           "saintName": "Paul",
           "dob": "2018-02-20T00:00:00.000Z",
-          "allergies": [
-            "gluten",
-            "grass"
-          ],
+          "allergies": ["gluten", "grass"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -9664,10 +9473,7 @@
           "middle": "An",
           "saintName": "Madeline",
           "dob": "2011-06-07T00:00:00.000Z",
-          "allergies": [
-            "peanuts",
-            "gluten"
-          ],
+          "allergies": ["peanuts", "gluten"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -9821,9 +9627,7 @@
           "middle": "Thanh",
           "saintName": "Paul",
           "dob": "2013-04-04T00:00:00.000Z",
-          "allergies": [
-            "eggs"
-          ],
+          "allergies": ["eggs"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -9944,10 +9748,7 @@
           "middle": null,
           "saintName": "Cecilia",
           "dob": "2014-02-23T00:00:00.000Z",
-          "allergies": [
-            "shellfish",
-            "milk"
-          ],
+          "allergies": ["shellfish", "milk"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -10002,9 +9803,7 @@
           "middle": "Thanh",
           "saintName": "Maria",
           "dob": "2016-10-12T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -10015,9 +9814,7 @@
           "middle": "",
           "saintName": "John",
           "dob": "2014-05-19T00:00:00.000Z",
-          "allergies": [
-            "peanuts"
-          ],
+          "allergies": ["peanuts"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -10116,9 +9913,7 @@
           "middle": null,
           "saintName": "Paul",
           "dob": "2017-03-08T00:00:00.000Z",
-          "allergies": [
-            "shellfish"
-          ],
+          "allergies": ["shellfish"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -10184,10 +9979,7 @@
           "middle": "Thanh",
           "saintName": "Barbara",
           "dob": "2015-07-27T00:00:00.000Z",
-          "allergies": [
-            "shellfish",
-            "gluten"
-          ],
+          "allergies": ["shellfish", "gluten"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -10297,10 +10089,7 @@
           "middle": null,
           "saintName": "Columban",
           "dob": "2011-01-14T00:00:00.000Z",
-          "allergies": [
-            "gluten",
-            "cheese"
-          ],
+          "allergies": ["gluten", "cheese"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -10311,9 +10100,7 @@
           "middle": "Thanh",
           "saintName": "Barbara",
           "dob": "2011-09-27T00:00:00.000Z",
-          "allergies": [
-            "shellfish"
-          ],
+          "allergies": ["shellfish"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -10368,9 +10155,7 @@
           "middle": "An",
           "saintName": "Bernadet",
           "dob": "2012-09-22T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -10667,10 +10452,7 @@
           "middle": null,
           "saintName": "Madeline",
           "dob": "2015-01-17T00:00:00.000Z",
-          "allergies": [
-            "cheese",
-            "milk"
-          ],
+          "allergies": ["cheese", "milk"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -10857,10 +10639,7 @@
           "middle": "An",
           "saintName": "Barbara",
           "dob": "2013-07-09T00:00:00.000Z",
-          "allergies": [
-            "peanuts",
-            "grass"
-          ],
+          "allergies": ["peanuts", "grass"],
           "isNameException": true,
           "exceptionNotes": "name exception"
         }
@@ -10948,10 +10727,7 @@
           "middle": "",
           "saintName": "Barbara",
           "dob": "2014-11-18T00:00:00.000Z",
-          "allergies": [
-            "cheese",
-            "milk"
-          ],
+          "allergies": ["cheese", "milk"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -10973,9 +10749,7 @@
           "middle": "Minh",
           "saintName": "Bernadet",
           "dob": "2010-01-03T00:00:00.000Z",
-          "allergies": [
-            "milk"
-          ],
+          "allergies": ["milk"],
           "isNameException": true,
           "exceptionNotes": "name exception"
         }
@@ -11019,9 +10793,7 @@
           "middle": "",
           "saintName": "Barbara",
           "dob": "2018-10-27T00:00:00.000Z",
-          "allergies": [
-            "grass"
-          ],
+          "allergies": ["grass"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -11032,9 +10804,7 @@
           "middle": "",
           "saintName": "Bernadet",
           "dob": "2016-12-16T00:00:00.000Z",
-          "allergies": [
-            "peanuts"
-          ],
+          "allergies": ["peanuts"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -11089,10 +10859,7 @@
           "middle": "",
           "saintName": "Maria",
           "dob": "2013-05-18T00:00:00.000Z",
-          "allergies": [
-            "peanuts",
-            "shellfish"
-          ],
+          "allergies": ["peanuts", "shellfish"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -11147,9 +10914,7 @@
           "middle": "Thanh",
           "saintName": "Columban",
           "dob": "2016-05-09T00:00:00.000Z",
-          "allergies": [
-            "cheese"
-          ],
+          "allergies": ["cheese"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -11204,9 +10969,7 @@
           "middle": "",
           "saintName": "Columban",
           "dob": "2015-05-27T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -11404,9 +11167,7 @@
           "middle": null,
           "saintName": "Paul",
           "dob": "2017-01-25T00:00:00.000Z",
-          "allergies": [
-            "peanuts"
-          ],
+          "allergies": ["peanuts"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -11516,9 +11277,7 @@
           "middle": "Thanh",
           "saintName": "Phanxico",
           "dob": "2018-02-13T00:00:00.000Z",
-          "allergies": [
-            "cheese"
-          ],
+          "allergies": ["cheese"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -11694,9 +11453,7 @@
           "middle": "Thanh",
           "saintName": "Phanxico",
           "dob": "2010-02-15T00:00:00.000Z",
-          "allergies": [
-            "peanuts"
-          ],
+          "allergies": ["peanuts"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -11718,9 +11475,7 @@
           "middle": "",
           "saintName": "Bernadet",
           "dob": "2011-07-10T00:00:00.000Z",
-          "allergies": [
-            "grass"
-          ],
+          "allergies": ["grass"],
           "isNameException": true,
           "exceptionNotes": "name exception"
         }
@@ -12028,9 +11783,7 @@
           "middle": "",
           "saintName": "Paul",
           "dob": "2016-07-25T00:00:00.000Z",
-          "allergies": [
-            "grass"
-          ],
+          "allergies": ["grass"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -12118,9 +11871,7 @@
           "middle": "An",
           "saintName": "Maria",
           "dob": "2014-12-15T00:00:00.000Z",
-          "allergies": [
-            "eggs"
-          ],
+          "allergies": ["eggs"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -12131,9 +11882,7 @@
           "middle": "Thanh",
           "saintName": "Barbara",
           "dob": "2014-06-24T00:00:00.000Z",
-          "allergies": [
-            "grass"
-          ],
+          "allergies": ["grass"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -12177,9 +11926,7 @@
           "middle": "",
           "saintName": "Giuse",
           "dob": "2018-04-12T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -12190,9 +11937,7 @@
           "middle": "An",
           "saintName": "Columban",
           "dob": "2013-09-27T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -12247,10 +11992,7 @@
           "middle": "An",
           "saintName": "Barbara",
           "dob": "2017-06-23T00:00:00.000Z",
-          "allergies": [
-            "cheese",
-            "grass"
-          ],
+          "allergies": ["cheese", "grass"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -12327,9 +12069,7 @@
           "middle": "An",
           "saintName": "John",
           "dob": "2016-02-04T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -12395,9 +12135,7 @@
           "middle": null,
           "saintName": "Emily",
           "dob": "2016-12-09T00:00:00.000Z",
-          "allergies": [
-            "shellfish"
-          ],
+          "allergies": ["shellfish"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -12452,9 +12190,7 @@
           "middle": "Minh",
           "saintName": "Columban",
           "dob": "2012-01-09T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -12465,9 +12201,7 @@
           "middle": "An",
           "saintName": "Barbara",
           "dob": "2010-07-15T00:00:00.000Z",
-          "allergies": [
-            "peanuts"
-          ],
+          "allergies": ["peanuts"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -12511,10 +12245,7 @@
           "middle": "An",
           "saintName": "Paul",
           "dob": "2017-09-21T00:00:00.000Z",
-          "allergies": [
-            "shellfish",
-            "cheese"
-          ],
+          "allergies": ["shellfish", "cheese"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -12657,10 +12388,7 @@
           "middle": null,
           "saintName": "Teresa",
           "dob": "2011-08-07T00:00:00.000Z",
-          "allergies": [
-            "peanuts",
-            "grass"
-          ],
+          "allergies": ["peanuts", "grass"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -12671,9 +12399,7 @@
           "middle": "Thanh",
           "saintName": "Maria",
           "dob": "2010-01-10T00:00:00.000Z",
-          "allergies": [
-            "milk"
-          ],
+          "allergies": ["milk"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -12728,10 +12454,7 @@
           "middle": "Thanh",
           "saintName": "Cecilia",
           "dob": "2012-05-06T00:00:00.000Z",
-          "allergies": [
-            "milk",
-            "gluten"
-          ],
+          "allergies": ["milk", "gluten"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -12775,9 +12498,7 @@
           "middle": "An",
           "saintName": "Madeline",
           "dob": "2016-02-18T00:00:00.000Z",
-          "allergies": [
-            "shellfish"
-          ],
+          "allergies": ["shellfish"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -12843,9 +12564,7 @@
           "middle": "",
           "saintName": "Giuse",
           "dob": "2010-02-27T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -13087,10 +12806,7 @@
           "middle": "An",
           "saintName": "Phero",
           "dob": "2017-11-26T00:00:00.000Z",
-          "allergies": [
-            "peanuts",
-            "milk"
-          ],
+          "allergies": ["peanuts", "milk"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -13134,9 +12850,7 @@
           "middle": "An",
           "saintName": "Phanxico",
           "dob": "2010-03-01T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -13191,9 +12905,7 @@
           "middle": "Thanh",
           "saintName": "Emily",
           "dob": "2012-06-01T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -13204,9 +12916,7 @@
           "middle": "",
           "saintName": "Paul",
           "dob": "2017-12-19T00:00:00.000Z",
-          "allergies": [
-            "grass"
-          ],
+          "allergies": ["grass"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -13272,9 +12982,7 @@
           "middle": "Thanh",
           "saintName": "Maria",
           "dob": "2014-01-21T00:00:00.000Z",
-          "allergies": [
-            "grass"
-          ],
+          "allergies": ["grass"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -13362,10 +13070,7 @@
           "middle": "An",
           "saintName": "Teresa",
           "dob": "2015-03-15T00:00:00.000Z",
-          "allergies": [
-            "grass",
-            "eggs"
-          ],
+          "allergies": ["grass", "eggs"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -13376,9 +13081,7 @@
           "middle": null,
           "saintName": "Bernadet",
           "dob": "2018-06-21T00:00:00.000Z",
-          "allergies": [
-            "grass"
-          ],
+          "allergies": ["grass"],
           "isNameException": true,
           "exceptionNotes": "name exception"
         }
@@ -13521,10 +13224,7 @@
           "middle": "Minh",
           "saintName": "Cecilia",
           "dob": "2015-07-19T00:00:00.000Z",
-          "allergies": [
-            "milk",
-            "cheese"
-          ],
+          "allergies": ["milk", "cheese"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -13535,9 +13235,7 @@
           "middle": "",
           "saintName": "Teresa",
           "dob": "2018-03-20T00:00:00.000Z",
-          "allergies": [
-            "milk"
-          ],
+          "allergies": ["milk"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -13581,9 +13279,7 @@
           "middle": "Minh",
           "saintName": "Phero",
           "dob": "2014-04-12T00:00:00.000Z",
-          "allergies": [
-            "milk"
-          ],
+          "allergies": ["milk"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -13704,9 +13400,7 @@
           "middle": "An",
           "saintName": "Teresa",
           "dob": "2013-05-14T00:00:00.000Z",
-          "allergies": [
-            "grass"
-          ],
+          "allergies": ["grass"],
           "isNameException": true,
           "exceptionNotes": "name exception"
         }
@@ -13750,9 +13444,7 @@
           "middle": null,
           "saintName": "John",
           "dob": "2015-05-18T00:00:00.000Z",
-          "allergies": [
-            "peanuts"
-          ],
+          "allergies": ["peanuts"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -13807,9 +13499,7 @@
           "middle": "",
           "saintName": "John",
           "dob": "2018-02-03T00:00:00.000Z",
-          "allergies": [
-            "milk"
-          ],
+          "allergies": ["milk"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -13897,9 +13587,7 @@
           "middle": "Minh",
           "saintName": "Cecilia",
           "dob": "2013-05-23T00:00:00.000Z",
-          "allergies": [
-            "shellfish"
-          ],
+          "allergies": ["shellfish"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -14009,9 +13697,7 @@
           "middle": "Thanh",
           "saintName": "Maria",
           "dob": "2013-11-17T00:00:00.000Z",
-          "allergies": [
-            "milk"
-          ],
+          "allergies": ["milk"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -14033,9 +13719,7 @@
           "middle": "Minh",
           "saintName": "John",
           "dob": "2018-04-08T00:00:00.000Z",
-          "allergies": [
-            "grass"
-          ],
+          "allergies": ["grass"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -14178,9 +13862,7 @@
           "middle": "Thanh",
           "saintName": "Barbara",
           "dob": "2012-03-22T00:00:00.000Z",
-          "allergies": [
-            "cheese"
-          ],
+          "allergies": ["cheese"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -14246,9 +13928,7 @@
           "middle": null,
           "saintName": "Paul",
           "dob": "2014-10-24T00:00:00.000Z",
-          "allergies": [
-            "grass"
-          ],
+          "allergies": ["grass"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -14523,10 +14203,7 @@
           "middle": "Minh",
           "saintName": "Columban",
           "dob": "2012-08-10T00:00:00.000Z",
-          "allergies": [
-            "cheese",
-            "eggs"
-          ],
+          "allergies": ["cheese", "eggs"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -14548,9 +14225,7 @@
           "middle": "Minh",
           "saintName": "Barbara",
           "dob": "2011-04-14T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -14660,10 +14335,7 @@
           "middle": "Minh",
           "saintName": "Phanxico",
           "dob": "2018-10-26T00:00:00.000Z",
-          "allergies": [
-            "milk",
-            "shellfish"
-          ],
+          "allergies": ["milk", "shellfish"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -14674,9 +14346,7 @@
           "middle": "",
           "saintName": "Emily",
           "dob": "2018-02-04T00:00:00.000Z",
-          "allergies": [
-            "milk"
-          ],
+          "allergies": ["milk"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -14830,9 +14500,7 @@
           "middle": "",
           "saintName": "Emily",
           "dob": "2013-05-21T00:00:00.000Z",
-          "allergies": [
-            "grass"
-          ],
+          "allergies": ["grass"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -15041,10 +14709,7 @@
           "middle": "",
           "saintName": "Cecilia",
           "dob": "2018-04-17T00:00:00.000Z",
-          "allergies": [
-            "eggs",
-            "peanuts"
-          ],
+          "allergies": ["eggs", "peanuts"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -15099,9 +14764,7 @@
           "middle": null,
           "saintName": "Paul",
           "dob": "2015-07-12T00:00:00.000Z",
-          "allergies": [
-            "milk"
-          ],
+          "allergies": ["milk"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -15200,9 +14863,7 @@
           "middle": null,
           "saintName": "Phanxico",
           "dob": "2010-06-21T00:00:00.000Z",
-          "allergies": [
-            "cheese"
-          ],
+          "allergies": ["cheese"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -15257,10 +14918,7 @@
           "middle": "Thanh",
           "saintName": "Giuse",
           "dob": "2015-02-17T00:00:00.000Z",
-          "allergies": [
-            "milk",
-            "shellfish"
-          ],
+          "allergies": ["milk", "shellfish"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -15370,9 +15028,7 @@
           "middle": "Minh",
           "saintName": "Madeline",
           "dob": "2010-10-14T00:00:00.000Z",
-          "allergies": [
-            "grass"
-          ],
+          "allergies": ["grass"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -15482,9 +15138,7 @@
           "middle": null,
           "saintName": "Phero",
           "dob": "2011-06-13T00:00:00.000Z",
-          "allergies": [
-            "eggs"
-          ],
+          "allergies": ["eggs"],
           "isNameException": true,
           "exceptionNotes": "name exception"
         },
@@ -15495,9 +15149,7 @@
           "middle": "Thanh",
           "saintName": "Bernadet",
           "dob": "2011-06-12T00:00:00.000Z",
-          "allergies": [
-            "cheese"
-          ],
+          "allergies": ["cheese"],
           "isNameException": true,
           "exceptionNotes": "name exception"
         },
@@ -15596,9 +15248,7 @@
           "middle": null,
           "saintName": "Bernadet",
           "dob": "2014-10-06T00:00:00.000Z",
-          "allergies": [
-            "cheese"
-          ],
+          "allergies": ["cheese"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -15620,9 +15270,7 @@
           "middle": "Minh",
           "saintName": "Maria",
           "dob": "2016-09-01T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -15721,9 +15369,7 @@
           "middle": "An",
           "saintName": "Maria",
           "dob": "2017-01-20T00:00:00.000Z",
-          "allergies": [
-            "shellfish"
-          ],
+          "allergies": ["shellfish"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -15855,9 +15501,7 @@
           "middle": "An",
           "saintName": "Phanxico",
           "dob": "2012-03-07T00:00:00.000Z",
-          "allergies": [
-            "eggs"
-          ],
+          "allergies": ["eggs"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -15912,9 +15556,7 @@
           "middle": "",
           "saintName": "Bernadet",
           "dob": "2010-10-02T00:00:00.000Z",
-          "allergies": [
-            "peanuts"
-          ],
+          "allergies": ["peanuts"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -16178,10 +15820,7 @@
           "middle": "An",
           "saintName": "Teresa",
           "dob": "2010-12-09T00:00:00.000Z",
-          "allergies": [
-            "gluten",
-            "eggs"
-          ],
+          "allergies": ["gluten", "eggs"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -16236,9 +15875,7 @@
           "middle": "Minh",
           "saintName": "Barbara",
           "dob": "2015-05-11T00:00:00.000Z",
-          "allergies": [
-            "cheese"
-          ],
+          "allergies": ["cheese"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -16293,9 +15930,7 @@
           "middle": null,
           "saintName": "Giuse",
           "dob": "2012-11-21T00:00:00.000Z",
-          "allergies": [
-            "grass"
-          ],
+          "allergies": ["grass"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -16658,9 +16293,7 @@
           "middle": "Thanh",
           "saintName": "Giuse",
           "dob": "2011-09-14T00:00:00.000Z",
-          "allergies": [
-            "cheese"
-          ],
+          "allergies": ["cheese"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -16770,9 +16403,7 @@
           "middle": "Minh",
           "saintName": "Madeline",
           "dob": "2016-09-03T00:00:00.000Z",
-          "allergies": [
-            "milk"
-          ],
+          "allergies": ["milk"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -16838,9 +16469,7 @@
           "middle": "An",
           "saintName": "Bernadet",
           "dob": "2016-02-03T00:00:00.000Z",
-          "allergies": [
-            "shellfish"
-          ],
+          "allergies": ["shellfish"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -17060,9 +16689,7 @@
           "middle": null,
           "saintName": "Cecilia",
           "dob": "2018-10-11T00:00:00.000Z",
-          "allergies": [
-            "eggs"
-          ],
+          "allergies": ["eggs"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -17128,10 +16755,7 @@
           "middle": "Minh",
           "saintName": "Emily",
           "dob": "2016-04-18T00:00:00.000Z",
-          "allergies": [
-            "gluten",
-            "eggs"
-          ],
+          "allergies": ["gluten", "eggs"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -17274,9 +16898,7 @@
           "middle": null,
           "saintName": "Barbara",
           "dob": "2012-10-17T00:00:00.000Z",
-          "allergies": [
-            "milk"
-          ],
+          "allergies": ["milk"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -17441,9 +17063,7 @@
           "middle": "An",
           "saintName": "Paul",
           "dob": "2013-12-28T00:00:00.000Z",
-          "allergies": [
-            "cheese"
-          ],
+          "allergies": ["cheese"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -17740,10 +17360,7 @@
           "middle": "",
           "saintName": "Paul",
           "dob": "2010-01-08T00:00:00.000Z",
-          "allergies": [
-            "eggs",
-            "cheese"
-          ],
+          "allergies": ["eggs", "cheese"],
           "isNameException": true,
           "exceptionNotes": "name exception"
         },
@@ -17754,9 +17371,7 @@
           "middle": "",
           "saintName": "Paul",
           "dob": "2015-01-28T00:00:00.000Z",
-          "allergies": [
-            "grass"
-          ],
+          "allergies": ["grass"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -17910,9 +17525,7 @@
           "middle": "An",
           "saintName": "Giuse",
           "dob": "2016-08-15T00:00:00.000Z",
-          "allergies": [
-            "milk"
-          ],
+          "allergies": ["milk"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -17923,9 +17536,7 @@
           "middle": null,
           "saintName": "Paul",
           "dob": "2010-11-02T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -17969,10 +17580,7 @@
           "middle": "Minh",
           "saintName": "Maria",
           "dob": "2016-01-28T00:00:00.000Z",
-          "allergies": [
-            "cheese",
-            "gluten"
-          ],
+          "allergies": ["cheese", "gluten"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -18016,9 +17624,7 @@
           "middle": null,
           "saintName": "Maria",
           "dob": "2018-11-04T00:00:00.000Z",
-          "allergies": [
-            "grass"
-          ],
+          "allergies": ["grass"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -18040,9 +17646,7 @@
           "middle": null,
           "saintName": "Emily",
           "dob": "2015-12-10T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -18174,10 +17778,7 @@
           "middle": "Minh",
           "saintName": "Paul",
           "dob": "2016-03-06T00:00:00.000Z",
-          "allergies": [
-            "gluten",
-            "eggs"
-          ],
+          "allergies": ["gluten", "eggs"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -18397,9 +17998,7 @@
           "middle": "An",
           "saintName": "Columban",
           "dob": "2012-04-05T00:00:00.000Z",
-          "allergies": [
-            "eggs"
-          ],
+          "allergies": ["eggs"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -18520,9 +18119,7 @@
           "middle": "Minh",
           "saintName": "Barbara",
           "dob": "2015-12-09T00:00:00.000Z",
-          "allergies": [
-            "grass"
-          ],
+          "allergies": ["grass"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -18577,10 +18174,7 @@
           "middle": "An",
           "saintName": "Teresa",
           "dob": "2010-10-02T00:00:00.000Z",
-          "allergies": [
-            "shellfish",
-            "eggs"
-          ],
+          "allergies": ["shellfish", "eggs"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -18866,9 +18460,7 @@
           "middle": "An",
           "saintName": "Cecilia",
           "dob": "2017-02-04T00:00:00.000Z",
-          "allergies": [
-            "grass"
-          ],
+          "allergies": ["grass"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -18912,9 +18504,7 @@
           "middle": "",
           "saintName": "Bernadet",
           "dob": "2012-09-12T00:00:00.000Z",
-          "allergies": [
-            "shellfish"
-          ],
+          "allergies": ["shellfish"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -18958,9 +18548,7 @@
           "middle": "An",
           "saintName": "Teresa",
           "dob": "2013-01-21T00:00:00.000Z",
-          "allergies": [
-            "peanuts"
-          ],
+          "allergies": ["peanuts"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -19059,9 +18647,7 @@
           "middle": null,
           "saintName": "Cecilia",
           "dob": "2013-09-01T00:00:00.000Z",
-          "allergies": [
-            "eggs"
-          ],
+          "allergies": ["eggs"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -19149,10 +18735,7 @@
           "middle": null,
           "saintName": "Maria",
           "dob": "2013-08-08T00:00:00.000Z",
-          "allergies": [
-            "eggs",
-            "milk"
-          ],
+          "allergies": ["eggs", "milk"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -19196,10 +18779,7 @@
           "middle": null,
           "saintName": "John",
           "dob": "2016-11-05T00:00:00.000Z",
-          "allergies": [
-            "shellfish",
-            "gluten"
-          ],
+          "allergies": ["shellfish", "gluten"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -19331,10 +18911,7 @@
           "middle": "Thanh",
           "saintName": "Phero",
           "dob": "2018-08-07T00:00:00.000Z",
-          "allergies": [
-            "gluten",
-            "peanuts"
-          ],
+          "allergies": ["gluten", "peanuts"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -19345,10 +18922,7 @@
           "middle": "Thanh",
           "saintName": "Phanxico",
           "dob": "2014-02-16T00:00:00.000Z",
-          "allergies": [
-            "gluten",
-            "grass"
-          ],
+          "allergies": ["gluten", "grass"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -19392,9 +18966,7 @@
           "middle": "An",
           "saintName": "Maria",
           "dob": "2012-05-18T00:00:00.000Z",
-          "allergies": [
-            "peanuts"
-          ],
+          "allergies": ["peanuts"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -19405,9 +18977,7 @@
           "middle": "An",
           "saintName": "Paul",
           "dob": "2014-03-28T00:00:00.000Z",
-          "allergies": [
-            "grass"
-          ],
+          "allergies": ["grass"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -19462,9 +19032,7 @@
           "middle": "",
           "saintName": "Giuse",
           "dob": "2011-05-01T00:00:00.000Z",
-          "allergies": [
-            "grass"
-          ],
+          "allergies": ["grass"],
           "isNameException": true,
           "exceptionNotes": "name exception"
         },
@@ -19475,10 +19043,7 @@
           "middle": null,
           "saintName": "Phanxico",
           "dob": "2013-05-18T00:00:00.000Z",
-          "allergies": [
-            "peanuts",
-            "grass"
-          ],
+          "allergies": ["peanuts", "grass"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -19489,9 +19054,7 @@
           "middle": "An",
           "saintName": "Paul",
           "dob": "2013-06-28T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -19590,9 +19153,7 @@
           "middle": null,
           "saintName": "Teresa",
           "dob": "2013-11-11T00:00:00.000Z",
-          "allergies": [
-            "peanuts"
-          ],
+          "allergies": ["peanuts"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -19603,9 +19164,7 @@
           "middle": "Thanh",
           "saintName": "Cecilia",
           "dob": "2017-04-25T00:00:00.000Z",
-          "allergies": [
-            "eggs"
-          ],
+          "allergies": ["eggs"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -19704,10 +19263,7 @@
           "middle": "",
           "saintName": "Cecilia",
           "dob": "2015-04-27T00:00:00.000Z",
-          "allergies": [
-            "gluten",
-            "cheese"
-          ],
+          "allergies": ["gluten", "cheese"],
           "isNameException": false,
           "exceptionNotes": null
         },
@@ -19729,9 +19285,7 @@
           "middle": "An",
           "saintName": "Cecilia",
           "dob": "2013-08-13T00:00:00.000Z",
-          "allergies": [
-            "shellfish"
-          ],
+          "allergies": ["shellfish"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -19775,10 +19329,7 @@
           "middle": "",
           "saintName": "Maria",
           "dob": "2014-04-21T00:00:00.000Z",
-          "allergies": [
-            "peanuts",
-            "gluten"
-          ],
+          "allergies": ["peanuts", "gluten"],
           "isNameException": true,
           "exceptionNotes": "name exception"
         }
@@ -20042,9 +19593,7 @@
           "middle": null,
           "saintName": "Cecilia",
           "dob": "2012-01-28T00:00:00.000Z",
-          "allergies": [
-            "shellfish"
-          ],
+          "allergies": ["shellfish"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -20099,10 +19648,7 @@
           "middle": null,
           "saintName": "Barbara",
           "dob": "2016-04-24T00:00:00.000Z",
-          "allergies": [
-            "milk",
-            "peanuts"
-          ],
+          "allergies": ["milk", "peanuts"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -20157,10 +19703,7 @@
           "middle": "An",
           "saintName": "Bernadet",
           "dob": "2014-12-02T00:00:00.000Z",
-          "allergies": [
-            "eggs",
-            "cheese"
-          ],
+          "allergies": ["eggs", "cheese"],
           "isNameException": true,
           "exceptionNotes": "name exception"
         },
@@ -20171,10 +19714,7 @@
           "middle": "Minh",
           "saintName": "Barbara",
           "dob": "2013-02-03T00:00:00.000Z",
-          "allergies": [
-            "milk",
-            "cheese"
-          ],
+          "allergies": ["milk", "cheese"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -20284,9 +19824,7 @@
           "middle": null,
           "saintName": "Barbara",
           "dob": "2015-01-22T00:00:00.000Z",
-          "allergies": [
-            "peanuts"
-          ],
+          "allergies": ["peanuts"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -20330,9 +19868,7 @@
           "middle": "Minh",
           "saintName": "Emily",
           "dob": "2015-02-18T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "isNameException": true,
           "exceptionNotes": "name exception"
         },
@@ -20354,9 +19890,7 @@
           "middle": "An",
           "saintName": "Maria",
           "dob": "2013-12-14T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "isNameException": false,
           "exceptionNotes": null
         }
@@ -20748,9 +20282,7 @@
           "saintName": "Maria",
           "fullName": "Vuong, Evelyn",
           "dob": "2014-07-10T00:00:00.000Z",
-          "allergies": [
-            "shellfishes"
-          ],
+          "allergies": ["shellfishes"],
           "status": "pending"
         }
       ],
@@ -21049,9 +20581,7 @@
           "saintName": "Madeline",
           "fullName": "Duong, Teresa",
           "dob": "2018-02-10T00:00:00.000Z",
-          "allergies": [
-            "milk"
-          ],
+          "allergies": ["milk"],
           "status": "pending"
         }
       ],
@@ -34483,9 +34013,7 @@
           "saintName": "Maria",
           "fullName": "Pham, Sophia",
           "dob": "2016-02-19T00:00:00.000Z",
-          "allergies": [
-            "eggs"
-          ],
+          "allergies": ["eggs"],
           "status": "pending"
         },
         {
@@ -34493,9 +34021,7 @@
           "saintName": "Paul",
           "fullName": "Pham, Thu",
           "dob": "2013-01-15T00:00:00.000Z",
-          "allergies": [
-            "eggs"
-          ],
+          "allergies": ["eggs"],
           "status": "pending"
         }
       ],
@@ -34546,10 +34072,7 @@
           "saintName": "Emily",
           "fullName": "Vuong, Anh",
           "dob": "2012-09-13T00:00:00.000Z",
-          "allergies": [
-            "eggs",
-            "shellfish"
-          ],
+          "allergies": ["eggs", "shellfish"],
           "status": "pending"
         }
       ],
@@ -34659,10 +34182,7 @@
           "saintName": "Giuse",
           "fullName": "Do, Tuan",
           "dob": "2011-09-08T00:00:00.000Z",
-          "allergies": [
-            "shellfish",
-            "gluten"
-          ],
+          "allergies": ["shellfish", "gluten"],
           "status": "pending"
         }
       ],
@@ -34713,9 +34233,7 @@
           "saintName": "Barbara",
           "fullName": "Pham, Huy",
           "dob": "2010-06-10T00:00:00.000Z",
-          "allergies": [
-            "grass"
-          ],
+          "allergies": ["grass"],
           "status": "pending"
         }
       ],
@@ -34774,9 +34292,7 @@
           "saintName": "John",
           "fullName": "Vuong, Trung",
           "dob": "2013-10-21T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "status": "pending"
         }
       ],
@@ -34878,9 +34394,7 @@
           "saintName": "John",
           "fullName": "Huynh, Khang",
           "dob": "2016-07-28T00:00:00.000Z",
-          "allergies": [
-            "peanuts"
-          ],
+          "allergies": ["peanuts"],
           "status": "pending"
         }
       ],
@@ -35304,10 +34818,7 @@
           "saintName": "Giuse",
           "fullName": "Pham, Yen",
           "dob": "2011-12-23T00:00:00.000Z",
-          "allergies": [
-            "shellfish",
-            "eggs"
-          ],
+          "allergies": ["shellfish", "eggs"],
           "status": "pending"
         },
         {
@@ -35315,10 +34826,7 @@
           "saintName": "Bernadet",
           "fullName": "Pham, Thomas",
           "dob": "2017-08-10T00:00:00.000Z",
-          "allergies": [
-            "peanuts",
-            "milk"
-          ],
+          "allergies": ["peanuts", "milk"],
           "status": "pending"
         }
       ],
@@ -35369,9 +34877,7 @@
           "saintName": "Teresa",
           "fullName": "Vuong, Quan",
           "dob": "2014-02-01T00:00:00.000Z",
-          "allergies": [
-            "milk"
-          ],
+          "allergies": ["milk"],
           "status": "pending"
         },
         {
@@ -35803,9 +35309,7 @@
           "saintName": "Phero",
           "fullName": "Dang, Trang",
           "dob": "2017-03-03T00:00:00.000Z",
-          "allergies": [
-            "grass"
-          ],
+          "allergies": ["grass"],
           "status": "pending"
         }
       ],
@@ -35966,9 +35470,7 @@
           "saintName": "Jacob",
           "fullName": "Do, Nam",
           "dob": "2010-12-15T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "status": "pending"
         }
       ],
@@ -36027,9 +35529,7 @@
           "saintName": "John",
           "fullName": "Bui, Anh",
           "dob": "2014-05-20T00:00:00.000Z",
-          "allergies": [
-            "cheese"
-          ],
+          "allergies": ["cheese"],
           "status": "pending"
         }
       ],
@@ -36190,10 +35690,7 @@
           "saintName": "John",
           "fullName": "Hoang, Laura",
           "dob": "2016-05-02T00:00:00.000Z",
-          "allergies": [
-            "shellfish",
-            "peanuts"
-          ],
+          "allergies": ["shellfish", "peanuts"],
           "status": "pending"
         }
       ],
@@ -36252,10 +35749,7 @@
           "saintName": "Phanxico",
           "fullName": "Pham, Sophia",
           "dob": "2013-12-11T00:00:00.000Z",
-          "allergies": [
-            "milk",
-            "eggs"
-          ],
+          "allergies": ["milk", "eggs"],
           "status": "pending"
         }
       ],
@@ -36314,9 +35808,7 @@
           "saintName": "Cecilia",
           "fullName": "Phan, Mai",
           "dob": "2014-11-10T00:00:00.000Z",
-          "allergies": [
-            "peanuts"
-          ],
+          "allergies": ["peanuts"],
           "status": "pending"
         }
       ],
@@ -36367,9 +35859,7 @@
           "saintName": "Cecilia",
           "fullName": "Pham, Huy",
           "dob": "2011-03-07T00:00:00.000Z",
-          "allergies": [
-            "cheese"
-          ],
+          "allergies": ["cheese"],
           "status": "pending"
         }
       ],
@@ -36471,9 +35961,7 @@
           "saintName": "John",
           "fullName": "Pham, Yen",
           "dob": "2016-02-18T00:00:00.000Z",
-          "allergies": [
-            "cheese"
-          ],
+          "allergies": ["cheese"],
           "status": "pending"
         }
       ],
@@ -36532,9 +36020,7 @@
           "saintName": "Emily",
           "fullName": "Hoang, Teresa",
           "dob": "2016-08-14T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "status": "pending"
         }
       ],
@@ -36636,9 +36122,7 @@
           "saintName": "Giuse",
           "fullName": "Bui, Thao",
           "dob": "2018-08-21T00:00:00.000Z",
-          "allergies": [
-            "cheese"
-          ],
+          "allergies": ["cheese"],
           "status": "pending"
         }
       ],
@@ -36689,10 +36173,7 @@
           "saintName": "Barbara",
           "fullName": "Le, Tuan",
           "dob": "2016-08-16T00:00:00.000Z",
-          "allergies": [
-            "gluten",
-            "cheese"
-          ],
+          "allergies": ["gluten", "cheese"],
           "status": "pending"
         }
       ],
@@ -36751,9 +36232,7 @@
           "saintName": "Madeline",
           "fullName": "Tran, Hoa",
           "dob": "2015-02-01T00:00:00.000Z",
-          "allergies": [
-            "peanuts"
-          ],
+          "allergies": ["peanuts"],
           "status": "pending"
         }
       ],
@@ -37016,10 +36495,7 @@
           "saintName": "Emily",
           "fullName": "Tran, William",
           "dob": "2012-10-06T00:00:00.000Z",
-          "allergies": [
-            "cheese",
-            "gluten"
-          ],
+          "allergies": ["cheese", "gluten"],
           "status": "pending"
         }
       ],
@@ -37129,9 +36605,7 @@
           "saintName": "Barbara",
           "fullName": "Dang, Quan",
           "dob": "2011-01-13T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "status": "pending"
         }
       ],
@@ -37182,9 +36656,7 @@
           "saintName": "Phero",
           "fullName": "Pham, Anh",
           "dob": "2015-12-21T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "status": "pending"
         },
         {
@@ -37302,9 +36774,7 @@
           "saintName": "Cecilia",
           "fullName": "Phan, Thu",
           "dob": "2012-04-13T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "status": "pending"
         }
       ],
@@ -37355,9 +36825,7 @@
           "saintName": "Barbara",
           "fullName": "Truong, Linh",
           "dob": "2014-02-12T00:00:00.000Z",
-          "allergies": [
-            "eggs"
-          ],
+          "allergies": ["eggs"],
           "status": "pending"
         },
         {
@@ -37416,9 +36884,7 @@
           "saintName": "Barbara",
           "fullName": "Pham, Quan",
           "dob": "2018-10-16T00:00:00.000Z",
-          "allergies": [
-            "grass"
-          ],
+          "allergies": ["grass"],
           "status": "pending"
         },
         {
@@ -37528,9 +36994,7 @@
           "saintName": "Madeline",
           "fullName": "Pham, William",
           "dob": "2017-03-13T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "status": "pending"
         },
         {
@@ -37648,9 +37112,7 @@
           "saintName": "Bernadet",
           "fullName": "Huynh, John",
           "dob": "2010-07-02T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "status": "pending"
         }
       ],
@@ -37701,9 +37163,7 @@
           "saintName": "Bernadet",
           "fullName": "Vu, Lam",
           "dob": "2016-10-14T00:00:00.000Z",
-          "allergies": [
-            "shellfish"
-          ],
+          "allergies": ["shellfish"],
           "status": "pending"
         }
       ],
@@ -37907,9 +37367,7 @@
           "saintName": "Phanxico",
           "fullName": "Tran, My",
           "dob": "2014-03-11T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "status": "pending"
         }
       ],
@@ -38027,9 +37485,7 @@
           "saintName": "Phero",
           "fullName": "Do, Yen",
           "dob": "2017-06-10T00:00:00.000Z",
-          "allergies": [
-            "eggs"
-          ],
+          "allergies": ["eggs"],
           "status": "pending"
         }
       ],
@@ -38080,9 +37536,7 @@
           "saintName": "Bernadet",
           "fullName": "Nguyen, Anh",
           "dob": "2015-12-16T00:00:00.000Z",
-          "allergies": [
-            "cheese"
-          ],
+          "allergies": ["cheese"],
           "status": "pending"
         }
       ],
@@ -38141,10 +37595,7 @@
           "saintName": "Jacob",
           "fullName": "Pham, Quan",
           "dob": "2014-04-04T00:00:00.000Z",
-          "allergies": [
-            "shellfish",
-            "grass"
-          ],
+          "allergies": ["shellfish", "grass"],
           "status": "pending"
         }
       ],
@@ -38203,9 +37654,7 @@
           "saintName": "Bernadet",
           "fullName": "Vuong, Tiffany",
           "dob": "2017-07-21T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "status": "pending"
         }
       ],
@@ -38382,9 +37831,7 @@
           "saintName": "Madeline",
           "fullName": "Nguyen, Trang",
           "dob": "2011-12-21T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "status": "pending"
         }
       ],
@@ -38443,9 +37890,7 @@
           "saintName": "Bernadet",
           "fullName": "Vu, Mai",
           "dob": "2018-11-27T00:00:00.000Z",
-          "allergies": [
-            "cheese"
-          ],
+          "allergies": ["cheese"],
           "status": "pending"
         }
       ],
@@ -38716,10 +38161,7 @@
           "saintName": "Maria",
           "fullName": "Bui, Huy",
           "dob": "2016-01-11T00:00:00.000Z",
-          "allergies": [
-            "eggs",
-            "shellfish"
-          ],
+          "allergies": ["eggs", "shellfish"],
           "status": "pending"
         },
         {
@@ -39108,9 +38550,7 @@
           "saintName": "Giuse",
           "fullName": "Truong, Thomas",
           "dob": "2017-04-07T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "status": "pending"
         }
       ],
@@ -39220,9 +38660,7 @@
           "saintName": "Phanxico",
           "fullName": "Bui, Phong",
           "dob": "2012-03-26T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "status": "pending"
         }
       ],
@@ -39375,9 +38813,7 @@
           "saintName": "Maria",
           "fullName": "Hoang, Duc",
           "dob": "2012-04-06T00:00:00.000Z",
-          "allergies": [
-            "eggs"
-          ],
+          "allergies": ["eggs"],
           "status": "pending"
         }
       ],
@@ -39546,9 +38982,7 @@
           "saintName": "Phero",
           "fullName": "Tran, Christina",
           "dob": "2016-03-25T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "status": "pending"
         }
       ],
@@ -39913,9 +39347,7 @@
           "saintName": "Phanxico",
           "fullName": "Hoang, Thu",
           "dob": "2016-05-01T00:00:00.000Z",
-          "allergies": [
-            "milk"
-          ],
+          "allergies": ["milk"],
           "status": "pending"
         }
       ],
@@ -40076,9 +39508,7 @@
           "saintName": "Phanxico",
           "fullName": "Pham, Huy",
           "dob": "2013-04-07T00:00:00.000Z",
-          "allergies": [
-            "shellfish"
-          ],
+          "allergies": ["shellfish"],
           "status": "pending"
         },
         {
@@ -40086,9 +39516,7 @@
           "saintName": "Paul",
           "fullName": "Huynh, Hoa",
           "dob": "2011-04-23T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "status": "pending"
         }
       ],
@@ -40469,10 +39897,7 @@
           "saintName": "Giuse",
           "fullName": "Vuong, Christina",
           "dob": "2012-07-19T00:00:00.000Z",
-          "allergies": [
-            "cheese",
-            "milk"
-          ],
+          "allergies": ["cheese", "milk"],
           "status": "pending"
         }
       ],
@@ -40692,9 +40117,7 @@
           "saintName": "Jacob",
           "fullName": "Pham, Bao",
           "dob": "2014-07-09T00:00:00.000Z",
-          "allergies": [
-            "shellfish"
-          ],
+          "allergies": ["shellfish"],
           "status": "pending"
         }
       ],
@@ -40796,9 +40219,7 @@
           "saintName": "Barbara",
           "fullName": "Dang, Ben",
           "dob": "2017-12-09T00:00:00.000Z",
-          "allergies": [
-            "peanuts"
-          ],
+          "allergies": ["peanuts"],
           "status": "pending"
         }
       ],
@@ -40908,9 +40329,7 @@
           "saintName": "Phero",
           "fullName": "Hoang, Duc",
           "dob": "2016-01-13T00:00:00.000Z",
-          "allergies": [
-            "grass"
-          ],
+          "allergies": ["grass"],
           "status": "pending"
         },
         {
@@ -40918,9 +40337,7 @@
           "saintName": "Teresa",
           "fullName": "Hoang, Lam",
           "dob": "2015-10-27T00:00:00.000Z",
-          "allergies": [
-            "shellfish"
-          ],
+          "allergies": ["shellfish"],
           "status": "pending"
         }
       ],
@@ -41022,9 +40439,7 @@
           "saintName": "Jacob",
           "fullName": "Nguyen, Trung",
           "dob": "2015-11-13T00:00:00.000Z",
-          "allergies": [
-            "shellfish"
-          ],
+          "allergies": ["shellfish"],
           "status": "pending"
         }
       ],
@@ -41193,9 +40608,7 @@
           "saintName": "Maria",
           "fullName": "Nguyen, Christina",
           "dob": "2012-01-11T00:00:00.000Z",
-          "allergies": [
-            "milk"
-          ],
+          "allergies": ["milk"],
           "status": "pending"
         }
       ],
@@ -41517,9 +40930,7 @@
           "saintName": "Bernadet",
           "fullName": "Vo, Yen",
           "dob": "2017-05-28T00:00:00.000Z",
-          "allergies": [
-            "cheese"
-          ],
+          "allergies": ["cheese"],
           "status": "pending"
         }
       ],
@@ -41621,10 +41032,7 @@
           "saintName": "Maria",
           "fullName": "Pham, Lam",
           "dob": "2011-07-26T00:00:00.000Z",
-          "allergies": [
-            "shellfish",
-            "gluten"
-          ],
+          "allergies": ["shellfish", "gluten"],
           "status": "pending"
         }
       ],
@@ -41946,10 +41354,7 @@
           "saintName": "Columban",
           "fullName": "Pham, John",
           "dob": "2015-03-02T00:00:00.000Z",
-          "allergies": [
-            "shellfish",
-            "cheese"
-          ],
+          "allergies": ["shellfish", "cheese"],
           "status": "pending"
         },
         {
@@ -42271,9 +41676,7 @@
           "saintName": "Phanxico",
           "fullName": "Vuong, Huy",
           "dob": "2012-12-11T00:00:00.000Z",
-          "allergies": [
-            "eggs"
-          ],
+          "allergies": ["eggs"],
           "status": "pending"
         }
       ],
@@ -42324,9 +41727,7 @@
           "saintName": "Maria",
           "fullName": "Vo, Nam",
           "dob": "2013-08-15T00:00:00.000Z",
-          "allergies": [
-            "peanuts"
-          ],
+          "allergies": ["peanuts"],
           "status": "pending"
         }
       ],
@@ -42581,9 +41982,7 @@
           "saintName": "Paul",
           "fullName": "Phan, My",
           "dob": "2016-12-15T00:00:00.000Z",
-          "allergies": [
-            "eggs"
-          ],
+          "allergies": ["eggs"],
           "status": "pending"
         }
       ],
@@ -42744,10 +42143,7 @@
           "saintName": "Cecilia",
           "fullName": "Le, Linh",
           "dob": "2018-09-02T00:00:00.000Z",
-          "allergies": [
-            "eggs",
-            "milk"
-          ],
+          "allergies": ["eggs", "milk"],
           "status": "pending"
         },
         {
@@ -42967,9 +42363,7 @@
           "saintName": "Paul",
           "fullName": "Do, Sophia",
           "dob": "2018-05-21T00:00:00.000Z",
-          "allergies": [
-            "shellfish"
-          ],
+          "allergies": ["shellfish"],
           "status": "pending"
         }
       ],
@@ -43197,10 +42591,7 @@
           "saintName": "Paul",
           "fullName": "Vo, Minh",
           "dob": "2018-02-20T00:00:00.000Z",
-          "allergies": [
-            "gluten",
-            "grass"
-          ],
+          "allergies": ["gluten", "grass"],
           "status": "pending"
         }
       ],
@@ -43251,10 +42642,7 @@
           "saintName": "Madeline",
           "fullName": "Pham, Lam",
           "dob": "2011-06-07T00:00:00.000Z",
-          "allergies": [
-            "peanuts",
-            "gluten"
-          ],
+          "allergies": ["peanuts", "gluten"],
           "status": "pending"
         },
         {
@@ -43415,9 +42803,7 @@
           "saintName": "Paul",
           "fullName": "Vu, Lam",
           "dob": "2013-04-04T00:00:00.000Z",
-          "allergies": [
-            "eggs"
-          ],
+          "allergies": ["eggs"],
           "status": "pending"
         },
         {
@@ -43578,9 +42964,7 @@
           "saintName": "Maria",
           "fullName": "Vuong, John",
           "dob": "2016-10-12T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "status": "pending"
         },
         {
@@ -43588,9 +42972,7 @@
           "saintName": "John",
           "fullName": "Vuong, Nam",
           "dob": "2014-05-19T00:00:00.000Z",
-          "allergies": [
-            "peanuts"
-          ],
+          "allergies": ["peanuts"],
           "status": "pending"
         }
       ],
@@ -43708,9 +43090,7 @@
           "saintName": "Paul",
           "fullName": "Pham, Thu",
           "dob": "2017-03-08T00:00:00.000Z",
-          "allergies": [
-            "shellfish"
-          ],
+          "allergies": ["shellfish"],
           "status": "pending"
         }
       ],
@@ -43761,10 +43141,7 @@
           "saintName": "Barbara",
           "fullName": "Phan, Christina",
           "dob": "2015-07-27T00:00:00.000Z",
-          "allergies": [
-            "shellfish",
-            "gluten"
-          ],
+          "allergies": ["shellfish", "gluten"],
           "status": "pending"
         },
         {
@@ -43874,9 +43251,7 @@
           "saintName": "Barbara",
           "fullName": "Pham, Quynh",
           "dob": "2011-09-27T00:00:00.000Z",
-          "allergies": [
-            "shellfish"
-          ],
+          "allergies": ["shellfish"],
           "status": "pending"
         },
         {
@@ -43935,9 +43310,7 @@
           "saintName": "Bernadet",
           "fullName": "Tran, Quan",
           "dob": "2012-09-22T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "status": "pending"
         },
         {
@@ -44369,10 +43742,7 @@
           "saintName": "Barbara",
           "fullName": "Phan, Duc",
           "dob": "2013-07-09T00:00:00.000Z",
-          "allergies": [
-            "peanuts",
-            "grass"
-          ],
+          "allergies": ["peanuts", "grass"],
           "status": "pending"
         }
       ],
@@ -44474,10 +43844,7 @@
           "saintName": "Barbara",
           "fullName": "Pham, Emily",
           "dob": "2014-11-18T00:00:00.000Z",
-          "allergies": [
-            "cheese",
-            "milk"
-          ],
+          "allergies": ["cheese", "milk"],
           "status": "pending"
         }
       ],
@@ -44528,9 +43895,7 @@
           "saintName": "Bernadet",
           "fullName": "Huynh, Tiffany",
           "dob": "2016-12-16T00:00:00.000Z",
-          "allergies": [
-            "peanuts"
-          ],
+          "allergies": ["peanuts"],
           "status": "pending"
         },
         {
@@ -44538,9 +43903,7 @@
           "saintName": "Barbara",
           "fullName": "Huynh, Minh",
           "dob": "2018-10-27T00:00:00.000Z",
-          "allergies": [
-            "grass"
-          ],
+          "allergies": ["grass"],
           "status": "pending"
         }
       ],
@@ -44599,10 +43962,7 @@
           "saintName": "Maria",
           "fullName": "Pham, Khang",
           "dob": "2013-05-18T00:00:00.000Z",
-          "allergies": [
-            "peanuts",
-            "shellfish"
-          ],
+          "allergies": ["peanuts", "shellfish"],
           "status": "pending"
         }
       ],
@@ -44653,9 +44013,7 @@
           "saintName": "Columban",
           "fullName": "Vu, My",
           "dob": "2016-05-09T00:00:00.000Z",
-          "allergies": [
-            "cheese"
-          ],
+          "allergies": ["cheese"],
           "status": "pending"
         }
       ],
@@ -44706,9 +44064,7 @@
           "saintName": "Columban",
           "fullName": "Vu, Khang",
           "dob": "2015-05-27T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "status": "pending"
         },
         {
@@ -44877,9 +44233,7 @@
           "saintName": "Paul",
           "fullName": "Vu, Phong",
           "dob": "2017-01-25T00:00:00.000Z",
-          "allergies": [
-            "peanuts"
-          ],
+          "allergies": ["peanuts"],
           "status": "pending"
         },
         {
@@ -44997,9 +44351,7 @@
           "saintName": "Phanxico",
           "fullName": "Pham, Thomas",
           "dob": "2018-02-13T00:00:00.000Z",
-          "allergies": [
-            "cheese"
-          ],
+          "allergies": ["cheese"],
           "status": "pending"
         }
       ],
@@ -45203,9 +44555,7 @@
           "saintName": "Phanxico",
           "fullName": "Do, Nam",
           "dob": "2010-02-15T00:00:00.000Z",
-          "allergies": [
-            "peanuts"
-          ],
+          "allergies": ["peanuts"],
           "status": "pending"
         }
       ],
@@ -45519,9 +44869,7 @@
           "saintName": "Paul",
           "fullName": "Vu, Tuan",
           "dob": "2016-07-25T00:00:00.000Z",
-          "allergies": [
-            "grass"
-          ],
+          "allergies": ["grass"],
           "status": "pending"
         }
       ],
@@ -45623,9 +44971,7 @@
           "saintName": "Barbara",
           "fullName": "Pham, Thao",
           "dob": "2014-06-24T00:00:00.000Z",
-          "allergies": [
-            "grass"
-          ],
+          "allergies": ["grass"],
           "status": "pending"
         }
       ],
@@ -45676,9 +45022,7 @@
           "saintName": "Columban",
           "fullName": "Pham, Anh",
           "dob": "2013-09-27T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "status": "pending"
         }
       ],
@@ -45729,10 +45073,7 @@
           "saintName": "Barbara",
           "fullName": "Huynh, Emily",
           "dob": "2017-06-23T00:00:00.000Z",
-          "allergies": [
-            "cheese",
-            "grass"
-          ],
+          "allergies": ["cheese", "grass"],
           "status": "pending"
         },
         {
@@ -45901,9 +45242,7 @@
           "saintName": "Columban",
           "fullName": "Vuong, Minh",
           "dob": "2012-01-09T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "status": "pending"
         }
       ],
@@ -45954,10 +45293,7 @@
           "saintName": "Paul",
           "fullName": "Vu, Minh",
           "dob": "2017-09-21T00:00:00.000Z",
-          "allergies": [
-            "shellfish",
-            "cheese"
-          ],
+          "allergies": ["shellfish", "cheese"],
           "status": "pending"
         },
         {
@@ -46118,10 +45454,7 @@
           "saintName": "Teresa",
           "fullName": "Hoang, Trang",
           "dob": "2011-08-07T00:00:00.000Z",
-          "allergies": [
-            "peanuts",
-            "grass"
-          ],
+          "allergies": ["peanuts", "grass"],
           "status": "pending"
         },
         {
@@ -46180,10 +45513,7 @@
           "saintName": "Cecilia",
           "fullName": "Pham, Trung",
           "dob": "2012-05-06T00:00:00.000Z",
-          "allergies": [
-            "milk",
-            "gluten"
-          ],
+          "allergies": ["milk", "gluten"],
           "status": "pending"
         }
       ],
@@ -46285,9 +45615,7 @@
           "saintName": "Giuse",
           "fullName": "Hoang, Vinh",
           "dob": "2010-02-27T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "status": "pending"
         }
       ],
@@ -46499,10 +45827,7 @@
           "saintName": "Phero",
           "fullName": "Vuong, Nam",
           "dob": "2017-11-26T00:00:00.000Z",
-          "allergies": [
-            "peanuts",
-            "milk"
-          ],
+          "allergies": ["peanuts", "milk"],
           "status": "pending"
         }
       ],
@@ -46604,9 +45929,7 @@
           "saintName": "Paul",
           "fullName": "Do, Nam",
           "dob": "2017-12-19T00:00:00.000Z",
-          "allergies": [
-            "grass"
-          ],
+          "allergies": ["grass"],
           "status": "pending"
         }
       ],
@@ -46665,9 +45988,7 @@
           "saintName": "Maria",
           "fullName": "Truong, Ben",
           "dob": "2014-01-21T00:00:00.000Z",
-          "allergies": [
-            "grass"
-          ],
+          "allergies": ["grass"],
           "status": "pending"
         }
       ],
@@ -46769,10 +46090,7 @@
           "saintName": "Teresa",
           "fullName": "Pham, Trang",
           "dob": "2015-03-15T00:00:00.000Z",
-          "allergies": [
-            "grass",
-            "eggs"
-          ],
+          "allergies": ["grass", "eggs"],
           "status": "pending"
         }
       ],
@@ -46984,9 +46302,7 @@
           "saintName": "Phero",
           "fullName": "Pham, Linh",
           "dob": "2014-04-12T00:00:00.000Z",
-          "allergies": [
-            "milk"
-          ],
+          "allergies": ["milk"],
           "status": "pending"
         }
       ],
@@ -47088,9 +46404,7 @@
           "saintName": "Teresa",
           "fullName": "Pham, Linh",
           "dob": "2013-05-14T00:00:00.000Z",
-          "allergies": [
-            "grass"
-          ],
+          "allergies": ["grass"],
           "status": "pending"
         }
       ],
@@ -47141,9 +46455,7 @@
           "saintName": "John",
           "fullName": "Phan, Mai",
           "dob": "2015-05-18T00:00:00.000Z",
-          "allergies": [
-            "peanuts"
-          ],
+          "allergies": ["peanuts"],
           "status": "pending"
         }
       ],
@@ -47296,9 +46608,7 @@
           "saintName": "Cecilia",
           "fullName": "Vo, Nam",
           "dob": "2013-05-23T00:00:00.000Z",
-          "allergies": [
-            "shellfish"
-          ],
+          "allergies": ["shellfish"],
           "status": "pending"
         }
       ],
@@ -47416,9 +46726,7 @@
           "saintName": "John",
           "fullName": "Vo, Thao",
           "dob": "2018-04-08T00:00:00.000Z",
-          "allergies": [
-            "grass"
-          ],
+          "allergies": ["grass"],
           "status": "pending"
         }
       ],
@@ -47571,9 +46879,7 @@
           "saintName": "Barbara",
           "fullName": "Dang, Minh",
           "dob": "2012-03-22T00:00:00.000Z",
-          "allergies": [
-            "cheese"
-          ],
+          "allergies": ["cheese"],
           "status": "pending"
         },
         {
@@ -47632,9 +46938,7 @@
           "saintName": "Paul",
           "fullName": "Nguyen, Anh",
           "dob": "2014-10-24T00:00:00.000Z",
-          "allergies": [
-            "grass"
-          ],
+          "allergies": ["grass"],
           "status": "pending"
         },
         {
@@ -47905,9 +47209,7 @@
           "saintName": "Barbara",
           "fullName": "Nguyen, Quynh",
           "dob": "2011-04-14T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "status": "pending"
         },
         {
@@ -47915,10 +47217,7 @@
           "saintName": "Columban",
           "fullName": "Nguyen, My",
           "dob": "2012-08-10T00:00:00.000Z",
-          "allergies": [
-            "cheese",
-            "eggs"
-          ],
+          "allergies": ["cheese", "eggs"],
           "status": "pending"
         }
       ],
@@ -48020,9 +47319,7 @@
           "saintName": "Emily",
           "fullName": "Tran, Vinh",
           "dob": "2018-02-04T00:00:00.000Z",
-          "allergies": [
-            "milk"
-          ],
+          "allergies": ["milk"],
           "status": "pending"
         },
         {
@@ -48030,10 +47327,7 @@
           "saintName": "Phanxico",
           "fullName": "Tran, Anh",
           "dob": "2018-10-26T00:00:00.000Z",
-          "allergies": [
-            "milk",
-            "shellfish"
-          ],
+          "allergies": ["milk", "shellfish"],
           "status": "pending"
         }
       ],
@@ -48398,10 +47692,7 @@
           "saintName": "Cecilia",
           "fullName": "Vu, Thao",
           "dob": "2018-04-17T00:00:00.000Z",
-          "allergies": [
-            "eggs",
-            "peanuts"
-          ],
+          "allergies": ["eggs", "peanuts"],
           "status": "pending"
         }
       ],
@@ -48452,9 +47743,7 @@
           "saintName": "Paul",
           "fullName": "Phan, Christina",
           "dob": "2015-07-12T00:00:00.000Z",
-          "allergies": [
-            "milk"
-          ],
+          "allergies": ["milk"],
           "status": "pending"
         }
       ],
@@ -48556,9 +47845,7 @@
           "saintName": "Phanxico",
           "fullName": "Truong, Thu",
           "dob": "2010-06-21T00:00:00.000Z",
-          "allergies": [
-            "cheese"
-          ],
+          "allergies": ["cheese"],
           "status": "pending"
         }
       ],
@@ -48609,10 +47896,7 @@
           "saintName": "Giuse",
           "fullName": "Nguyen, Trang",
           "dob": "2015-02-17T00:00:00.000Z",
-          "allergies": [
-            "milk",
-            "shellfish"
-          ],
+          "allergies": ["milk", "shellfish"],
           "status": "pending"
         }
       ],
@@ -48722,9 +48006,7 @@
           "saintName": "Madeline",
           "fullName": "Truong, Son",
           "dob": "2010-10-14T00:00:00.000Z",
-          "allergies": [
-            "grass"
-          ],
+          "allergies": ["grass"],
           "status": "pending"
         }
       ],
@@ -48826,9 +48108,7 @@
           "saintName": "Phero",
           "fullName": "Tran, Sophia",
           "dob": "2011-06-13T00:00:00.000Z",
-          "allergies": [
-            "eggs"
-          ],
+          "allergies": ["eggs"],
           "status": "pending"
         },
         {
@@ -48938,9 +48218,7 @@
           "saintName": "Maria",
           "fullName": "Truong, Minh",
           "dob": "2016-09-01T00:00:00.000Z",
-          "allergies": [
-            "gluten"
-          ],
+          "allergies": ["gluten"],
           "status": "pending"
         },
         {
@@ -49160,9 +48438,7 @@
           "saintName": "Phanxico",
           "fullName": "Bui, Bao",
           "dob": "2012-03-07T00:00:00.000Z",
-          "allergies": [
-            "eggs"
-          ],
+          "allergies": ["eggs"],
           "status": "pending"
         }
       ],
@@ -49213,9 +48489,7 @@
           "saintName": "Bernadet",
           "fullName": "Vu, Teresa",
           "dob": "2010-10-02T00:00:00.000Z",
-          "allergies": [
-            "peanuts"
-          ],
+          "allergies": ["peanuts"],
           "status": "pending"
         }
       ],
@@ -49470,10 +48744,7 @@
           "saintName": "Teresa",
           "fullName": "Truong, William",
           "dob": "2010-12-09T00:00:00.000Z",
-          "allergies": [
-            "gluten",
-            "eggs"
-          ],
+          "allergies": ["gluten", "eggs"],
           "status": "pending"
         }
       ],
@@ -49532,9 +48803,7 @@
           "saintName": "Barbara",
           "fullName": "Tran, John",
           "dob": "2015-05-11T00:00:00.000Z",
-          "allergies": [
-            "cheese"
-          ],
+          "allergies": ["cheese"],
           "status": "pending"
         }
       ],
@@ -49593,9 +48862,7 @@
           "saintName": "Giuse",
           "fullName": "Vu, Thomas",
           "dob": "2012-11-21T00:00:00.000Z",
-          "allergies": [
-            "grass"
-          ],
+          "allergies": ["grass"],
           "status": "pending"
         }
       ],
@@ -49917,9 +49184,7 @@
           "saintName": "Giuse",
           "fullName": "Pham, Trung",
           "dob": "2011-09-14T00:00:00.000Z",
-          "allergies": [
-            "cheese"
-          ],
+          "allergies": ["cheese"],
           "status": "pending"
         },
         {
@@ -50292,9 +49557,7 @@
           "saintName": "Cecilia",
           "fullName": "Vu, Thomas",
           "dob": "2018-10-11T00:00:00.000Z",
-          "allergies": [
-            "eggs"
-          ],
+          "allergies": ["eggs"],
           "status": "pending"
         },
         {
@@ -50361,10 +49624,7 @@
           "saintName": "Emily",
           "fullName": "Pham, Bao",
           "dob": "2016-04-18T00:00:00.000Z",
-          "allergies": [
-            "gluten",
-            "eggs"
-          ],
+          "allergies": ["gluten", "eggs"],
           "status": "pending"
         }
       ],
@@ -50465,9 +49725,7 @@
           "saintName": "Jacob",
           "fullName": "Green, Ben  William",
           "dob": "2014-09-10T00:00:00.000Z",
-          "allergies": [
-            "peanuts"
-          ],
+          "allergies": ["peanuts"],
           "status": "pending"
         }
       ],

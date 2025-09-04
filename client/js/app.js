@@ -53,11 +53,7 @@ const FALLBACK_SETUP = {
     { key: 'CHECK', value: 'check', label: 'Check' },
     { key: 'ZELLE', value: 'zelle', label: 'Zelle' },
   ],
-  receivedBy: [
-    { value: 'Alice', label: 'Alice' },
-    { value: 'Bob', label: 'Bob' },
-    { value: 'Timothy', label: 'Timothy' },
-  ],
+  volunteers: [{ program: '', value: 'Huy', label: 'Huy' }],
 };
 
 const STORAGE_KEYS = {
@@ -78,7 +74,7 @@ const app = createApp({
       eventTypes: [],
       levels: [],
       paymentMethods: [],
-      receivedBy: [],
+      volunteers: [],
     });
 
     async function loadSetup({ showStatusIfActive = false } = {}) {
@@ -284,7 +280,7 @@ const app = createApp({
     const EVENT_TYPES = computed(() => (Array.isArray(setup.eventTypes) ? setup.eventTypes : []));
     const LEVEL_OPTIONS = computed(() => (Array.isArray(setup.levels) ? setup.levels : []));
     const PAYMENT_METHOD_OPTIONS = computed(() => (Array.isArray(setup.paymentMethods) ? setup.paymentMethods : []));
-    const RECEIVED_BY_OPTIONS = computed(() => (Array.isArray(setup.receivedBy) ? setup.receivedBy : []));
+    const RECEIVED_BY_OPTIONS = computed(() => (Array.isArray(setup.volunteers) ? setup.volunteers : []));
 
     const YEAR_OPTIONS = computed(() => {
       const y = new Date().getFullYear();
@@ -337,6 +333,35 @@ const app = createApp({
         syncEnum(METHOD, PAYMENT_METHOD_OPTIONS.value || []);
       },
       { deep: true, immediate: true },
+    );
+
+    // Build program-aware options from RECEIVED_BY_OPTIONS
+    function volunteersFor(programId = '') {
+      const all = RECEIVED_BY_OPTIONS.value || [];
+      const pid = String(programId || '').trim();
+
+      // Merge GLOBAL (no programId) + program-specific; dedupe by value
+      const merged = new Map();
+      for (const r of all) {
+        if (!r) continue;
+        const rpid = String(r.program || '').trim(); // "" means global
+        if (rpid === '' || rpid === pid) {
+          const value = r.value;
+          const label = r.label ?? String(value);
+          merged.set(String(value), { value, label });
+        }
+      }
+      return [...merged.values()];
+    }
+
+    watch(
+      () => selectedEvent.value?.programId,
+      (pid) => {
+        const allowed = new Set(volunteersFor(pid).map((o) => o.value));
+        (registrationForm.payments || []).forEach((p) => {
+          if (p.receivedBy && !allowed.has(p.receivedBy)) p.receivedBy = '';
+        });
+      },
     );
 
     // --- Relative Display: source registry ------------------------------------
@@ -1988,7 +2013,12 @@ const app = createApp({
         { col: 'method', label: 'Method', type: 'select', selOpt: PAYMENT_METHOD_OPTIONS },
         { col: 'txnRef', label: 'Ref/Check #', type: 'text', show: ({ row }) => (row?.method || '') !== METHOD?.CASH },
         { col: 'receiptNo', label: 'Receipt #', type: 'text' },
-        { col: 'receivedBy', label: 'Received By', type: 'select', selOpt: RECEIVED_BY_OPTIONS },
+        {
+          col: 'receivedBy',
+          label: 'Received By',
+          type: 'select',
+          selOpt: () => volunteersFor(selectedEvent.value?.programId || registrationForm.event?.programId || ''),
+        },
       ],
     };
 
