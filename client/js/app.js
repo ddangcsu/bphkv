@@ -199,11 +199,11 @@ const app = createApp({
 
     const BURGER_MENU = [
       { id: SECTION_NAMES.FAMILIES, label: 'Families Data', icon: 'fa-solid fa-people-roof', onClick: switchSection },
-      { id: SECTION_NAMES.EVENTS, label: 'Events Setup', icon: 'fa-solid fa-calendar-days', onClick: switchSection },
+      { id: SECTION_NAMES.EVENTS, label: 'Events Setup', icon: 'fa-regular fa-calendar-days', onClick: switchSection },
       {
         id: SECTION_NAMES.REGISTRATIONS,
         label: 'Registrations',
-        icon: 'fa-solid fa-clipboard-list',
+        icon: 'fa-solid fa-address-card',
         onClick: switchSection,
       },
       {
@@ -216,7 +216,7 @@ const app = createApp({
         id: SECTION_NAMES.SETTINGS,
         label: 'Settings',
         icon: 'fa-solid fa-sliders',
-        onClick: () => switchSection(SECTION_NAMES.SETTINGS, MODE_NAMES.EDIT)
+        onClick: () => switchSection(SECTION_NAMES.SETTINGS, MODE_NAMES.EDIT),
       },
     ];
 
@@ -530,7 +530,7 @@ const app = createApp({
     };
 
     function deepClone(obj) {
-      return obj == null ? obj: JSON.parse(JSON.stringify(obj));
+      return obj == null ? obj : JSON.parse(JSON.stringify(obj));
     }
 
     // =========================================================
@@ -794,7 +794,7 @@ const app = createApp({
     }
 
     const registrationOriginalSnapshot = ref('');
-    const isRegistrationDirty = computed(()=> JSON.stringify(registrationForm) !== registrationOriginalSnapshot.value);
+    const isRegistrationDirty = computed(() => JSON.stringify(registrationForm) !== registrationOriginalSnapshot.value);
     function snapshotRegistrationForm() {
       registrationOriginalSnapshot.value = JSON.stringify(registrationForm);
     }
@@ -1095,7 +1095,7 @@ const app = createApp({
           selOpt: YEAR_OPTIONS,
           default: () => getCurrentSchoolYear(),
         },
-        { col: 'level', label: 'Apply Level', type: 'select', selOpt: LEVEL_OPTIONS, default: '' },
+        { col: 'level', label: 'Scope Level', type: 'select', selOpt: LEVEL_OPTIONS, default: '' },
         { col: 'openDate', label: 'Open Date', type: 'date', default: '' },
         { col: 'endDate', label: 'End Date', type: 'date', default: '' },
       ],
@@ -1992,24 +1992,6 @@ const app = createApp({
       ],
     };
 
-    function editEventFromReg(r) {
-      const ev = eventRows.value.find((e) => e.id === r.eventId);
-      if (ev) {
-        beginEditEvent(ev);
-      } else {
-        setStatus('Event not found for this registration.', 'warn', 1800);
-      }
-    }
-
-    function editFamilyFromReg(r) {
-      const fam = familyRows.value.find((f) => f.id === r.familyId);
-      if (fam) {
-        beginEditFamily(fam);
-      } else {
-        setStatus('Family not found for this registration.', 'warn', 1800);
-      }
-    }
-
     function quickCheckRegistration() {
       // Must have event + family
       if (!registrationForm.eventId) return false;
@@ -2261,6 +2243,104 @@ const app = createApp({
       }));
     });
 
+    // ======================= RECEIPT (view/print/email) =======================
+    const showReceiptModal = ref(false);
+    const receiptView = reactive({
+      id: '',
+      eventTitle: '',
+      eventTypeLabel: '',
+      programId: '',
+      year: '',
+      familyId: '',
+      parishMember: null,
+      parishNumber: '',
+      contacts: [], // [{ name, relationship, phone, email }]
+      children: [], // [{ fullName, saintName, dob }]
+      payments: [], // [{ code, codeLabel, unitAmount, qty, amount, method, receiptNo, receivedBy }]
+      total: 0,
+      acceptedBy: '',
+      updatedAt: '',
+    });
+
+    const money = (n) => `$${Number(n || 0).toFixed(2)}`;
+
+    function buildReceiptView(r) {
+      const fam = familyById(r.familyId);
+      const typeLabel = codeToLabel(r.event?.eventType, EVENT_TYPES.value, undefined, { fallback: r.event?.eventType || '' });
+      const parishNumber = fam.parishMember ? fam.parishNumber : 'Non-Parish';
+
+      const pays = (r.payments || []).map((p) => ({
+        code: p.code,
+        codeLabel: codeToLabel(p.code, FEE_CODES.value, undefined, { fallback: p.code }),
+        unitAmount: Number(p.unitAmount || p.amount || 0),
+        qty: Number(p.quantity || 1),
+        amount: Number(p.amount || 0),
+        method: p.method || '',
+        receiptNo: p.receiptNo || '',
+        receivedBy: p.receivedBy || '',
+      }));
+
+      Object.assign(receiptView, {
+        id: r.id,
+        eventTitle: r.event?.title || '',
+        eventTypeLabel: typeLabel,
+        programId: r.event?.programId,
+        year: r.event?.year,
+        familyId: r.familyId,
+        parishMember: r.parishMember ?? null,
+        parishNumber: parishNumber,
+        status: r.status,
+        contacts: getPrimaryContactsForFamily(fam),
+        children: (r.children || []).map((c) => ({
+          fullName: c.fullName || '',
+          saintName: c.saintName || '',
+          age: computeAgeByYear(c.dob),
+          grade: r.event?.programId === PROGRAM.TNTT ? ageGroupLabelTNTT(computeAgeByYear(c.dob)) : ' - ',
+        })),
+        payments: pays,
+        total: pays.reduce((sum, p) => sum + Number(p.amount || 0), 0),
+        acceptedBy: r.acceptedBy || '',
+        updatedAt: (r.updatedAt || r.createdAt || '').slice(0, 10),
+      });
+    }
+
+    function openReceipt(r) {
+      buildReceiptView(r);
+      showReceiptModal.value = true;
+    }
+
+    function openReceiptById(regId) {
+      const r = registrationRows.value.find((x) => x.id === regId);
+      if (!r) return setStatus('Registration not found.', 'warn', 1800);
+      openReceipt(r);
+    }
+
+    function closeReceipt() {
+      showReceiptModal.value = false;
+    }
+
+    function printReceipt(selector = '#receipt-sheet') {
+      const src = document.querySelector(selector);
+      const dest = document.getElementById('print-root');
+      if (!src || !dest) {
+        setStatus('Receipt not ready to print.', 'warn', 1500);
+        return;
+      }
+      // Clone the current rendered HTML into the print root
+      dest.innerHTML = src.outerHTML;
+
+      // Optional: strip any screen-only controls in the clone
+      dest.querySelectorAll('[data-no-print]').forEach((el) => el.remove());
+
+      // Fire print
+      window.print();
+
+      // Cleanup after a moment so the DOM stays light
+      setTimeout(() => {
+        dest.innerHTML = '';
+      }, 500);
+    }
+
     // ---- Roster "Contacts" modal ----
     const showContactsModal = ref(false);
     const contactsModal = reactive({
@@ -2414,8 +2494,6 @@ const app = createApp({
       hasActiveRegFilter,
       isRegistrationDirty,
       resetRegFilters,
-      editEventFromReg,
-      editFamilyFromReg,
       beginCreateRegistration,
       registerAdminForFamily,
       registerTNTTForFamily,
@@ -2430,6 +2508,15 @@ const app = createApp({
       availableChildOptions,
       addRegChildRow,
       removeRegChildRow,
+
+      // receipt
+      showReceiptModal,
+      receiptView,
+      openReceipt,
+      openReceiptById,
+      closeReceipt,
+      printReceipt,
+      money,
 
       // rosters
       rosterSearch,
