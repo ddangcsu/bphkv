@@ -409,6 +409,68 @@
                 </div>
               </div>
             </section>
+
+            <!-- Notes -->
+            <section id="panel-notes" role="tabpanel" class="subpanel">
+              <!-- Notes Header and Actions-->
+              <div class="item-header compact bordered">
+                <h4 class="title">Notes/Logs</h4>
+                <div class="spacer"></div>
+                <div class="actions">
+                  <button tabindex="-1" type="button" class="btn small accent" :disabled="isReadOnly"
+                    @click="addFamilyNote">
+                    <i class="fa-solid fa-plus"></i>
+                  </button>
+                </div>
+              </div>
+
+              <div class="row" v-for="(n,i) in familyForm.notes" :key="'note'+i">
+                <div class="row-actions">
+                  <button tabindex="-1" type="button" class="btn small danger" :disabled="isReadOnly"
+                    @click="removeFamilyNote(i)">
+                    <i class="fa-solid fa-minus"></i>
+                  </button>
+                </div>
+
+                <div class="grid">
+                  <label v-for="f in familyFields.notes" :key="f.col" :for="`note-${i}-${f.col}`"
+                    :class="fieldClass(f, { form: n, index: i })" v-show="isVisible(f, {form: n})">
+                    {{ f.label }}
+                    <small class="error" v-if="familyErrors?.notes?.[i]?.[f.col]">{{
+                      familyErrors.notes[i][f.col] }}</small>
+
+                    <template v-if="f.type === 'select'">
+                      <select class="input" :id="`note-${i}-${f.col}`" :name="`family.note[${i}].${f.col}`"
+                        :disabled="getFieldDisabled(f, {mode: currentMode, form: familyForm})" v-model="n[f.col]"
+                        @input="onFormFieldInput(f, {form: n }, $event)"
+                        @change="onFormFieldChange(f, {form: n }, $event)">
+                        <option disabled value="">-- choose --</option>
+                        <option v-for="opt in getOptions(f, {form: familyForm})" :key="String(opt.value)"
+                          :value="opt.value">
+                          {{ formatOptionLabel(opt) }}
+                        </option>
+                      </select>
+                    </template>
+
+                    <template v-else-if="f.type === 'checkbox'">
+                      <input class="check-lg" type="checkbox" :id="`note-${i}-${f.col}`"
+                        :name="`family.notes[${i}].${f.col}`"
+                        :disabled="getFieldDisabled(f, {mode: currentMode, form: familyForm})" v-model="n[f.col]"
+                        @input="onFormFieldInput(f, {form: n }, $event)"
+                        @change="onFormFieldChange(f, {form: n }, $event)" />
+                    </template>
+
+                    <template v-else>
+                      <input class="input" :type="f.type || 'text'" :id="`note-${i}-${f.col}`"
+                        :name="`family.note[${i}].${f.col}`"
+                        :disabled="getFieldDisabled(f, {mode: currentMode, form: familyForm})" v-model.trim="n[f.col]"
+                        :placeholder="f.placeholder" @input="onFormFieldInput(f, {form: n }, $event)"
+                        @change="onFormFieldChange(f, {form: n }, $event)" />
+                    </template>
+                  </label>
+                </div>
+              </div>
+            </section>
           </form>
         </section>
       </main>

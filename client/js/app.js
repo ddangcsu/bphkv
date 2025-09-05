@@ -280,7 +280,7 @@ const app = createApp({
     const EVENT_TYPES = computed(() => (Array.isArray(setup.eventTypes) ? setup.eventTypes : []));
     const LEVEL_OPTIONS = computed(() => (Array.isArray(setup.levels) ? setup.levels : []));
     const PAYMENT_METHOD_OPTIONS = computed(() => (Array.isArray(setup.paymentMethods) ? setup.paymentMethods : []));
-    const RECEIVED_BY_OPTIONS = computed(() => (Array.isArray(setup.volunteers) ? setup.volunteers : []));
+    const VOLUNTEERS_OPTIONS = computed(() => (Array.isArray(setup.volunteers) ? setup.volunteers : []));
 
     const YEAR_OPTIONS = computed(() => {
       const y = new Date().getFullYear();
@@ -335,9 +335,9 @@ const app = createApp({
       { deep: true, immediate: true },
     );
 
-    // Build program-aware options from RECEIVED_BY_OPTIONS
+    // Build program-aware options from VOLUNTEERS_OPTIONS
     function volunteersFor(programId = '') {
-      const all = RECEIVED_BY_OPTIONS.value || [];
+      const all = VOLUNTEERS_OPTIONS.value || [];
       const pid = String(programId || '').trim();
 
       // Merge GLOBAL (no programId) + program-specific; dedupe by value
@@ -353,16 +353,6 @@ const app = createApp({
       }
       return [...merged.values()];
     }
-
-    watch(
-      () => selectedEvent.value?.programId,
-      (pid) => {
-        const allowed = new Set(volunteersFor(pid).map((o) => o.value));
-        (registrationForm.payments || []).forEach((p) => {
-          if (p.receivedBy && !allowed.has(p.receivedBy)) p.receivedBy = '';
-        });
-      },
-    );
 
     // --- Relative Display: source registry ------------------------------------
     const RD_SOURCES = {
@@ -531,6 +521,12 @@ const app = createApp({
       return !!evalMaybe(field.show, ctx);
     }
 
+    function fieldClass(fieldMeta, ctx = {}) {
+      // supports string | array | object | function(ctx)=>any of those
+      const v = typeof fieldMeta?.classes === 'function' ? fieldMeta.classes(ctx) : fieldMeta?.classes ?? fieldMeta?.class;
+      return v || null;
+    }
+
     function getFieldDisabled(field, ctx = {}) {
       // Global readonly flag
       if (isReadOnly.value) return true;
@@ -665,7 +661,7 @@ const app = createApp({
           default: '',
         },
         { col: 'email', label: 'Email Address', type: 'text', default: '' },
-        { col: 'isEmergency', label: 'Emergency Contact', type: 'checkbox', default: false },
+        { col: 'isEmergency', label: 'Primary Contact', type: 'checkbox', default: false },
       ],
       children: [
         { col: 'childId', label: 'Child ID', type: 'text', show: false, default: makeId('S') },
@@ -684,6 +680,11 @@ const app = createApp({
         },
         { col: 'exception_notes', label: 'Exception Notes', type: 'text', default: '', show: ({ form }) => needsNameException(form) },
       ],
+      notes: [
+        { col: 'timeStamp', label: 'Time Stamp', type: 'text', default: () => new Date().toLocaleString(), disabled: true, show: true },
+        { col: 'note', label: 'Family Note', type: 'text', default: '', show: true, classes: 'col-span-2' },
+        { col: 'updatedBy', label: 'Updated By', type: 'select', default: '', selOpt: VOLUNTEERS_OPTIONS },
+      ],
     };
 
     function newFamilyContact() {
@@ -692,23 +693,28 @@ const app = createApp({
     function newFamilyChild() {
       return buildFromFields(familyFields.children);
     }
+    function newFamilyNote() {
+      return buildFromFields(familyFields.notes);
+    }
+
     function newFamilyForm() {
       const main = buildFromFields(familyFields.household.main);
       const address = buildFromFields(familyFields.household.address);
-      return { ...main, address: { ...address }, contacts: [newFamilyContact()], children: [newFamilyChild()] };
+      return { ...main, address: { ...address }, contacts: [newFamilyContact()], children: [newFamilyChild()], notes: [] };
     }
     const familyForm = reactive(newFamilyForm());
-    const familyErrors = reactive({ household: {}, contacts: [{}], children: [{}] });
+    const familyErrors = reactive({ household: {}, contacts: [{}], children: [{}], notes: [{}] });
 
     function hydrateFamilyErrors() {
       familyErrors.household = {};
       familyErrors.contacts = familyForm.contacts.map(() => ({}));
       familyErrors.children = familyForm.children.map(() => ({}));
+      familyErrors.notes = familyForm.notes.map(() => ({}));
     }
 
     function validateFamily() {
       const s = familyForm;
-      let e = { household: {}, contacts: [], children: [] };
+      let e = { household: {}, contacts: [], children: [], notes: [] };
 
       if (!s.id?.trim()) e.household.id = 'required';
       if (!s.parishNumber?.trim() && s.parishMember) e.household.parishNumber = 'required';
@@ -739,16 +745,29 @@ const app = createApp({
         }
         return ce;
       });
+
+      e.notes =
+        s.notes?.length > 0
+          ? s.notes.map((n) => {
+              const ce = {};
+              if (!n.note?.trim()) ce.note = 'required';
+              if (!n.updatedBy?.trim()) ce.updatedBy = 'required';
+              return ce;
+            })
+          : [];
+
       familyErrors.household = e.household;
       familyErrors.contacts = e.contacts;
       familyErrors.children = e.children;
+      familyErrors.notes = e.notes;
 
       // final result (pure booleans)
       const noHouseHoldErrors = Object.keys(e.household).length === 0;
       const noContactsErrors = (e.contacts || []).every((obj) => !obj || Object.keys(obj).length === 0);
       const noChildrenErrors = (e.children || []).every((obj) => !obj || Object.keys(obj).length === 0);
+      const noNotesErrors = (e.notes || []).every((obj) => !obj || Object.keys(obj).length === 0);
 
-      return noHouseHoldErrors && noContactsErrors && noChildrenErrors;
+      return noHouseHoldErrors && noContactsErrors && noChildrenErrors && noNotesErrors;
     }
 
     // paging
@@ -870,6 +889,12 @@ const app = createApp({
         is_name_exception: !!ch.isNameException,
         exception_notes: ch.exceptionNotes || '',
       }));
+      familyForm.notes = (f.notes || []).map((n) => ({
+        timeStamp: n.timeStamp || new Date().toLocaleString(),
+        note: n.note || '',
+        updatedBy: n.updatedBy || '',
+      }));
+
       hydrateFamilyErrors();
       snapshotFamilyForm();
       switchSection(SECTION_NAMES.FAMILIES, MODE_NAMES.EDIT);
@@ -968,6 +993,20 @@ const app = createApp({
       familyForm.children.splice(i, 1);
       familyErrors.children.splice(i, 1);
     }
+
+    async function addFamilyNote() {
+      if (isReadOnly.value) return;
+      familyForm.notes.push(newFamilyNote());
+      familyErrors.notes.push({});
+      await nextTick();
+    }
+
+    function removeFamilyNote(i) {
+      if (isReadOnly.value) return;
+      familyForm.notes.splice(i, 1);
+      familyErrors.notes.splice(i, 1);
+    }
+
     function resetFamilyForm() {
       Object.assign(familyForm, newFamilyForm());
       hydrateFamilyErrors();
@@ -1009,6 +1048,14 @@ const app = createApp({
           isNameException: !!ch.is_name_exception,
           exceptionNotes: ch.exception_notes || null,
         })),
+        notes:
+          familyForm.notes?.length > 0
+            ? familyForm.notes.map((n) => ({
+                timeStamp: n.timeStamp || new Date().toLocaleString(),
+                note: n.note,
+                updatedBy: n.updatedBy,
+              }))
+            : [],
       };
     }
 
@@ -1930,6 +1977,16 @@ const app = createApp({
       },
     );
 
+    watch(
+      () => selectedEvent?.value?.programId,
+      (pid) => {
+        const allowed = new Set(volunteersFor(pid).map((o) => o.value));
+        (registrationForm.payments || []).forEach((p) => {
+          if (p.receivedBy && !allowed.has(p.receivedBy)) p.receivedBy = '';
+        });
+      },
+    );
+
     // REG_META
     const registrationFields = {
       main: [
@@ -2306,6 +2363,7 @@ const app = createApp({
         qty: Number(p.quantity || 1),
         amount: Number(p.amount || 0),
         method: p.method || '',
+        txnRef: p.txnRef || '',
         receiptNo: p.receiptNo || '',
         receivedBy: p.receivedBy || '',
       }));
@@ -2455,6 +2513,7 @@ const app = createApp({
       codeToLabel,
       relativeDisplayValue,
       isVisible,
+      fieldClass,
       getFieldDisabled,
       onFormFieldInput,
       onFormFieldChange,
@@ -2479,6 +2538,7 @@ const app = createApp({
       familyChildrenMode,
       familyChildrenIndex,
       visibleFamilyChildren,
+      isFamilyDirty,
       nextFamilyChild,
       prevFamilyChild,
       beginCreateFamily,
@@ -2489,6 +2549,8 @@ const app = createApp({
       removeFamilyContact,
       addFamilyChild,
       removeFamilyChild,
+      addFamilyNote,
+      removeFamilyNote,
       contactDisplay,
       buildFamilyPayload,
 
