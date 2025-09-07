@@ -1,5 +1,5 @@
 /* eslint-env browser, es2021 */
-/* global Vue, axios */
+/* global Vue, API, Util */
 /* eslint no-unused-vars: ["warn", {
   "vars": "all",
   "args": "after-used",
@@ -11,51 +11,6 @@
 // Vue 3 Composition API
 const { createApp, ref, reactive, computed, onMounted, watch, nextTick } = Vue;
 
-// ---------- API ----------
-const api = axios.create({
-  baseURL: 'http://localhost:3000',
-  headers: { Accept: 'application/json' },
-  timeout: 5000,
-});
-
-// Only used if /settings/app is missing on first run.
-const FALLBACK_SETUP = {
-  programs: [
-    { key: 'BPH', value: 'BPH', label: 'Ban Phu Huynh' },
-    { key: 'TNTT', value: 'TNTT', label: 'Thieu Nhi Thanh The' },
-  ],
-  relationships: [
-    { value: 'Mother', label: 'Mother' },
-    { value: 'Father', label: 'Father' },
-    { value: 'Guardian', label: 'Guardian' },
-    { value: 'Grandparent', label: 'Grandparent' },
-    { value: 'Aunt', label: 'Aunt' },
-    { value: 'Uncle', label: 'Uncle' },
-    { value: 'Sibling', label: 'Sibling' },
-  ],
-  feeCodes: [
-    { key: 'REG_FEE', value: 'REGF', label: 'Registration Fee' },
-    { key: 'EVT_FEE', value: 'EVTF', label: 'Event Fee' },
-    { key: 'SEC_FEE', value: 'SECF', label: 'Security Fee' },
-    { key: 'NPM_FEE', value: 'NPMF', label: 'NonParish Fee' },
-  ],
-  eventTypes: [
-    { key: 'ADMIN', value: 'ADM', label: 'Security' },
-    { key: 'REGISTRATION', value: 'REG', label: 'Registration' },
-    { key: 'EVENT', value: 'EVT', label: 'Event' },
-  ],
-  levels: [
-    { key: 'PER_FAMILY', value: 'PF', label: 'Per Family' },
-    { key: 'PER_CHILD', value: 'PC', label: 'Per Child' },
-  ],
-  paymentMethods: [
-    { key: 'CASH', value: 'cash', label: 'Cash' },
-    { key: 'CHECK', value: 'check', label: 'Check' },
-    { key: 'ZELLE', value: 'zelle', label: 'Zelle' },
-  ],
-  volunteers: [{ program: '', value: 'Huy', label: 'Huy' }],
-};
-
 const STORAGE_KEYS = {
   section: 'ui.currentSection',
   mode: 'ui.currentMode',
@@ -64,8 +19,14 @@ const STORAGE_KEYS = {
 
 const app = createApp({
   setup() {
+    /**
+     * De-reference utilities helper
+     */
+    const { normPhone, formatUSPhone, makeId, formatMoney } = Util.Format;
+    const { getByPath, setDefault, evalMaybe, deepClone, getCurrentSchoolYear } = Util.Helpers;
+
     //
-    // Settings OPTIONS
+    // Core setup settings (mostly lookup options)
     //
     const setup = reactive({
       programs: [],
@@ -77,49 +38,52 @@ const app = createApp({
       volunteers: [],
     });
 
+    Schema.Options.setLiveSetupRef(setup);
+
+    /**
+     * Define OPTIONS
+     */
+    const YES_NO_OPTIONS = computed(() => Schema.Options.YES_NO_OPTIONS);
+    const REG_STATUS_OPTIONS = computed(() => Schema.Options.REG_STATUS_OPTIONS);
+    const PROGRAM_OPTIONS = computed(() => Schema.Options.PROGRAM_OPTIONS);
+    const RELATIONSHIP_OPTIONS = computed(() => Schema.Options.RELATIONSHIP_OPTIONS);
+    const FEE_CODES = computed(() => Schema.Options.FEE_CODES);
+    const EVENT_TYPES = computed(() => Schema.Options.EVENT_TYPES);
+    const LEVEL_OPTIONS = computed(() => Schema.Options.LEVEL_OPTIONS);
+    const PAYMENT_METHOD_OPTIONS = computed(() => Schema.Options.PAYMENT_METHOD_OPTIONS);
+    const VOLUNTEERS_OPTIONS = computed(() => Schema.Options.VOLUNTEERS_OPTIONS);
+    const YEAR_OPTIONS = computed(() => Schema.Options.YEAR_OPTIONS);
+
+    /**
+     * Define ENUMS
+     */
+    const PROGRAM = Schema.Options.ENUMS.PROGRAM;
+    const EVENT = Schema.Options.ENUMS.EVENT;
+    const LEVEL = Schema.Options.ENUMS.LEVEL;
+    const METHOD = Schema.Options.ENUMS.METHOD;
+
     async function loadSetup({ showStatusIfActive = false } = {}) {
       try {
-        // GET /settings/app
-        const { data } = await api.get(`settings/${encodeURIComponent('app')}`, {
-          params: { _: Date.now() },
-        });
-        // write into reactive setup (don’t keep id inside it)
-        const { id: _ignore, ...rest } = data || {};
-        Object.assign(setup, FALLBACK_SETUP, rest);
+        const data = await API.Setup.getOrSeed();
+        Object.assign(setup, data);
         if (showStatusIfActive) setStatus('Setup loaded.', 'info', 1200);
       } catch (e) {
-        if (e?.response?.status === 404) {
-          // Seed DB on first run, then adopt it
-          const seed = { id: 'app', ...FALLBACK_SETUP };
-          await api.post('/settings', seed);
-          Object.assign(setup, FALLBACK_SETUP);
-          if (showStatusIfActive) setStatus('Setup initialized with defaults.', 'info', 1500);
-        } else {
-          console.error('loadSetup failed:', e);
-          // As a last resort, use fallback in-memory so app still works
-          Object.assign(setup, FALLBACK_SETUP);
-          setStatus('Using default setup (load failed).', 'warn', 1500);
-        }
+        console.error('Failed to load setup:', e);
+        // As a last resort, use fallback in-memory so app still works
+        Object.assign(setup, Schema.Setup.FALLBACK_SETUP);
+        setStatus('Using default setup (load failed).', 'warn', 1500);
       }
     }
 
     async function saveSetup() {
-      // PUT full document to /settings/app (json-server-friendly)
-      const payload = { id: 'app', ...JSON.parse(JSON.stringify(setup)) };
+      const payload = { ...JSON.parse(JSON.stringify(setup)) };
       try {
-        await api.put(`settings/${encodeURIComponent('app')}`, payload);
+        await API.Setup.update(payload);
         setStatus('Settings saved.', 'success', 1200);
-        // not strictly needed, but safe if server normalizes data
         await loadSetup({ showStatusIfActive: false });
       } catch (e) {
-        if (e?.response?.status === 404) {
-          await api.post('/settings', payload);
-          setStatus('Settings saved (created).', 'success', 1200);
-          await loadSetup({ showStatusIfActive: false });
-        } else {
-          console.error('saveSetup failed:', e);
-          setStatus('Save failed.', 'error', 2000);
-        }
+        console.error('saveSetup failed:', e);
+        setStatus('Save failed.', 'error', 2000);
       }
     }
 
@@ -266,12 +230,8 @@ const app = createApp({
     // =========================================================
     // OPTIONS ({ value, label }) — codes/labels centralized
     // =========================================================
-
-    // Instead of fixed arrays, use settings (DB-backed)
-    const YES_NO_OPTIONS = [
-      { key: 'YES', value: true, label: 'Yes' },
-      { key: 'NO', value: false, label: 'No' },
-    ];
+    /*
+    const { YES_NO_OPTIONS, REG_STATUS_OPTIONS, ENUMS } = Schema.Options;
 
     // ===== Option lists as COMPUTED (no manual rehydrate needed) =====
     const PROGRAM_OPTIONS = computed(() => (Array.isArray(setup.programs) ? setup.programs : []));
@@ -281,35 +241,11 @@ const app = createApp({
     const LEVEL_OPTIONS = computed(() => (Array.isArray(setup.levels) ? setup.levels : []));
     const PAYMENT_METHOD_OPTIONS = computed(() => (Array.isArray(setup.paymentMethods) ? setup.paymentMethods : []));
     const VOLUNTEERS_OPTIONS = computed(() => (Array.isArray(setup.volunteers) ? setup.volunteers : []));
-
     const YEAR_OPTIONS = computed(() => {
-      const y = new Date().getFullYear();
-      const years = [];
-      for (let i = -4; i <= 2; i++) {
-        years.push({
-          value: y + i,
-          label: `${String(y + i)}-${String(y + i + 1).slice(2)}`,
-        });
-      }
-      return years;
+      return Schema.Options.getYearOptions({ before: 2, after: 2 });
     });
+  */
 
-    // Keep using these exactly as before (not refs)
-    // The first 3 object.value of RELATIONSHIP_OPTIONS
-    /*
-    const PARENT_RELATIONSHIPS = computed(() => {
-      const rows = setup.relationships || [];
-      const parents = rows.filter((r) => r?.isParent).map((r) => String(r.value || '').trim());
-      const chosen = parents.length ? parents : rows.slice(0, 3).map((r) => String(r.value || '').trim());
-      return new Set(chosen);
-    });
-    */
-
-    // Plain objects / Set so the rest of your code stays unchanged
-    const PROGRAM = {}; // e.g. { BPH:'BPH', TNTT:'TNTT' }
-    const EVENT = {}; // e.g. { ADMIN:'ADM', REGISTRATION:'REG', EVENT:'EVT' }
-    const LEVEL = {}; // e.g. { PER_FAMILY:'PF', PER_CHILD:'PC' }
-    const METHOD = {};
     const PARENT_RELATIONSHIPS = new Set(); // first 3 relationships
 
     function syncEnum(target, options = []) {
@@ -362,45 +298,6 @@ const app = createApp({
     // =========================================================
     // COMMON HELPERS (refactored & only what's used)
     // =========================================================
-
-    function randInt(bound) {
-      if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
-        const buf = new Uint8Array(1);
-        const max = Math.floor(256 / bound) * bound; // largest multiple of bound <= 256
-        let x;
-        do {
-          crypto.getRandomValues(buf);
-          x = buf[0];
-        } while (x >= max);
-        return x % bound;
-      }
-      // Fallback
-      return Math.floor(Math.random() * bound);
-    }
-    function randomNumericString(len = 12, forbidLeadingZero = true) {
-      if (len <= 0) return '';
-      let out = '';
-      out += String(forbidLeadingZero ? 1 + randInt(9) : randInt(10));
-      for (let i = 1; i < len; i++) out += String(randInt(10));
-      return out;
-    }
-    function groupDigits(s, groupSize = 4) {
-      if (!groupSize || groupSize <= 0) return s;
-      return s.match(new RegExp(`\\d{1,${groupSize}}`, 'g')).join('-');
-    }
-    function makeId(prefix, length = 12, groupSize = 4, forbidLeadingZero = true) {
-      const digits = randomNumericString(length, forbidLeadingZero);
-      const formatted = groupDigits(digits, groupSize);
-      return `${prefix}:${formatted}`;
-    }
-
-    // Safe shallow path getter
-    function getByPath(obj, path) {
-      if (!obj || !path) return undefined;
-      return String(path)
-        .split('.')
-        .reduce((acc, k) => (acc == null ? acc : acc[k]), obj);
-    }
 
     function relativeDisplayValue(row, fld, rd) {
       if (!row || !fld || !rd) return '';
@@ -474,31 +371,6 @@ const app = createApp({
       return `${opt.value} - ${opt.label}`;
     }
 
-    const normPhone = (s = '') => (s || '').replace(/\D+/g, '');
-
-    function formatUSPhone(raw = '') {
-      const d = normPhone(raw).slice(0, 10);
-      if (!d) return '';
-      if (d.length < 4) return `(${d}`;
-      if (d.length < 7) return `(${d.slice(0, 3)}) ${d.slice(3)}`;
-      return `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}`;
-    }
-
-    function evalMaybe(val, ctx) {
-      return typeof val === 'function' ? val(ctx) : val;
-    }
-
-    function setDefault(target, column, value) {
-      const keys = String(column).split('.');
-      let obj = target;
-      for (let i = 0; i < keys.length - 1; i++) {
-        const k = keys[i];
-        if (obj[k] == null || typeof obj[k] !== 'object') obj[k] = {};
-        obj = obj[k];
-      }
-      obj[keys[keys.length - 1]] = value;
-    }
-
     function getDefaultValue(field, ctx) {
       if ('default' in field) return evalMaybe(field.default, ctx);
       return field.type === 'checkbox' ? false : '';
@@ -550,10 +422,6 @@ const app = createApp({
       return d ? `•${d.slice(-4)}` : '';
     };
 
-    function deepClone(obj) {
-      return obj == null ? obj : JSON.parse(JSON.stringify(obj));
-    }
-
     // =========================================================
     // FAMILIES
     // =========================================================
@@ -567,16 +435,16 @@ const app = createApp({
 
     async function loadFamilies({ showStatusIfActive = false } = {}) {
       try {
-        const { data } = await api.get('/families', { params: { _: Date.now() } });
-        const list = Array.isArray(data) ? data : Array.isArray(data.families) ? data.families : [];
+        const list = await API.Families.list();
         familyRows.value = list.map(normalizeFamilyRow);
+
         if (showStatusIfActive && SECTION.FAMILIES) setStatus('Families loaded.', 'info', 1200);
       } catch {
         familyRows.value = [];
       }
     }
 
-    const contactDisplay = (f) => {
+    const contactDisplay = (f, one = false) => {
       const contacts = Array.isArray(f.contacts) ? f.contacts : [];
       if (!contacts.length) return '—';
 
@@ -591,8 +459,7 @@ const app = createApp({
           return `${c.name} ${maskLast4(c.phone)}`;
         }
       });
-
-      return result.join(' / ');
+      return one ? result[0] : result.join(' / ');
     };
 
     function onContactPhoneInput(fieldMeta, ctx, event) {
@@ -619,73 +486,7 @@ const app = createApp({
     };
 
     // FAMILIES_META
-    const familyFields = {
-      household: {
-        main: [
-          {
-            col: 'id',
-            label: 'Family ID',
-            type: 'text',
-            placeholder: '',
-            default: makeId('F'),
-            disabled: true,
-            show: true,
-          },
-          { col: 'parishMember', label: 'Parish Member', type: 'select', selOpt: YES_NO_OPTIONS, default: true },
-          {
-            col: 'parishNumber',
-            label: 'Parish Number',
-            type: 'text',
-            default: '',
-            show: ({ form }) => form.parishMember === true,
-          },
-        ],
-        address: [
-          { col: 'street', label: 'Number and Street', type: 'text', default: '' },
-          { col: 'city', label: 'City', type: 'text', default: '' },
-          { col: 'state', label: 'State', type: 'text', default: 'CA' },
-          { col: 'zip', label: 'Zip Code', type: 'text', default: '' },
-        ],
-      },
-      contacts: [
-        { col: 'lastName', label: 'Last Name', type: 'text', default: '' },
-        { col: 'firstName', label: 'First Name', type: 'text', default: '' },
-        { col: 'middle', label: 'Middle', type: 'text', default: '' },
-        { col: 'relationship', label: 'Relationship', type: 'select', selOpt: RELATIONSHIP_OPTIONS, default: '' },
-        {
-          col: 'phone',
-          label: 'Contact Phone',
-          type: 'tel',
-          onInput: onContactPhoneInput,
-          placeholder: '(714) 123-4567',
-          default: '',
-        },
-        { col: 'email', label: 'Email Address', type: 'text', default: '' },
-        { col: 'isEmergency', label: 'Primary Contact', type: 'checkbox', default: false },
-      ],
-      children: [
-        { col: 'childId', label: 'Child ID', type: 'text', show: false, default: makeId('S') },
-        { col: 'lastName', label: 'Last Name', type: 'text', default: '' },
-        { col: 'firstName', label: 'First Name', type: 'text', default: '' },
-        { col: 'middle', label: 'Middle', type: 'text', default: '' },
-        { col: 'saintName', label: 'Saint Name', type: 'text', default: '' },
-        { col: 'dob', label: 'Date of Birth', type: 'date', default: '' },
-        { col: 'allergiesStr', label: 'Allergies (comma separated)', type: 'text', default: '' },
-        {
-          col: 'is_name_exception',
-          label: 'Name Exception',
-          type: 'checkbox',
-          default: false,
-          show: ({ form }) => needsNameException(form),
-        },
-        { col: 'exception_notes', label: 'Exception Notes', type: 'text', default: '', show: ({ form }) => needsNameException(form) },
-      ],
-      notes: [
-        { col: 'timeStamp', label: 'Time Stamp', type: 'text', default: () => new Date().toLocaleString(), disabled: true, show: true },
-        { col: 'note', label: 'Family Note', type: 'text', default: '', show: true, classes: 'col-span-2' },
-        { col: 'updatedBy', label: 'Updated By', type: 'select', default: '', selOpt: VOLUNTEERS_OPTIONS },
-      ],
-    };
+    const familyFields = Schema.Forms.Families({ onContactPhoneInput, needsNameException });
 
     function newFamilyContact() {
       return buildFromFields(familyFields.contacts);
@@ -827,7 +628,7 @@ const app = createApp({
           }
         }
       },
-      { deep: true },
+      { deep: true, immediate: true },
     );
 
     // dirty tracking
@@ -1085,7 +886,7 @@ const app = createApp({
       const payload = buildFamilyPayload();
       if (MODE.CREATE) {
         try {
-          await api.post('/families', payload);
+          await API.Families.create(payload);
           await loadFamilies();
           setStatus('Family created.', 'success', 1500);
           await nextTick();
@@ -1096,11 +897,11 @@ const app = createApp({
         }
         return;
       }
-      const encodeId = encodeURIComponent(editingFamilyId.value);
+
       const patch = { ...payload };
       delete patch.id;
       try {
-        await api.patch(`/families/${encodeId}`, patch);
+        await API.Families.update(editingFamilyId.value, patch);
         await loadFamilies();
         setStatus('Family updated.', 'success', 1500);
         await nextTick();
@@ -1117,9 +918,14 @@ const app = createApp({
     const eventRows = ref([]);
 
     async function loadEvents({ showStatusIfActive = false } = {}) {
-      const { data } = await api.get('/events', { params: { _: Date.now() } });
-      eventRows.value = Array.isArray(data) ? data : data?.events || [];
-      if (showStatusIfActive && SECTION.EVENTS) setStatus('Events loaded.', 'info', 1200);
+      try {
+        const list = await API.Events.list();
+        eventRows.value = list;
+        if (showStatusIfActive && SECTION.EVENTS) setStatus('Events loaded.', 'info', 1200);
+      } catch (e) {
+        console.error('loadEvents failed:', e);
+        eventRows.value = [];
+      }
     }
 
     const eventSearch = ref('');
@@ -1141,60 +947,7 @@ const app = createApp({
     }
 
     // EVENTS_META
-    const eventFields = {
-      main: [
-        {
-          col: 'id',
-          label: 'Event ID',
-          type: 'text',
-          placeholder: 'Self Generated',
-          default: () => makeId('E'),
-          disabled: true,
-        },
-        {
-          col: 'programId',
-          label: 'Program Code',
-          type: 'select',
-          selOpt: PROGRAM_OPTIONS,
-          default: '',
-        },
-        { col: 'eventType', label: 'Event Type', type: 'select', selOpt: EVENT_TYPES, default: '' },
-        { col: 'title', label: 'Description', type: 'text', default: '', placeholder: 'TNTT Roster 2025-26' },
-        {
-          col: 'year',
-          label: 'School Year',
-          type: 'select',
-          selOpt: YEAR_OPTIONS,
-          default: () => getCurrentSchoolYear(),
-        },
-        { col: 'level', label: 'Scope Level', type: 'select', selOpt: LEVEL_OPTIONS, default: '' },
-        { col: 'openDate', label: 'Open Date', type: 'date', default: '' },
-        { col: 'endDate', label: 'End Date', type: 'date', default: '' },
-      ],
-      feeRow: [
-        { col: 'code', label: 'Fee Type', type: 'select', selOpt: FEE_CODES, default: '' },
-        { col: 'amount', label: 'Fee Amount', type: 'number', default: 0, attrs: { min: 0, step: 1 } },
-      ],
-      prerequisiteRow: [
-        {
-          col: 'eventId',
-          label: 'Prerequisite Event',
-          type: 'select',
-          selOpt: (fieldMeta, ctx) => {
-            const index = Number.isInteger(ctx?.index) ? ctx.index : -1;
-            return availablePrerequisiteOptions(index).map((e) => ({
-              value: e.id,
-              label: `${e.programId}_${e.eventType}_${e.year} ${e.title}`,
-            }));
-          },
-          default: '',
-          relativeDisplay: [
-            { label: 'Type', rdSource: 'eventRows', rdKey: 'id', rdCol: 'eventType', map: EVENT_TYPES },
-            { label: 'Description', rdSource: 'eventRows', rdKey: 'id', rdCol: 'title' },
-          ],
-        },
-      ],
-    };
+    const eventFields = Schema.Forms.Events({ availablePrerequisiteOptions });
 
     function availablePrerequisiteOptions(rowIndex) {
       const reqType = requiredPrereqType();
@@ -1451,7 +1204,7 @@ const app = createApp({
 
       if (MODE.CREATE) {
         try {
-          await api.post('/events', payload);
+          await API.Events.create(buildEventPayload());
           await loadEvents();
           setStatus('Event created.', 'success', 1500);
           goBackSection();
@@ -1461,10 +1214,10 @@ const app = createApp({
         }
       } else {
         try {
-          const id = encodeURIComponent(editingEventId.value);
+          const id = editingEventId.value;
           const patchPayload = { ...payload };
           delete patchPayload.id;
-          await api.patch(`/events/${id}`, patchPayload);
+          await API.Events.update(id, patchPayload);
           await loadEvents();
           setStatus('Event updated.', 'success', 1500);
           goBackSection();
@@ -1482,18 +1235,14 @@ const app = createApp({
 
     async function loadRegistrations({ showStatusIfActive = false } = {}) {
       try {
-        const { data } = await api.get('/registrations', { params: { _: Date.now() } });
-        registrationRows.value = Array.isArray(data) ? data : data?.registrations || [];
+        const list = await API.Registrations.list();
+        registrationRows.value = list;
         if (showStatusIfActive && SECTION.REGISTRATIONS) setStatus('Registrations loaded.', 'info', 1200);
       } catch {
+        console.error('loadRegistrations failed:', e);
         registrationRows.value = [];
       }
     }
-
-    const REG_STATUS_OPTIONS = [
-      { value: 'paid', label: 'Paid' },
-      { value: 'cancelled', label: 'Cancelled' },
-    ];
 
     const registrationSearch = ref('');
     const registrationFilter = reactive({ year: '', programId: '', eventType: '' });
@@ -1535,13 +1284,6 @@ const app = createApp({
       const todayPST = new Date(Date.now() - 8 * 3600 * 1000).toISOString().slice(0, 10);
       return (!ev?.openDate || ev?.openDate <= todayPST) && (!ev?.endDate || todayPST <= ev?.endDate);
     };
-
-    function getCurrentSchoolYear() {
-      // July-start version (optional):
-      const now = new Date();
-      const julyStartYear = now.getMonth() + 1 >= 7 ? now.getFullYear() : now.getFullYear() - 1;
-      return julyStartYear;
-    }
 
     function isCurrentSchoolYear(ev) {
       return Number(ev?.year) === Number(getCurrentSchoolYear());
@@ -1987,97 +1729,33 @@ const app = createApp({
       },
     );
 
-    // REG_META
-    const registrationFields = {
-      main: [
-        { col: 'id', label: 'Registration ID', type: 'text', disabled: true },
-        {
-          col: 'familyId',
-          label: 'Family ID',
-          type: 'datalist',
-          placeholder: 'Start typing ID or name…',
-          onChange: onRegFamilyChange,
-          onInput: () => {},
-          disabled: () => MODE.EDIT,
-        },
-        {
-          col: 'eventId',
-          label: 'Registration Event',
-          type: 'select',
-          selOpt: eventOptionsForRegistration,
-          onChange: onRegEventChange,
-          disabled: ({ form }) => (MODE.CREATE && !form.familyId) || MODE.EDIT,
-        },
-        {
-          col: 'parishMember',
-          label: 'Parish Member',
-          type: 'select',
-          selOpt: YES_NO_OPTIONS,
-          disabled: true,
-          show: ({ form }) => !!form.familyId, // only show after a family is chosen
-        },
-      ],
-      eventSnapshot: [
-        { col: 'title', label: 'Event Description', disabled: true },
-        { col: 'year', label: 'School Year', disabled: true, transform: (v) => codeToLabel(v, YEAR_OPTIONS.value) },
-        { col: 'programId', label: 'Program', disabled: true, transform: (v) => codeToLabel(v, PROGRAM_OPTIONS.value) },
-        { col: 'eventType', label: 'Event Type', disabled: true, transform: (v) => codeToLabel(v, EVENT_TYPES.value) },
-      ],
-      contactSnapshot: [
-        { col: 'name', label: 'Contact Name', disabled: true },
-        { col: 'relationship', label: 'Relationship', disabled: true },
-        { col: 'phone', label: 'Phone', disabled: true },
-      ],
-      meta: [
-        { col: 'status', label: 'Status', type: 'select', selOpt: REG_STATUS_OPTIONS },
-        {
-          col: 'acceptedBy',
-          label: 'Accepted & Signed By',
-          type: 'select',
-          selOpt: () => {
-            const fam = familyById(registrationForm.familyId);
-            return (fam?.contacts || []).map((c) => {
-              const name = `${c.lastName}, ${c.firstName}${c.middle ? ' ' + c.middle : ''}`;
-              return { value: name, label: `${name} (${c.relationship || 'Contact'})` };
-            });
-          },
-        },
-      ],
-      childrenRow: [
-        {
-          col: 'childId',
-          label: 'Child Name',
-          type: 'select',
-          selOpt: childRegistrationOptions,
-          onChange: hydrateChildSnapshot,
-        },
-        { col: 'fullName', label: 'Full Name', type: 'text', disabled: true, show: false },
-        { col: 'saintName', label: 'Saint Name', type: 'text', disabled: true },
-        { col: 'dob', label: 'Age to Grade', type: 'select', selOpt: ageGroupOptionsForRow, disabled: true },
-        {
-          col: 'allergies',
-          label: 'Allergies',
-          type: 'text',
-          disabled: true,
-          transform: (v) => (Array.isArray(v) ? v.join(', ') : ''),
-        },
-      ],
-      paymentsRow: [
-        { col: 'code', label: 'Fee Type', type: 'select', selOpt: FEE_CODES, disabled: true },
-        { col: 'unitAmount', label: 'Unit Price', disabled: true, show: true },
-        { col: 'quantity', label: 'Quantity', disabled: true },
-        { col: 'amount', label: 'Total Amount', disabled: true },
-        { col: 'method', label: 'Method', type: 'select', selOpt: PAYMENT_METHOD_OPTIONS },
-        { col: 'txnRef', label: 'Ref/Check #', type: 'text', show: ({ row }) => (row?.method || '') !== METHOD?.CASH },
-        { col: 'receiptNo', label: 'Receipt #', type: 'text' },
-        {
-          col: 'receivedBy',
-          label: 'Received By',
-          type: 'select',
-          selOpt: () => volunteersFor(selectedEvent.value?.programId || registrationForm.event?.programId || ''),
-        },
-      ],
+    // Passing functions/objects to registrations form
+    const registrationFormCtx = {
+      onRegFamilyChange,
+      onRegEventChange,
+      eventOptionsForRegistration,
+      codeToLabel,
+      signedRegistrationOptions,
+      childRegistrationOptions,
+      hydrateChildSnapshot,
+      ageGroupOptionsForRow,
+      receivedByOptions,
+      MODE,
     };
+
+    const registrationFields = Schema.Forms.Registrations(registrationFormCtx);
+
+    function signedRegistrationOptions() {
+      const fam = familyById(registrationForm.familyId);
+      return (fam?.contacts || []).map((c) => {
+        const name = `${c.lastName}, ${c.firstName}${c.middle ? ' ' + c.middle : ''}`;
+        return { value: name, label: `${name} (${c.relationship || 'Contact'})` };
+      });
+    }
+
+    function receivedByOptions() {
+      return volunteersFor(selectedEvent.value?.programId || registrationForm.event?.programId || '');
+    }
 
     function quickCheckRegistration() {
       // Must have event + family
@@ -2211,7 +1889,7 @@ const app = createApp({
       const payload = buildRegistrationPayload();
       if (MODE.CREATE) {
         try {
-          await api.post('/registrations', payload);
+          await API.Registrations.create(buildRegistrationPayload());
           await loadRegistrations();
           setStatus('Registration created.', 'success', 1500);
           goBackSection();
@@ -2221,10 +1899,10 @@ const app = createApp({
         }
       } else {
         try {
-          const id = encodeURIComponent(editingRegistrationId.value);
+          const id = editingRegistrationId.value;
           const patch = { ...payload };
           delete patch.id;
-          await api.patch(`/registrations/${id}`, patch);
+          await API.Registrations.update(id, patch);
           await loadRegistrations();
           setStatus('Registration updated.', 'success', 1500);
           goBackSection();
@@ -2348,8 +2026,6 @@ const app = createApp({
       acceptedBy: '',
       updatedAt: '',
     });
-
-    const money = (n) => `$${Number(n || 0).toFixed(2)}`;
 
     function buildReceiptView(r) {
       const fam = familyById(r.familyId);
@@ -2480,8 +2156,6 @@ const app = createApp({
     // =========================================================
     return {
       // layout
-      currentSection,
-      fromSection,
       currentMode,
       menuOpen,
       BURGER_MENU,
@@ -2503,6 +2177,7 @@ const app = createApp({
       EVENT_TYPES,
       FEE_CODES,
       YEAR_OPTIONS,
+      PAYMENT_METHOD_OPTIONS,
       EVENT,
       LEVEL,
       PROGRAM,
@@ -2517,8 +2192,6 @@ const app = createApp({
       getFieldDisabled,
       onFormFieldInput,
       onFormFieldChange,
-      maskLast4,
-      getCurrentSchoolYear,
 
       // families
       familyFields,
@@ -2608,7 +2281,7 @@ const app = createApp({
       openReceiptById,
       closeReceipt,
       printReceipt,
-      money,
+      formatMoney,
 
       // rosters
       rosterSearch,
