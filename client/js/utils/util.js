@@ -61,6 +61,10 @@
 
   const formatMoney = (n) => `$${Number(n || 0).toFixed(2)}`;
 
+  function capitalize(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  }
+
   // ------------------------------
   // Generic helpers (data/object)
   // ------------------------------
@@ -88,6 +92,70 @@
     return obj == null ? obj : JSON.parse(JSON.stringify(obj));
   }
 
+  function onFormFieldChange(fieldMeta, ctx = {}, event) {
+    if (typeof fieldMeta?.onChange === 'function') {
+      fieldMeta.onChange(fieldMeta, ctx, event);
+    }
+  }
+  function onFormFieldInput(fieldMeta, ctx = {}, event) {
+    if (typeof fieldMeta?.onInput === 'function') {
+      fieldMeta.onInput(fieldMeta, ctx, event);
+    }
+  }
+
+  // Options resolver (now passes fieldMeta to selOpt functions)
+  function getOptions(fieldMeta, ctx = {}) {
+    const src = fieldMeta?.selOpt;
+    if (!src) return [];
+    if (Array.isArray(src)) return src;
+    if (typeof src === 'function') return src(fieldMeta, ctx) || [];
+    if (typeof src === 'object' && 'value' in src) {
+      const v = src.value;
+      return Array.isArray(v) ? v : [];
+    }
+    return [];
+  }
+
+  function formatOptionLabel(opt, withValue = false) {
+    if (opt == null) return '';
+    if (opt.label == null || opt.label === '' || opt.label === opt.value) return String(opt.value);
+    if (typeof opt.value === 'boolean' || !withValue) return opt.label;
+    return `${opt.value} - ${opt.label}`;
+  }
+
+  // Accept Array | Function(ctx)=>Array | Ref<Array> | undefined
+  function resolveOptions(source, ctx) {
+    if (!source) return [];
+    if (Array.isArray(source)) return source;
+    if (typeof source === 'function') return source(ctx) || [];
+    if (typeof source === 'object' && 'value' in source) {
+      const v = source.value;
+      return Array.isArray(v) ? v : [];
+    }
+    return [];
+  }
+
+  // Option → label
+  function codeToLabel(value, source, ctx = undefined, { withCode = false, fallback = '' } = {}) {
+    const options = resolveOptions(source, ctx);
+    const found = options.find((o) => o && o.value === value);
+    if (!found) return fallback || (value ?? '');
+    const label = found.label ?? found.value;
+    return withCode ? `${found.value} - ${label}` : label;
+  }
+
+  function isVisible(field, ctx = {}) {
+    if (!('show' in field)) return true;
+    return !!evalMaybe(field.show, ctx);
+  }
+
+  function fieldClass(fieldMeta, ctx = {}) {
+    // supports string | array | object | function(ctx)=>any of those
+    const v =
+      typeof fieldMeta?.classes === 'function' ? fieldMeta.classes(ctx) : fieldMeta?.classes ?? fieldMeta?.class;
+    return v || null;
+  }
+
   /** Build school-year choices like 2023-24 around a base year.
    * before: # years before baseYear (inclusive range)
    * after:  # years after  baseYear (inclusive range)
@@ -98,7 +166,42 @@
     return m >= 7 ? now.getFullYear() : now.getFullYear() - 1;
   }
 
+  function getDefaultValue(field, ctx) {
+    if ('default' in field) return evalMaybe(field.default, ctx);
+    return field.type === 'checkbox' ? false : '';
+  }
+
+  function buildFromFields(fields, { ctx = {}, overrides = {} } = {}) {
+    const out = {};
+    for (const f of fields) setDefault(out, f.col, getDefaultValue(f, ctx));
+    for (const [path, value] of Object.entries(overrides)) setDefault(out, path, value);
+    return out;
+  }
+
   // Public surface (non-breaking shape)
-  root.Format = { randInt, groupDigits, randomNumericString, makeId, normPhone, formatUSPhone, formatMoney };
-  root.Helpers = { getByPath, setDefault, evalMaybe, deepClone, getCurrentSchoolYear };
+  root.Format = {
+    randInt,
+    groupDigits,
+    randomNumericString,
+    makeId,
+    normPhone,
+    formatUSPhone,
+    formatMoney,
+    capitalize,
+    codeToLabel,
+  };
+  root.Helpers = {
+    getByPath,
+    setDefault,
+    buildFromFields,
+    evalMaybe,
+    deepClone,
+    getCurrentSchoolYear,
+    onFormFieldChange,
+    onFormFieldInput,
+    getOptions,
+    formatOptionLabel,
+    isVisible,
+    fieldClass,
+  };
 })(typeof window !== 'undefined' ? (window.Util ? window : (window.Util = {}) && window) : globalThis);

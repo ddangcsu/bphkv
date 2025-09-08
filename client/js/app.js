@@ -182,10 +182,16 @@ const app = createApp({
 
     const breadcrumbs = computed(() => {
       if (SECTION.FAMILIES) {
-        return [{ label: 'Families', onClick: goFamilyList }, { label: MODE.LIST ? 'Browse Families' : MODE.CREATE ? 'Create Family' : 'Edit Family' }];
+        return [
+          { label: 'Families', onClick: goFamilyList },
+          { label: MODE.LIST ? 'Browse Families' : MODE.CREATE ? 'Create Family' : 'Edit Family' },
+        ];
       }
       if (SECTION.EVENTS) {
-        return [{ label: 'Events', onClick: goEventList }, { label: MODE.LIST ? 'Browse Events' : MODE.CREATE ? 'Create Event' : 'Edit Event' }];
+        return [
+          { label: 'Events', onClick: goEventList },
+          { label: MODE.LIST ? 'Browse Events' : MODE.CREATE ? 'Create Event' : 'Edit Event' },
+        ];
       }
       if (SECTION.REGISTRATIONS) {
         return [
@@ -204,7 +210,10 @@ const app = createApp({
         ];
       }
       if (SECTION.SETTINGS) {
-        return [{ label: 'Settings', onClick: () => switchSection(SECTION_NAMES.SETTINGS, MODE_NAMES.EDIT) }, { label: 'Edit Options' }];
+        return [
+          { label: 'Settings', onClick: () => switchSection(SECTION_NAMES.SETTINGS, MODE_NAMES.EDIT) },
+          { label: 'Edit Options' },
+        ];
       }
     });
 
@@ -226,25 +235,6 @@ const app = createApp({
       status.visible = true;
       if (ms) setTimeout(() => (status.visible = false), ms);
     }
-
-    // =========================================================
-    // OPTIONS ({ value, label }) — codes/labels centralized
-    // =========================================================
-    /*
-    const { YES_NO_OPTIONS, REG_STATUS_OPTIONS, ENUMS } = Schema.Options;
-
-    // ===== Option lists as COMPUTED (no manual rehydrate needed) =====
-    const PROGRAM_OPTIONS = computed(() => (Array.isArray(setup.programs) ? setup.programs : []));
-    const RELATIONSHIP_OPTIONS = computed(() => (Array.isArray(setup.relationships) ? setup.relationships : []));
-    const FEE_CODES = computed(() => (Array.isArray(setup.feeCodes) ? setup.feeCodes : []));
-    const EVENT_TYPES = computed(() => (Array.isArray(setup.eventTypes) ? setup.eventTypes : []));
-    const LEVEL_OPTIONS = computed(() => (Array.isArray(setup.levels) ? setup.levels : []));
-    const PAYMENT_METHOD_OPTIONS = computed(() => (Array.isArray(setup.paymentMethods) ? setup.paymentMethods : []));
-    const VOLUNTEERS_OPTIONS = computed(() => (Array.isArray(setup.volunteers) ? setup.volunteers : []));
-    const YEAR_OPTIONS = computed(() => {
-      return Schema.Options.getYearOptions({ before: 2, after: 2 });
-    });
-  */
 
     const PARENT_RELATIONSHIPS = new Set(); // first 3 relationships
 
@@ -299,6 +289,8 @@ const app = createApp({
     // COMMON HELPERS (refactored & only what's used)
     // =========================================================
 
+    const codeToLabel = Util.Format.codeToLabel;
+
     function relativeDisplayValue(row, fld, rd) {
       if (!row || !fld || !rd) return '';
       const src = RD_SOURCES[rd.rdSource];
@@ -318,86 +310,16 @@ const app = createApp({
       return String(raw);
     }
 
-    // Accept Array | Function(ctx)=>Array | Ref<Array> | undefined
-    function resolveOptions(source, ctx) {
-      if (!source) return [];
-      if (Array.isArray(source)) return source;
-      if (typeof source === 'function') return source(ctx) || [];
-      if (typeof source === 'object' && 'value' in source) {
-        const v = source.value;
-        return Array.isArray(v) ? v : [];
-      }
-      return [];
-    }
-
-    // Option → label
-    function codeToLabel(value, source, ctx = undefined, { withCode = false, fallback = '' } = {}) {
-      const options = resolveOptions(source, ctx);
-      const found = options.find((o) => o && o.value === value);
-      if (!found) return fallback || (value ?? '');
-      const label = found.label ?? found.value;
-      return withCode ? `${found.value} - ${label}` : label;
-    }
-
     // Unified meta-driven handlers
-    function onFormFieldChange(fieldMeta, ctx = {}, event) {
-      if (typeof fieldMeta?.onChange === 'function') {
-        fieldMeta.onChange(fieldMeta, ctx, event);
-      }
-    }
-    function onFormFieldInput(fieldMeta, ctx = {}, event) {
-      if (typeof fieldMeta?.onInput === 'function') {
-        fieldMeta.onInput(fieldMeta, ctx, event);
-      }
-    }
-
-    // Options resolver (now passes fieldMeta to selOpt functions)
-    function getOptions(fieldMeta, ctx = {}) {
-      const src = fieldMeta?.selOpt;
-      if (!src) return [];
-      if (Array.isArray(src)) return src;
-      if (typeof src === 'function') return src(fieldMeta, ctx) || [];
-      if (typeof src === 'object' && 'value' in src) {
-        const v = src.value;
-        return Array.isArray(v) ? v : [];
-      }
-      return [];
-    }
-
-    function formatOptionLabel(opt, withValue = false) {
-      if (opt == null) return '';
-      if (opt.label == null || opt.label === '' || opt.label === opt.value) return String(opt.value);
-      if (typeof opt.value === 'boolean' || !withValue) return opt.label;
-      return `${opt.value} - ${opt.label}`;
-    }
-
-    function getDefaultValue(field, ctx) {
-      if ('default' in field) return evalMaybe(field.default, ctx);
-      return field.type === 'checkbox' ? false : '';
-    }
-
-    function buildFromFields(fields, { ctx = {}, overrides = {} } = {}) {
-      const out = {};
-      for (const f of fields) setDefault(out, f.col, getDefaultValue(f, ctx));
-      for (const [path, value] of Object.entries(overrides)) setDefault(out, path, value);
-      return out;
-    }
-
-    function capitalize(str) {
-      return str.charAt(0).toUpperCase() + str.slice(1);
-    }
+    const onFormFieldChange = Util.Helpers.onFormFieldChange;
+    const onFormFieldInput = Util.Helpers.onFormFieldInput;
+    const getOptions = Util.Helpers.getOptions;
+    const formatOptionLabel = Util.Helpers.formatOptionLabel;
+    const buildFromFields = Util.Helpers.buildFromFields;
 
     // === Unified meta switches ===
-    function isVisible(field, ctx = {}) {
-      if (!('show' in field)) return true;
-      return !!evalMaybe(field.show, ctx);
-    }
-
-    function fieldClass(fieldMeta, ctx = {}) {
-      // supports string | array | object | function(ctx)=>any of those
-      const v = typeof fieldMeta?.classes === 'function' ? fieldMeta.classes(ctx) : fieldMeta?.classes ?? fieldMeta?.class;
-      return v || null;
-    }
+    const isVisible = Util.Helpers.isVisible;
+    const fieldClass = Util.Helpers.fieldClass;
 
     function getFieldDisabled(field, ctx = {}) {
       // Global readonly flag
@@ -486,23 +408,17 @@ const app = createApp({
     };
 
     // FAMILIES_META
-    const familyFields = Schema.Forms.Families({ onContactPhoneInput, needsNameException });
+    const familyCtx = {
+      onContactPhoneInput,
+      needsNameException,
+    };
+    const familyFields = Schema.Forms.Families(familyCtx);
 
-    function newFamilyContact() {
-      return buildFromFields(familyFields.contacts);
-    }
-    function newFamilyChild() {
-      return buildFromFields(familyFields.children);
-    }
-    function newFamilyNote() {
-      return buildFromFields(familyFields.notes);
-    }
+    const newFamilyContact = Schema.Forms.Families.newContact;
+    const newFamilyChild = Schema.Forms.Families.newChild;
+    const newFamilyNote = Schema.Forms.Families.newNote;
+    const newFamilyForm = Schema.Forms.Families.new;
 
-    function newFamilyForm() {
-      const main = buildFromFields(familyFields.household.main);
-      const address = buildFromFields(familyFields.household.address);
-      return { ...main, address: { ...address }, contacts: [newFamilyContact()], children: [newFamilyChild()], notes: [] };
-    }
     const familyForm = reactive(newFamilyForm());
     const familyErrors = reactive({ household: {}, contacts: [{}], children: [{}], notes: [{}] });
 
@@ -717,7 +633,9 @@ const app = createApp({
     });
 
     // Display-friendly string
-    const parentLastNamesDisplay = computed(() => [...parentLastNameSet.value].map((e) => capitalize(e)).join(' / '));
+    const parentLastNamesDisplay = computed(() =>
+      [...parentLastNameSet.value].map((e) => Util.Format.capitalize(e)).join(' / '),
+    );
 
     const filteredFamilyRows = computed(() => {
       if (!familySearch.value) return familyRows.value;
@@ -725,13 +643,16 @@ const app = createApp({
       const qDigits = normPhone(familySearch.value);
       return familyRows.value.filter((f) => {
         const hitsTop =
-          (f.id || '').toLowerCase().includes(q) || (f.parishNumber || '').toLowerCase().includes(q) || (f.address?.city || '').toLowerCase().includes(q);
+          (f.id || '').toLowerCase().includes(q) ||
+          (f.parishNumber || '').toLowerCase().includes(q) ||
+          (f.address?.city || '').toLowerCase().includes(q);
         const hitsContacts = (f.contacts || []).some(
           (c) =>
             (c.lastName || '').toLowerCase().includes(q) ||
             (c.firstName || '').toLowerCase().includes(q) ||
             (c.middle || '').toLowerCase().includes(q) ||
-            (c.lastName + c.firstName + c.middle).toLowerCase().includes(q) ||
+            [c.lastName, [c.firstName, c.middle].join(' ')].join(', ').toLowerCase().includes(q) ||
+            [c.lastName, c.firstName, c.middle].join(' ').toLowerCase().includes(q) ||
             (c.email || '').toLowerCase().includes(q) ||
             (qDigits && normPhone(c.phone).includes(qDigits)),
         );
@@ -947,21 +868,26 @@ const app = createApp({
     }
 
     // EVENTS_META
-    const eventFields = Schema.Forms.Events({ availablePrerequisiteOptions });
+    const eventCtx = { availablePrerequisiteOptions };
+    const eventFields = Schema.Forms.Events(eventCtx);
 
     function availablePrerequisiteOptions(rowIndex) {
       const reqType = requiredPrereqType();
       if (!reqType) return [];
-      const selectedElsewhere = new Set((eventForm.prerequisites || []).map((p, i) => (i === rowIndex ? null : p.eventId)).filter(Boolean));
+      const selectedElsewhere = new Set(
+        (eventForm.prerequisites || []).map((p, i) => (i === rowIndex ? null : p.eventId)).filter(Boolean),
+      );
       return eventRows.value.filter(
-        (ev) => Number(ev.year) === Number(eventForm.year) && ev.id !== eventForm.id && (ev.eventType || '') === reqType && !selectedElsewhere.has(ev.id),
+        (ev) =>
+          Number(ev.year) === Number(eventForm.year) &&
+          ev.id !== eventForm.id &&
+          (ev.eventType || '') === reqType &&
+          !selectedElsewhere.has(ev.id),
       );
     }
 
-    function newEventForm() {
-      const main = buildFromFields(eventFields.main);
-      return { ...main, prerequisites: [], fees: [] };
-    }
+    const newEventForm = Schema.Forms.Events.new;
+
     const eventForm = reactive(newEventForm());
 
     const showPrerequisites = computed(() => eventForm.eventType !== EVENT.ADMIN);
@@ -1004,7 +930,9 @@ const app = createApp({
 
     function addEventPrerequisiteRow() {
       if (isReadOnly.value) return;
-      eventForm.prerequisites.push(buildFromFields(eventFields.prerequisiteRow, { ctx: { index: 0, form: eventForm } }));
+      eventForm.prerequisites.push(
+        buildFromFields(eventFields.prerequisiteRow, { ctx: { index: 0, form: eventForm } }),
+      );
     }
     function removeEventPrerequisiteRow(i) {
       if (isReadOnly.value) return;
@@ -1155,7 +1083,8 @@ const app = createApp({
       if (!LEVEL_OPTIONS.value.some((o) => o.value === eventForm.level)) return false;
       if (!eventForm.openDate || !eventForm.endDate) return false;
       if (!Array.isArray(eventForm.fees) || eventForm.fees.length === 0) return false;
-      if (!eventForm.fees.every((f) => FEE_CODES.value.some((o) => o.value === f.code) && Number(f.amount) >= 0)) return false;
+      if (!eventForm.fees.every((f) => FEE_CODES.value.some((o) => o.value === f.code) && Number(f.amount) >= 0))
+        return false;
 
       const reqType = requiredPrereqType();
       if (reqType) {
@@ -1249,73 +1178,6 @@ const app = createApp({
 
     const editingRegistrationId = ref(null);
 
-    const registrationForm = reactive(newRegistrationForm());
-    const registrationErrors = reactive({ main: {}, children: [], payments: [] });
-
-    const hasActiveRegFilter = computed(() => !!(registrationFilter.programId || registrationFilter.eventType || registrationFilter.year));
-
-    function resetRegFilters() {
-      registrationFilter.year = '';
-      registrationFilter.programId = '';
-      registrationFilter.eventType = '';
-      registrationSearch.value = '';
-    }
-
-    function newRegistrationForm() {
-      return {
-        id: makeId('R'),
-        eventId: '',
-        familyId: '',
-        status: '',
-        acceptedBy: '',
-        parishMember: null,
-        event: { title: '', year: '', programId: '', eventType: '' }, // snapshot (disabled)
-        contacts: [], // snapshot (disabled) - 2 rows
-        children: [], // [{childId, fullName, saintName, dob, allergies, status}]
-        payments: [], // [{code, quantity, amount, method, txnRef, receiptNo, receivedBy}]
-        createdAt: null,
-        updatedAt: null,
-      };
-    }
-
-    // --- Helpers --------------------------------------------------------------
-
-    const isOpenEventFilter = (ev) => {
-      const todayPST = new Date(Date.now() - 8 * 3600 * 1000).toISOString().slice(0, 10);
-      return (!ev?.openDate || ev?.openDate <= todayPST) && (!ev?.endDate || todayPST <= ev?.endDate);
-    };
-
-    function isCurrentSchoolYear(ev) {
-      return Number(ev?.year) === Number(getCurrentSchoolYear());
-    }
-
-    // Check whether a given family has registered for the year
-    function alreadyRegistered({ familyId, year = getCurrentSchoolYear(), eventId = null, programId = null, eventType = null }) {
-      if (!familyId || !Number.isFinite(Number(year))) return false;
-      return registrationRows.value.some((r) => {
-        if (r.familyId !== familyId) return false;
-        if (Number(r.event?.year) !== Number(year)) return false;
-        if (eventId != null && r.eventId !== eventId) return false;
-        if (programId != null && r.event?.programId !== programId) return false;
-        if (eventType != null && r.event?.eventType !== eventType) return false;
-        return true;
-      });
-    }
-
-    // Does this family meet all prerequisites for the event (same year)?
-    function familyMetPrereqs(ev, familyId) {
-      const prereqIds = Array.isArray(ev?.prerequisites) ? ev.prerequisites.map((p) => (typeof p === 'string' ? p : p?.eventId)).filter(Boolean) : [];
-
-      // No prereqs → automatically OK
-      if (prereqIds.length === 0) return true;
-
-      // If no family yet, we can’t assert prereqs. Treat as not met so the UI nudges user to pick family first.
-      if (!familyId) return false;
-
-      const yr = Number(ev.year);
-      return prereqIds.every((pid) => registrationRows.value.some((r) => r.familyId === familyId && r.eventId === pid && Number(r.event?.year) === yr));
-    }
-
     // --- Select options for eventId on Registration Form ----------------------
     const eventOptionsForRegistration = computed(() => {
       const familyId = (registrationForm.familyId || '').trim();
@@ -1344,6 +1206,86 @@ const app = createApp({
       }));
     });
 
+    // Passing functions/objects to registrations form
+    const registrationFormCtx = {
+      onRegFamilyChange,
+      onRegEventChange,
+      eventOptionsForRegistration,
+      signedRegistrationOptions,
+      childRegistrationOptions,
+      hydrateChildSnapshot,
+      ageGroupOptionsForRow,
+      receivedByOptions,
+      MODE,
+    };
+
+    const registrationFields = Schema.Forms.Registrations(registrationFormCtx);
+    const newRegistrationForm = Schema.Forms.Registrations.new;
+
+    const registrationForm = reactive(newRegistrationForm());
+    const registrationErrors = reactive({ main: {}, children: [], payments: [] });
+
+    const hasActiveRegFilter = computed(
+      () => !!(registrationFilter.programId || registrationFilter.eventType || registrationFilter.year),
+    );
+
+    function resetRegFilters() {
+      registrationFilter.year = '';
+      registrationFilter.programId = '';
+      registrationFilter.eventType = '';
+      registrationSearch.value = '';
+    }
+
+    // --- Helpers --------------------------------------------------------------
+
+    const isOpenEventFilter = (ev) => {
+      const todayPST = new Date(Date.now() - 8 * 3600 * 1000).toISOString().slice(0, 10);
+      return (!ev?.openDate || ev?.openDate <= todayPST) && (!ev?.endDate || todayPST <= ev?.endDate);
+    };
+
+    function isCurrentSchoolYear(ev) {
+      return Number(ev?.year) === Number(getCurrentSchoolYear());
+    }
+
+    // Check whether a given family has registered for the year
+    function alreadyRegistered({
+      familyId,
+      year = getCurrentSchoolYear(),
+      eventId = null,
+      programId = null,
+      eventType = null,
+    }) {
+      if (!familyId || !Number.isFinite(Number(year))) return false;
+      return registrationRows.value.some((r) => {
+        if (r.familyId !== familyId) return false;
+        if (Number(r.event?.year) !== Number(year)) return false;
+        if (eventId != null && r.eventId !== eventId) return false;
+        if (programId != null && r.event?.programId !== programId) return false;
+        if (eventType != null && r.event?.eventType !== eventType) return false;
+        return true;
+      });
+    }
+
+    // Does this family meet all prerequisites for the event (same year)?
+    function familyMetPrereqs(ev, familyId) {
+      const prereqIds = Array.isArray(ev?.prerequisites)
+        ? ev.prerequisites.map((p) => (typeof p === 'string' ? p : p?.eventId)).filter(Boolean)
+        : [];
+
+      // No prereqs → automatically OK
+      if (prereqIds.length === 0) return true;
+
+      // If no family yet, we can’t assert prereqs. Treat as not met so the UI nudges user to pick family first.
+      if (!familyId) return false;
+
+      const yr = Number(ev.year);
+      return prereqIds.every((pid) =>
+        registrationRows.value.some(
+          (r) => r.familyId === familyId && r.eventId === pid && Number(r.event?.year) === yr,
+        ),
+      );
+    }
+
     watch(
       () => registrationForm.children.map((c) => c.childId).join(','),
       () => {
@@ -1361,7 +1303,9 @@ const app = createApp({
     const familyDatalistOptions = computed(() =>
       familyRows.value.map((f) => ({
         value: f.id,
-        label: `${f.parishMember ? 'Member' : 'NonMember'} — ${f.contacts?.[0]?.lastName || ''}, ${f.contacts?.[0]?.firstName || ''}
+        label: `${f.parishMember ? 'Member' : 'NonMember'} — ${f.contacts?.[0]?.lastName || ''}, ${
+          f.contacts?.[0]?.firstName || ''
+        }
         — ${f.contacts?.[0]?.phone} - ${f.address?.city || ''}`,
       })),
     );
@@ -1377,7 +1321,9 @@ const app = createApp({
           (r.event?.eventType || '').toLowerCase().includes(q) ||
           (r.event?.title || '').toLowerCase().includes(q) ||
           String(r.event?.year || '').includes(q);
-        const hitContacts = (r.contacts || []).some((c) => (c.name || '').toLowerCase().includes(q) || (qDigits && normPhone(c.phone).includes(qDigits)));
+        const hitContacts = (r.contacts || []).some(
+          (c) => (c.name || '').toLowerCase().includes(q) || (qDigits && normPhone(c.phone).includes(qDigits)),
+        );
         const hitReceipts = (r.payments || []).some((p) => (p.receiptNo || '').toLowerCase().includes(q));
 
         const byYear = !registrationFilter.year || Number(r.event?.year) === Number(registrationFilter.year);
@@ -1404,11 +1350,17 @@ const app = createApp({
     }
 
     const adminRegistration = computed(
-      () => eventRows.value.find((e) => e.programId === PROGRAM.BPH && e.eventType === EVENT.ADMIN && isOpenEventFilter(e)) || null,
+      () =>
+        eventRows.value.find(
+          (e) => e.programId === PROGRAM.BPH && e.eventType === EVENT.ADMIN && isOpenEventFilter(e),
+        ) || null,
     );
 
     const tnttRegistration = computed(
-      () => eventRows.value.find((e) => e.programId === PROGRAM.TNTT && e.eventType === EVENT.REGISTRATION && isOpenEventFilter(e)) || null,
+      () =>
+        eventRows.value.find(
+          (e) => e.programId === PROGRAM.TNTT && e.eventType === EVENT.REGISTRATION && isOpenEventFilter(e),
+        ) || null,
     );
 
     function getRegistrationFor(familyId, eventId) {
@@ -1477,10 +1429,14 @@ const app = createApp({
       // Family + anti-duplication set
       const fam = familyById(famId);
       if (!fam) return [];
-      const chosenElsewhere = new Set((registrationForm.children || []).map((c, i) => (i === idx ? null : c.childId)).filter(Boolean));
+      const chosenElsewhere = new Set(
+        (registrationForm.children || []).map((c, i) => (i === idx ? null : c.childId)).filter(Boolean),
+      );
 
       // Collect prerequisite ids
-      const prereqIds = Array.isArray(ev?.prerequisites) ? ev.prerequisites.map((p) => (typeof p === 'string' ? p : p?.eventId)).filter(Boolean) : [];
+      const prereqIds = Array.isArray(ev?.prerequisites)
+        ? ev.prerequisites.map((p) => (typeof p === 'string' ? p : p?.eventId)).filter(Boolean)
+        : [];
 
       // 3) PC event:
       //    - No prereq OR only PF prereqs → full children for selected family
@@ -1489,7 +1445,9 @@ const app = createApp({
       const hasPCPrereq = prereqEvents.some((p) => p.level === LEVEL.PER_CHILD);
 
       if (!hasPCPrereq) {
-        return (fam.children || []).filter((c) => !chosenElsewhere.has(c.childId)).map((c) => ({ value: c.childId, label: displayChildNameAndAge(c) }));
+        return (fam.children || [])
+          .filter((c) => !chosenElsewhere.has(c.childId))
+          .map((c) => ({ value: c.childId, label: displayChildNameAndAge(c) }));
       }
 
       //    - Any PC prereq → only children that registered for *any* PC prereq
@@ -1558,7 +1516,9 @@ const app = createApp({
       const mustHaveIds = new Set(prereqs.map((p) => (typeof p === 'string' ? p : p?.eventId)).filter(Boolean));
       const year = Number(ev.year);
       const hasAll = Array.from(mustHaveIds).every((reqId) =>
-        registrationRows.value.some((r) => r.familyId === famId && r.eventId === reqId && Number(r.event?.year) === year),
+        registrationRows.value.some(
+          (r) => r.familyId === famId && r.eventId === reqId && Number(r.event?.year) === year,
+        ),
       );
       return hasAll ? { ok: true } : { ok: false, message: 'Prerequisite not met for this family/year.' };
     }
@@ -1595,7 +1555,9 @@ const app = createApp({
     }
 
     function computeQuantity(ev) {
-      return ev?.level === LEVEL.PER_CHILD ? Math.max(1, (registrationForm.children || []).filter((c) => c.childId).length) : 1;
+      return ev?.level === LEVEL.PER_CHILD
+        ? Math.max(1, (registrationForm.children || []).filter((c) => c.childId).length)
+        : 1;
     }
 
     function hydrateRegistrationPayments() {
@@ -1667,7 +1629,9 @@ const app = createApp({
 
       // Remove any already-chosen children that don't belong to this family
       const fam = familyById(registrationForm.familyId);
-      registrationForm.children = (registrationForm.children || []).filter((row) => fam?.children?.some((c) => c.childId === row.childId));
+      registrationForm.children = (registrationForm.children || []).filter((row) =>
+        fam?.children?.some((c) => c.childId === row.childId),
+      );
       registrationErrors.children = registrationForm.children.map(() => ({}));
 
       // Recompute total amounts in case quantity depends on children
@@ -1729,22 +1693,6 @@ const app = createApp({
       },
     );
 
-    // Passing functions/objects to registrations form
-    const registrationFormCtx = {
-      onRegFamilyChange,
-      onRegEventChange,
-      eventOptionsForRegistration,
-      codeToLabel,
-      signedRegistrationOptions,
-      childRegistrationOptions,
-      hydrateChildSnapshot,
-      ageGroupOptionsForRow,
-      receivedByOptions,
-      MODE,
-    };
-
-    const registrationFields = Schema.Forms.Registrations(registrationFormCtx);
-
     function signedRegistrationOptions() {
       const fam = familyById(registrationForm.familyId);
       return (fam?.contacts || []).map((c) => {
@@ -1780,7 +1728,8 @@ const app = createApp({
       if (!registrationForm.eventId) e.main.eventId = 'required';
       if (!registrationForm.familyId) e.main.familyId = 'required';
       if (!registrationForm.acceptedBy) e.main.acceptedBy = 'required';
-      if (!registrationForm.status || registrationForm.status === 'pending') e.main.status = 'Status must be paid or cancelled';
+      if (!registrationForm.status || registrationForm.status === 'pending')
+        e.main.status = 'Status must be paid or cancelled';
 
       // --- children checks (only for PC)
       if (selectedEventLevel.value === LEVEL.PER_CHILD) {
@@ -1921,7 +1870,15 @@ const app = createApp({
     const rosterFilter = reactive({ programId: '', eventType: '', eventId: '', year: '', age: '' });
 
     const hasActiveRosterFilter = computed(
-      () => !!(rosterSearch.value || rosterFilter.programId || rosterFilter.eventType || rosterFilter.eventId || rosterFilter.year || rosterFilter.age),
+      () =>
+        !!(
+          rosterSearch.value ||
+          rosterFilter.programId ||
+          rosterFilter.eventType ||
+          rosterFilter.eventId ||
+          rosterFilter.year ||
+          rosterFilter.age
+        ),
     );
 
     function resetRosterFilters() {
@@ -2029,7 +1986,9 @@ const app = createApp({
 
     function buildReceiptView(r) {
       const fam = familyById(r.familyId);
-      const typeLabel = codeToLabel(r.event?.eventType, EVENT_TYPES.value, undefined, { fallback: r.event?.eventType || '' });
+      const typeLabel = codeToLabel(r.event?.eventType, EVENT_TYPES.value, undefined, {
+        fallback: r.event?.eventType || '',
+      });
       const parishNumber = fam.parishMember ? fam.parishNumber : 'Non-Parish';
 
       const pays = (r.payments || []).map((p) => ({
@@ -2225,7 +2184,6 @@ const app = createApp({
       addFamilyNote,
       removeFamilyNote,
       contactDisplay,
-      buildFamilyPayload,
 
       // events
       eventSearch,
@@ -2248,7 +2206,6 @@ const app = createApp({
       submitEventForm,
       beginCreateEvent,
       beginEditEvent,
-      buildEventPayload,
 
       // registrations
       registrationRows,

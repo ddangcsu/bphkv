@@ -50741,6 +50741,65 @@
       "acceptedBy": "Truong, Phong Van",
       "createdAt": "2025-09-07T19:42:31.471Z",
       "updatedAt": "2025-09-07T19:42:31.472Z"
+    },
+    {
+      "id": "R:6543-7798-8338",
+      "eventId": "E:7036-8713-7616",
+      "familyId": "F:3264-3205-7691",
+      "status": "paid",
+      "parishMember": true,
+      "event": {
+        "title": "TNTT DoiTruongPho 2 days",
+        "year": 2025,
+        "programId": "TNTT",
+        "eventType": "EVT"
+      },
+      "contacts": [
+        {
+          "name": "Dang, Teresa Thi",
+          "relationship": "Mother",
+          "phone": "(562) 234-3469"
+        },
+        {
+          "name": "Dang, Duc",
+          "relationship": "Father",
+          "phone": "(714) 250-4396"
+        }
+      ],
+      "children": [
+        {
+          "childId": "S:9151-2811-2770",
+          "saintName": "John",
+          "fullName": "Vuong, Trung Thanh",
+          "dob": "2013-10-21",
+          "allergies": [],
+          "status": "pending"
+        },
+        {
+          "childId": "S:7938-1739-9497",
+          "saintName": "Phero",
+          "fullName": "Bui, Trang An",
+          "dob": "2016-09-01",
+          "allergies": [],
+          "status": "pending"
+        }
+      ],
+      "payments": [
+        {
+          "code": "EVTF",
+          "unitAmount": 50,
+          "amount": 100,
+          "quantity": 2,
+          "method": "cash",
+          "txnRef": null,
+          "receiptNo": "B123123",
+          "receivedBy": "Steven",
+          "paidAt": "2025-09-08T05:54:58.250Z"
+        }
+      ],
+      "acceptedBy": "Dang, Teresa Thi",
+      "createdAt": "2025-09-08T05:54:58.249Z",
+      "updatedAt": "2025-09-08T05:54:58.250Z"
     }
   ]
 }

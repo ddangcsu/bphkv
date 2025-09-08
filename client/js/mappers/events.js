@@ -15,7 +15,9 @@
         level: row.level || '',
         openDate: row.openDate || '',
         endDate: row.endDate || '',
-        fees: Array.isArray(row.fees) ? row.fees.map((f) => ({ code: f.code || '', amount: Number(f.amount) || 0 })) : [],
+        fees: Array.isArray(row.fees)
+          ? row.fees.map((f) => ({ code: f.code || '', amount: Number(f.amount) || 0 }))
+          : [],
         prerequisites: Array.isArray(row.prerequisites)
           ? row.prerequisites.map((p) => (typeof p === 'string' ? { eventId: p } : { eventId: p?.eventId || '' }))
           : [],
