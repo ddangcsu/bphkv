@@ -29,8 +29,8 @@
             saintName: ch.saintName || '',
             dob: (ch.dob || '').slice(0, 10),
             allergiesStr: Array.isArray(ch.allergies) ? ch.allergies.join(',') : '',
-            is_name_exception: !!ch.isNameException,
-            exception_notes: ch.exceptionNotes || '',
+            isNameException: !!ch.isNameException,
+            exceptionNotes: ch.exceptionNotes || '',
           }))
         : [
             {
@@ -41,8 +41,8 @@
               saintName: '',
               dob: '',
               allergiesStr: '',
-              is_name_exception: false,
-              exception_notes: '',
+              isNameException: false,
+              exceptionNotes: '',
             },
           ];
 
@@ -101,8 +101,8 @@
             .split(',')
             .map((s) => s.trim())
             .filter(Boolean),
-          isNameException: !!ch.is_name_exception,
-          exceptionNotes: ch.exception_notes || null,
+          isNameException: !!ch.isNameException,
+          exceptionNotes: ch.exceptionNotes || null,
         })),
         notes: (form.notes || []).map((n) => ({
           timeStamp: n.timeStamp || new Date().toLocaleString(),

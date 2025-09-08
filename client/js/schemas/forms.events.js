@@ -46,8 +46,7 @@
         label: 'Prerequisite Event',
         type: 'select',
         selOpt: (_meta, ctx) => {
-          const index = Number.isInteger(ctx?.index) ? ctx.index : -1;
-          const list = (Ctx.availablePrerequisiteOptions && Ctx.availablePrerequisiteOptions(index)) || [];
+          const list = (Ctx.availablePrerequisiteOptions && Ctx.availablePrerequisiteOptions(ctx)) || [];
           return list.map(Ctx.eventOption);
         },
         default: '',

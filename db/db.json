@@ -20767,6 +20767,27 @@
           "eventId": "E:5216-9373-5181"
         }
       ]
+    },
+    {
+      "id": "E:2722-4982-6536",
+      "programId": "TNTT",
+      "eventType": "EVT",
+      "title": "asfda",
+      "year": 2025,
+      "level": "PC",
+      "openDate": "2020-01-01",
+      "endDate": "2020-01-01",
+      "fees": [
+        {
+          "code": "EVTF",
+          "amount": 0
+        }
+      ],
+      "prerequisites": [
+        {
+          "eventId": "E:5216-9373-5181"
+        }
+      ]
     }
   ],
   "registrations": [

@@ -38,7 +38,7 @@ body {
   background: var(--card);
   position: sticky;
   top: 0;
-  z-index: 2;
+  z-index: 99;
 }
 .crumb-text {
   margin: 0;
@@ -115,6 +115,9 @@ body {
   display: flex;
   gap: 12px;
   margin-bottom: 12px;
+  top: 72px;
+  position: sticky;
+  z-index: 2;
 }
 
 .toolbar > .input {
@@ -181,6 +184,13 @@ body {
 .table tr {
   border-bottom: 1px solid var(--border);
 }
+
+.table thead {
+  top: 100px;
+  position: sticky;
+  z-index: 2;
+}
+
 .table thead th {
   background: #dceaf8;
 }
@@ -380,6 +390,12 @@ table.table tbody tr:nth-child(even) {
   --cols-lg: 4;
   --cols-md: 2;
   --cols-sm: 1;
+}
+.grid.col7 {
+  --cols-xl: 7; /* full width: 8 cols */
+  --cols-lg: 4; /* then 2 rows × 4 cols */
+  --cols-md: 2; /* then 4 rows × 2 cols */
+  --cols-sm: 1; /* then 8 rows × 1 col  */
 }
 .grid.col8 {
   --cols-xl: 8; /* full width: 8 cols */
@@ -670,7 +686,7 @@ label:has(> input[type='checkbox']) input {
   box-shadow: 0 6px 20px rgba(15, 23, 42, 0.12);
   padding: 8px;
   min-width: 250px;
-  z-index: 5;
+  z-index: 100;
 }
 .menu-item {
   width: 100%;

@@ -86,7 +86,9 @@
     obj[keys[keys.length - 1]] = value;
   }
 
-  const evalMaybe = (val, ctx) => (typeof val === 'function' ? val(ctx) : val);
+  function evalMaybe(val, ctx) {
+    return typeof val === 'function' ? val(ctx) : val;
+  }
 
   function deepClone(obj) {
     return obj == null ? obj : JSON.parse(JSON.stringify(obj));
@@ -101,6 +103,14 @@
     if (typeof fieldMeta?.onInput === 'function') {
       fieldMeta.onInput(fieldMeta, ctx, event);
     }
+  }
+
+  function getFieldDisabled(field, ctx = {}) {
+    // Global readonly flag
+    if (ctx.isReadOnly && ctx.isReadOnly === true) return true;
+
+    if (!('disabled' in field)) return false;
+    return !!evalMaybe(field.disabled, ctx);
   }
 
   // Options resolver (now passes fieldMeta to selOpt functions)
@@ -178,6 +188,40 @@
     return out;
   }
 
+  // Pure helper: returns ONE best-fit option (or [] if none)
+  // Uses your existing computeAgeByYear(dob)
+  // Internal: produce TNTT label by exact age
+  function ageGroupLabelTNTT(age) {
+    if (age == null) return null;
+    if (age < 7) return 'Under Age';
+    if (age >= 7 && age <= 9) return `Ấu Nhi Cấp ${age - 7 + 1}`; // 7→C1, 8→C2, 9→C3
+    if (age >= 10 && age <= 12) return `Thiếu Nhi Cấp ${age - 10 + 1}`; // 10→C1, 11→C2, 12→C3
+    if (age >= 13 && age <= 15) return `Nghĩa Sĩ Cấp ${age - 13 + 1}`; // 13→C1, 14→C2, 15→C3
+    if (age >= 16) return 'Hiệp Sĩ';
+    return null;
+  }
+
+  function getYearPart(input) {
+    if (!input) return null;
+    if (typeof input === 'number') return input;
+    if (typeof input === 'string') {
+      const m = input.match(/^(\d{4})/);
+      if (m) return Number(m[1]);
+      const d = new Date(input);
+      if (!isNaN(d)) return d.getFullYear();
+      return null;
+    }
+    if (input instanceof Date && !isNaN(input)) return input.getFullYear();
+    return null;
+  }
+
+  function computeAgeByYear(dob) {
+    const birthYear = getYearPart(dob);
+    if (birthYear == null) return null;
+    const age = getCurrentSchoolYear() - birthYear;
+    return age < 0 ? 0 : age;
+  }
+
   // Public surface (non-breaking shape)
   root.Format = {
     randInt,
@@ -189,6 +233,7 @@
     formatMoney,
     capitalize,
     codeToLabel,
+    ageGroupLabelTNTT,
   };
   root.Helpers = {
     getByPath,
@@ -203,5 +248,7 @@
     formatOptionLabel,
     isVisible,
     fieldClass,
+    getFieldDisabled,
+    computeAgeByYear,
   };
 })(typeof window !== 'undefined' ? (window.Util ? window : (window.Util = {}) && window) : globalThis);

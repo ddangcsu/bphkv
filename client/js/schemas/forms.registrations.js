@@ -34,7 +34,7 @@
         type: 'datalist',
         default: '',
         placeholder: 'Start typing ID or name…',
-        onChange: (fieldMeta, ctx, event) => Ctx.onRegFamilyChange(),
+        onChange: (fieldMeta, ctx, event) => Ctx.onRegFamilyChange(ctx),
         disabled: () => Ctx.MODE.EDIT,
       },
       {
@@ -46,7 +46,7 @@
           const src = Ctx.eventOptionsForRegistration;
           return typeof src === 'function' ? src() || [] : (src && src.value) || src || [];
         },
-        onChange: (fieldMeta, ctx, event) => Ctx.onRegEventChange(),
+        onChange: (fieldMeta, ctx, event) => Ctx.onRegEventChange(ctx),
         disabled: ({ form }) => (Ctx.MODE.CREATE && !form.familyId) || Ctx.MODE.EDIT,
       },
       {
@@ -98,7 +98,7 @@
         label: 'Accepted & Signed By',
         type: 'select',
         default: '',
-        selOpt: () => Ctx.signedRegistrationOptions(),
+        selOpt: (fieldMeta, ctx) => Ctx.signedRegistrationOptions(ctx),
       },
     ],
     childrenRow: [
@@ -148,7 +148,7 @@
         label: 'Received By',
         type: 'select',
         default: '',
-        selOpt: () => Ctx.receivedByOptions(),
+        selOpt: (fieldMeta, ctx) => Ctx.receivedByOptions(ctx),
       },
     ],
   };
