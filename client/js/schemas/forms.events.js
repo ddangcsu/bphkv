@@ -31,6 +31,9 @@
         type: 'select',
         selOpt: () => Options.YEAR_OPTIONS,
         default: () => Util.Helpers.getCurrentSchoolYear(),
+        api: {
+          toApi: (v) => Util.Helpers.toNumber(v),
+        },
       },
       { col: 'level', label: 'Scope Level', type: 'select', selOpt: () => Options.LEVEL_OPTIONS, default: '' },
       { col: 'openDate', label: 'Open Date', type: 'date', default: '' },
@@ -38,7 +41,17 @@
     ],
     feeRow: [
       { col: 'code', label: 'Fee Type', type: 'select', selOpt: () => Options.FEE_CODES, default: '' },
-      { col: 'amount', label: 'Fee Amount', type: 'number', default: 0, attrs: { min: 0, step: 1 } },
+      {
+        col: 'amount',
+        label: 'Fee Amount',
+        type: 'number',
+        default: 0,
+        attrs: { min: 0, step: 1 },
+        api: {
+          fromApi: (v) => Util.Helpers.toNumber(v),
+          toApi: (v) => Util.Helpers.toNumber(v),
+        },
+      },
     ],
     prerequisiteRow: [
       {

@@ -222,6 +222,21 @@
     return age < 0 ? 0 : age;
   }
 
+  function listToString(arr, sep = ',') {
+    return Array.isArray(arr) ? arr.join(sep) : typeof arr === 'string' ? arr : '';
+  }
+
+  function stringToList(str, sep = ',') {
+    return (str || '')
+      .split(sep)
+      .map((s) => s.trim())
+      .filter(Boolean);
+  }
+
+  function toNumber(str) {
+    return str == null || str === '' || Number.isFinite(Number(str)) ? Number(str) : 0;
+  }
+
   // Public surface (non-breaking shape)
   root.Format = {
     randInt,
@@ -250,5 +265,8 @@
     fieldClass,
     getFieldDisabled,
     computeAgeByYear,
+    listToString,
+    stringToList,
+    toNumber,
   };
 })(typeof window !== 'undefined' ? (window.Util ? window : (window.Util = {}) && window) : globalThis);

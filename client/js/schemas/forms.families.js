@@ -75,7 +75,16 @@
       { col: 'middle', label: 'Middle', type: 'text', default: '' },
       { col: 'saintName', label: 'Saint Name', type: 'text', default: '' },
       { col: 'dob', label: 'Date of Birth', type: 'date', default: '' },
-      { col: 'allergiesStr', label: 'Allergies (comma)', type: 'text', default: '' },
+      {
+        col: 'allergies',
+        label: 'Allergies (comma)',
+        type: 'text',
+        default: '',
+        api: {
+          fromApi: (v) => Util.Helpers.listToString(v),
+          toApi: (v) => Util.Helpers.stringToList(v),
+        },
+      },
       {
         col: 'isNameException',
         label: 'Name Exception',

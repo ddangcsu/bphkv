@@ -289,7 +289,7 @@
                   </button>
                 </div>
 
-                <div class="grid col7">
+                <div class="grid">
                   <label v-for="f in familyFields.contacts" :key="f.col" :for="`contact-${row.i}-${f.col}`"
                     v-show="isVisible(f, {mode: currentMode, form: familyForm, row: row.c, index: row.i})">
                     {{ f.label }}
@@ -331,6 +331,7 @@
                     </template>
                   </label>
                 </div>
+                <small class="error" v-if="familyErrors?.contactErrors">{{familyErrors?.contactErrors }}</small>
               </div>
             </section>
 
@@ -375,7 +376,7 @@
                   </div>
                 </div>
 
-                <div class="grid col5">
+                <div class="grid">
                   <label v-for="f in familyFields.children" :key="f.col" :for="`child-${row.i}-${f.col}`"
                     v-show="isVisible(f, {mode: currentMode, form: familyForm, row: row.c, index: row.i })">
                     {{ f.label }}
@@ -1756,29 +1757,30 @@
   <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
 
   <!-- Utilities -->
-  <script src="./js/utils/util.js"></script>
+  <script src="./js/utils/util.js" defer></script>
   <!-- Based API -->
-  <script src="./js/api/http.js"></script>
+  <script src="./js/api/http.js" defer></script>
   <!-- Schemas -->
-  <script src="./js/schemas/setup.js"></script>
-  <script src="./js/schemas/options.js"></script>
-  <script src="./js/schemas/forms.events.js"></script>
-  <script src="./js/schemas/forms.families.js"></script>
-  <script src="./js/schemas/forms.registrations.js"></script>
+  <script src="./js/schemas/setup.js" defer></script>
+  <script src="./js/schemas/options.js" defer></script>
+  <script src="./js/schemas/forms.events.js" defer></script>
+  <script src="./js/schemas/forms.families.js" defer></script>
+  <script src="./js/schemas/forms.registrations.js" defer></script>
 
   <!-- Mappers -->
-  <script src="./js/mappers/events.js"></script>
-  <script src="./js/mappers/families.js"></script>
-  <script src="./js/mappers/registrations.js"></script>
+  <script src="./js/utils/mappers.factory.js" defer></script>
+  <script src="./js/mappers/events.js" defer></script>
+  <script src="./js/mappers/families.js" defer></script>
+  <script src="./js/mappers/registrations.js" defer></script>
 
   <!-- App API -->
-  <script src="./js/api/setup.js"></script>
-  <script src="./js/api/events.js"></script>
-  <script src="./js/api/families.js"></script>
-  <script src="./js/api/registrations.js"></script>
+  <script src="./js/api/setup.js" defer></script>
+  <script src="./js/api/events.js" defer></script>
+  <script src="./js/api/families.js" defer></script>
+  <script src="./js/api/registrations.js" defer></script>
 
 
-  <script src="./js/app.js"></script>
+  <script src="./js/app.js" defer></script>
 
   <div id="print-root" aria-hidden="true"></div>
 

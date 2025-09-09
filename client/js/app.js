@@ -426,7 +426,7 @@ const app = createApp({
 
     function validateFamily() {
       const s = familyForm;
-      let e = { household: {}, contacts: [], children: [], notes: [] };
+      let e = { household: {}, contacts: [], children: [], notes: [], contactErrors: '' };
 
       if (!s.id?.trim()) e.household.id = 'required';
       if (!s.parishNumber?.trim() && s.parishMember) e.household.parishNumber = 'required';
@@ -443,6 +443,9 @@ const app = createApp({
         if ((c.email || '').trim() && !/^\S+@\S+\.\S+$/.test(c.email)) ce.email = 'blank or valid email';
         return ce;
       });
+
+      if (!s.contacts.some((c) => PARENT_RELATIONSHIPS.has(c.relationship)))
+        e.contactErrors = 'Contacts must have at least one with Father/Mother/Guardian relationship';
 
       e.children = s.children.map((c) => {
         const ce = {};
@@ -472,10 +475,12 @@ const app = createApp({
       familyErrors.contacts = e.contacts;
       familyErrors.children = e.children;
       familyErrors.notes = e.notes;
+      familyErrors.contactErrors = e.contactErrors;
 
       // final result (pure booleans)
       const noHouseHoldErrors = Object.keys(e.household).length === 0;
-      const noContactsErrors = (e.contacts || []).every((obj) => !obj || Object.keys(obj).length === 0);
+      const noContactsErrors =
+        (e.contacts || []).every((obj) => !obj || Object.keys(obj).length === 0) || e.contactErrors.length === 0;
       const noChildrenErrors = (e.children || []).every((obj) => !obj || Object.keys(obj).length === 0);
       const noNotesErrors = (e.notes || []).every((obj) => !obj || Object.keys(obj).length === 0);
 
@@ -574,43 +579,19 @@ const app = createApp({
       switchSection(SECTION_NAMES.FAMILIES, MODE_NAMES.CREATE);
       setStatus('Creating new family…', 'info', 1200);
     }
-    function beginEditFamily(f) {
-      editingFamilyId.value = f.id;
-      Object.assign(familyForm, newFamilyForm());
-      familyForm.id = f.id;
-      familyForm.parishMember = f.parishMember;
-      familyForm.parishNumber = f.parishNumber || '';
-      familyForm.address = { ...(f.address || {}) };
-      familyForm.contacts = (f.contacts || []).map((c) => ({
-        lastName: c.lastName,
-        firstName: c.firstName,
-        middle: c.middle,
-        relationship: c.relationship,
-        phone: formatUSPhone(c.phone) || '',
-        email: c.email || '',
-        isEmergency: !!c.isEmergency,
-      }));
-      familyForm.children = (f.children || []).map((ch, i) => ({
-        childId: ch.childId || makeId('C'),
-        lastName: ch.lastName,
-        firstName: ch.firstName,
-        middle: ch.middle,
-        saintName: ch.saintName,
-        dob: (ch.dob || '').slice(0, 10),
-        allergiesStr: Array.isArray(ch.allergies) ? ch.allergies.join(',') : '',
-        isNameException: !!ch.isNameException,
-        exceptionNotes: ch.exceptionNotes || '',
-      }));
-      familyForm.notes = (f.notes || []).map((n) => ({
-        timeStamp: n.timeStamp || new Date().toLocaleString(),
-        note: n.note || '',
-        updatedBy: n.updatedBy || '',
-      }));
 
+    function beginEditFamily(apiFamily) {
+      if (!apiFamily || !apiFamily.id) {
+        setStatus('Nothing to edit', 'warn', 1500);
+        return;
+      }
+      editingFamilyId.value = apiFamily.id;
+      const ui = Mappers.Families.toUi(apiFamily || {});
+      Object.assign(familyForm, newFamilyForm(), ui);
       hydrateFamilyErrors();
       snapshotFamilyForm();
       switchSection(SECTION_NAMES.FAMILIES, MODE_NAMES.EDIT);
-      setStatus(`Editing ${f.id}`, 'info', 1200);
+      setStatus(`Editing ${apiFamily.id}`, 'info', 1200);
     }
 
     const parentLastNameSet = computed(() => {
@@ -712,49 +693,10 @@ const app = createApp({
       setStatus('Form reset.', 'info', 1200);
     }
 
-    function buildFamilyPayload() {
-      return {
-        id: familyForm.id,
-        parishMember: familyForm.parishMember,
-        parishNumber: familyForm.parishMember ? familyForm.parishNumber : null,
-        address: {
-          street: familyForm.address.street,
-          city: familyForm.address.city,
-          state: familyForm.address.state,
-          zip: familyForm.address.zip,
-        },
-        contacts: familyForm.contacts.map((c) => ({
-          lastName: c.lastName,
-          firstName: c.firstName,
-          middle: c.middle || null,
-          relationship: c.relationship,
-          phone: c.phone || null,
-          email: c.email || null,
-          isEmergency: !!c.isEmergency,
-        })),
-        children: familyForm.children.map((ch) => ({
-          childId: ch.childId,
-          lastName: ch.lastName,
-          firstName: ch.firstName,
-          middle: ch.middle || null,
-          saintName: ch.saintName || null,
-          dob: ch.dob ? new Date(ch.dob).toISOString() : null,
-          allergies: (ch.allergiesStr || '')
-            .split(',')
-            .map((s) => s.trim())
-            .filter(Boolean),
-          isNameException: !!ch.isNameException,
-          exceptionNotes: ch.exceptionNotes || null,
-        })),
-        notes:
-          familyForm.notes?.length > 0
-            ? familyForm.notes.map((n) => ({
-                timeStamp: n.timeStamp || new Date().toLocaleString(),
-                note: n.note,
-                updatedBy: n.updatedBy,
-              }))
-            : [],
-      };
+    function buildFamilyPayload(form = familyForm) {
+      const payload = Mappers.Families.toApi(form);
+      if (!payload.id && form?.id) payload.id = form.id;
+      return payload;
     }
 
     function submitFamilyForm() {
@@ -952,30 +894,16 @@ const app = createApp({
       setStatus('Creating new event…', 'info', 1200);
     }
 
-    function beginEditEvent(e) {
-      const snap = deepClone(e);
-
-      const prerequisites = (Array.isArray(snap.prerequisites) ? snap.prerequisites : []).map((p) =>
-        typeof p === 'string' ? { eventId: p } : { eventId: p?.eventId || '' },
-      );
-
-      const fees = (snap.fees || []).map((f) => ({ code: f.code, amount: f.amount }));
-
-      Object.assign(eventForm, newEventForm(), snap, { prerequisites, fees });
-
-      if (!EVENT_TYPES.value.some((t) => t.value === eventForm.eventType)) eventForm.eventType = EVENT.REGISTRATION;
-
-      if (eventForm.eventType === EVENT.ADMIN) {
-        eventForm.prerequisites = [];
-      } else if (!Array.isArray(eventForm.prerequisites) || eventForm.prerequisites.length === 0) {
-        addEventPrerequisiteRow();
+    function beginEditEvent(apiEvent) {
+      if (!apiEvent || !apiEvent.id) {
+        setStatus('Nothing to edit', 'warn', 1500);
+        return;
       }
-
-      if (!Array.isArray(eventForm.fees) || eventForm.fees.length === 0) addEventFee();
+      editingEventId.value = apiEvent.id;
+      const ui = Mappers.Events.toUi(apiEvent || {});
+      Object.assign(eventForm, newEventForm(), ui);
 
       clearEventErrors();
-
-      editingEventId.value = e.id;
       snapshotEventForm();
       switchSection(SECTION_NAMES.EVENTS, MODE_NAMES.EDIT);
       setStatus(`Editing ${e.id}`, 'info', 1200);
@@ -993,6 +921,21 @@ const app = createApp({
       if (!LEVEL_OPTIONS.value.some((o) => o.value === eventForm.level)) e.level = 'invalid';
       if (!eventForm.openDate) e.openDate = 'required';
       if (!eventForm.endDate) e.endDate = 'required';
+
+      if (
+        YEAR_OPTIONS.value.some((o) => Number(o.value) === Number(eventForm.year)) &&
+        eventForm.openDate &&
+        eventForm.endDate
+      ) {
+        const boundStart = new Date(Number(eventForm.year), 6, 1); // July = month 6 (0-based)
+        const boundEnd = new Date(Number(eventForm.year) + 1, 6, 0, 23, 59, 59, 999); // June 30 end-of-day
+        const start = new Date(eventForm.openDate);
+        const end = new Date(eventForm.endDate);
+
+        if (start > end) e.openDate = 'Must <= End Date';
+        if (start < boundStart) e.openDate = 'Not in School Year';
+        if (end > boundEnd) e.endDate = 'Not in School Year';
+      }
 
       if (!Array.isArray(eventForm.fees) || eventForm.fees.length === 0) {
         e.fees = 'at least one fee';
@@ -1075,22 +1018,10 @@ const app = createApp({
     }
     const canSaveEvent = computed(() => quickCheckEventForm());
 
-    function buildEventPayload() {
-      return {
-        id: eventForm.id,
-        programId: eventForm.programId,
-        eventType: eventForm.eventType,
-        title: eventForm.title,
-        year: Number(eventForm.year),
-        level: eventForm.level,
-        openDate: eventForm.openDate,
-        endDate: eventForm.endDate,
-        fees: (eventForm.fees || []).map((f) => ({
-          code: f.code,
-          amount: Number(f.amount || 0),
-        })),
-        prerequisites: requiredPrereqType() ? (eventForm.prerequisites || []).map((p) => ({ eventId: p.eventId })) : [],
-      };
+    function buildEventPayload(form = eventForm) {
+      const payload = Mappers.Events.toApi(form);
+      if (!payload.id && form?.id) payload.id = form.id;
+      return payload;
     }
 
     async function submitEventForm() {

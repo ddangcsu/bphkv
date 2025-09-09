@@ -118,6 +118,7 @@ body {
   top: 72px;
   position: sticky;
   z-index: 2;
+  background-color: #ffffff;
 }
 
 .toolbar > .input {
