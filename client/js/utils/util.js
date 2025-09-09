@@ -227,14 +227,40 @@
   }
 
   function stringToList(str, sep = ',') {
-    return (str || '')
-      .split(sep)
-      .map((s) => s.trim())
-      .filter(Boolean);
+    return Array.isArray(str)
+      ? str
+      : (str || '')
+          .split(sep)
+          .map((s) => s.trim())
+          .filter(Boolean);
   }
 
   function toNumber(str) {
     return str == null || str === '' || Number.isFinite(Number(str)) ? Number(str) : 0;
+  }
+
+  function isoLocalString(date = new Date()) {
+    const pad2 = (n) => String(n).padStart(2, '0');
+    const pad3 = (n) => String(n).padStart(3, '0');
+
+    const y = date.getFullYear();
+    const m = pad2(date.getMonth() + 1);
+    const d = pad2(date.getDate());
+    const hh = pad2(date.getHours());
+    const mm = pad2(date.getMinutes());
+    const ss = pad2(date.getSeconds());
+    const ms = pad3(date.getMilliseconds());
+
+    const tz = -date.getTimezoneOffset(); // minutes east of UTC
+    const sign = tz >= 0 ? '+' : '-';
+    const tzh = pad2(Math.floor(Math.abs(tz) / 60));
+    const tzm = pad2(Math.abs(tz) % 60);
+
+    return `${y}-${m}-${d}T${hh}:${mm}:${ss}.${ms}${sign}${tzh}:${tzm}`;
+  }
+
+  function isoNowLocal() {
+    return isoLocalString(new Date());
   }
 
   // Public surface (non-breaking shape)
@@ -268,5 +294,6 @@
     listToString,
     stringToList,
     toNumber,
+    isoNowLocal,
   };
 })(typeof window !== 'undefined' ? (window.Util ? window : (window.Util = {}) && window) : globalThis);

@@ -68,6 +68,9 @@
         default: '',
         disabled: true,
         transform: (v) => Util.Format.codeToLabel(v, Options.YEAR_OPTIONS),
+        api: {
+          toApi: (v) => Util.Helpers.toNumber(v),
+        },
       },
       {
         col: 'programId',
@@ -127,13 +130,38 @@
         default: '',
         disabled: true,
         transform: (v) => (Array.isArray(v) ? v.join(', ') : ''),
+        api: {
+          toApi: (v) => Util.Helpers.stringToList(v),
+        },
       },
     ],
     paymentsRow: [
       { col: 'code', label: 'Fee Type', type: 'select', default: '', selOpt: () => Options.FEE_CODES, disabled: true },
-      { col: 'unitAmount', label: 'Unit Price', type: 'text', default: '', disabled: true, show: true },
-      { col: 'quantity', label: 'Quantity', type: 'text', default: '', disabled: true },
-      { col: 'amount', label: 'Total Amount', type: 'text', default: '', disabled: true },
+      {
+        col: 'unitAmount',
+        label: 'Unit Price',
+        type: 'text',
+        default: '',
+        disabled: true,
+        show: true,
+        api: { toApi: (v) => Util.Helpers.toNumber(v) },
+      },
+      {
+        col: 'quantity',
+        label: 'Quantity',
+        type: 'text',
+        default: '',
+        disabled: true,
+        api: { toApi: (v) => Util.Helpers.toNumber(v) },
+      },
+      {
+        col: 'amount',
+        label: 'Total Amount',
+        type: 'text',
+        default: '',
+        disabled: true,
+        api: { toApi: (v) => Util.Helpers.toNumber(v) },
+      },
       { col: 'method', label: 'Method', type: 'select', default: '', selOpt: () => Options.PAYMENT_METHOD_OPTIONS },
       {
         col: 'txnRef',

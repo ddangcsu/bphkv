@@ -13,12 +13,12 @@
     const { data } = await http.get(`${BASE}/${encodeURIComponent(id)}`);
     return map.toUi(data);
   }
-  async function create(uiPayload) {
-    const { data } = await http.post(BASE, map.toApi(uiPayload));
+  async function create(apiPayload) {
+    const { data } = await http.post(BASE, apiPayload);
     return map.toUi(data);
   }
-  async function update(id, uiPatch) {
-    const { data } = await http.put(`${BASE}/${encodeURIComponent(id)}`, map.toApi(uiPatch));
+  async function update(id, apiPatch) {
+    const { data } = await http.put(`${BASE}/${encodeURIComponent(id)}`, apiPatch);
     return map.toUi(data);
   }
   async function remove(id) {

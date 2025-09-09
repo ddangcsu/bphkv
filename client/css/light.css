@@ -186,11 +186,13 @@ body {
   border-bottom: 1px solid var(--border);
 }
 
+/*
 .table thead {
   top: 100px;
   position: sticky;
   z-index: 2;
 }
+*/
 
 .table thead th {
   background: #dceaf8;
@@ -1116,8 +1118,11 @@ textarea.input[readonly] {
 /* ---------- Screen preview: show it as a Letter sheet ---------- */
 @media screen {
   .print-page {
+    width: auto;
+    /*
     width: 8.5in;
     min-height: 7in;
+    */
     padding: 0.5in; /* 1/2" content margin */
     margin: 2rem auto;
     background: white;

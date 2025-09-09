@@ -215,4 +215,125 @@
 
     return { toUi, toApi };
   };
+
+  Helpers.makeRegistrationMappersFromSchema = function makeRegistrationMappersFromSchema(regSchema) {
+    const mainFields = Array.isArray(regSchema.main) ? regSchema.main : [];
+    const metaFields = Array.isArray(regSchema.meta) ? regSchema.meta : [];
+    const eventSnapFields = Array.isArray(regSchema.eventSnapshot) ? regSchema.eventSnapshot : [];
+    const contactSnapFields = Array.isArray(regSchema.contactSnapshot) ? regSchema.contactSnapshot : [];
+    const childFields = Array.isArray(regSchema.childrenRow) ? regSchema.childrenRow : [];
+    const paymentFields = Array.isArray(regSchema.paymentsRow) ? regSchema.paymentsRow : [];
+
+    function toUi(apiReg = {}) {
+      const ui = {};
+
+      mainFields.forEach((f) => {
+        ui[f.col] = getWithDefault(readFieldValueFromApi(apiReg, f), f.default);
+      });
+      metaFields.forEach((f) => {
+        ui[f.col] = getWithDefault(readFieldValueFromApi(apiReg, f), f.default);
+      });
+
+      const apiEvent = apiReg.event || {};
+      ui.event = {};
+      eventSnapFields.forEach((f) => {
+        ui.event[f.col] = getWithDefault(readFieldValueFromApi(apiEvent, f), f.default);
+      });
+
+      ui.contacts = Array.isArray(apiReg.contacts)
+        ? apiReg.contacts.map((row) => {
+            const out = {};
+            contactSnapFields.forEach((f) => {
+              out[f.col] = getWithDefault(readFieldValueFromApi(row, f), f.default);
+            });
+            return out;
+          })
+        : [];
+
+      ui.children = Array.isArray(apiReg.children)
+        ? apiReg.children.map((row) => {
+            const out = {};
+            childFields.forEach((f) => {
+              out[f.col] = getWithDefault(readFieldValueFromApi(row, f), f.default);
+            });
+            return out;
+          })
+        : [];
+
+      ui.payments = Array.isArray(apiReg.payments)
+        ? apiReg.payments.map((row) => {
+            const out = {};
+            paymentFields.forEach((f) => {
+              out[f.col] = getWithDefault(readFieldValueFromApi(row, f), f.default);
+            });
+            return out;
+          })
+        : [];
+
+      ui.createdAt = apiReg.createdAt !== undefined ? apiReg.createdAt : null;
+      ui.updatedAt = apiReg.updatedAt !== undefined ? apiReg.updatedAt : null;
+
+      return ui;
+    }
+
+    function toApi(uiReg = {}) {
+      const api = {};
+
+      mainFields.forEach((f) => {
+        const [k, v] = writeFieldValueToApi(uiReg, f);
+        if (v !== undefined) api[k] = v;
+      });
+      metaFields.forEach((f) => {
+        const [k, v] = writeFieldValueToApi(uiReg, f);
+        if (v !== undefined) api[k] = v;
+      });
+
+      api.event = {};
+      const uiEvent = uiReg.event || {};
+      eventSnapFields.forEach((f) => {
+        const [k, v] = writeFieldValueToApi(uiEvent, f);
+        if (v !== undefined) api.event[k] = v;
+      });
+
+      api.contacts = Array.isArray(uiReg.contacts)
+        ? uiReg.contacts.map((row) => {
+            const out = {};
+            contactSnapFields.forEach((f) => {
+              const [k, v] = writeFieldValueToApi(row, f);
+              if (v !== undefined) out[k] = v;
+            });
+            return out;
+          })
+        : [];
+
+      api.children = Array.isArray(uiReg.children)
+        ? uiReg.children.map((row) => {
+            const out = {};
+            childFields.forEach((f) => {
+              const [k, v] = writeFieldValueToApi(row, f);
+              if (v !== undefined) out[k] = v;
+            });
+            return out;
+          })
+        : [];
+
+      api.payments = Array.isArray(uiReg.payments)
+        ? uiReg.payments.map((row) => {
+            const out = {};
+            paymentFields.forEach((f) => {
+              const [k, v] = writeFieldValueToApi(row, f);
+              if (v !== undefined) out[k] = v;
+            });
+            return out;
+          })
+        : [];
+
+      api.createdAt = uiReg.createdAt ? uiReg.createdAt : Util.Helpers.isoNowLocal();
+      api.updatedAt = Util.Helpers.isoNowLocal();
+
+      return api;
+    }
+
+    return { toUi, toApi };
+  };
 })(typeof window !== 'undefined' ? window : globalThis);

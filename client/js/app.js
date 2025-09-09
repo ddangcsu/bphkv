@@ -345,7 +345,7 @@ const app = createApp({
 
     const familyRows = ref([]);
     function normalizeFamilyRow(f) {
-      return { ...f, _show: false };
+      return { ...f };
     }
 
     async function loadFamilies({ showStatusIfActive = false } = {}) {
@@ -1304,6 +1304,15 @@ const app = createApp({
       }
     }
 
+    function beginEditRegistration(apiReg) {
+      editingRegistrationId.value = apiReg.id;
+      Object.assign(registrationForm, newRegistrationForm(), Mappers.Registrations.toUi(apiReg || {}));
+      snapshotRegistrationForm();
+      switchSection(SECTION_NAMES.REGISTRATIONS, MODE_NAMES.EDIT);
+      setStatus(`Editing ${apiReg.id}`, 'info', 1200);
+    }
+
+    /*
     function beginEditRegistration(r) {
       const snap = deepClone(r);
       editingRegistrationId.value = snap.id;
@@ -1314,6 +1323,7 @@ const app = createApp({
       setStatus(`Editing ${r.id}`, 'info', 1200);
     }
 
+    */
     // Children selection logic for the "Add Child" button
     // Reuses the same rules as `childRegistrationOptions`
     // (no family → none, non-PC event → none, PF-only prereqs → all,
@@ -1682,51 +1692,8 @@ const app = createApp({
 
     const canSaveRegistration = computed(() => quickCheckRegistration());
 
-    function buildRegistrationPayload() {
-      const nowIso = new Date().toISOString();
-      const ev = selectedEvent.value;
-      return {
-        id: registrationForm.id,
-        eventId: registrationForm.eventId,
-        familyId: registrationForm.familyId,
-        status: registrationForm.status,
-        parishMember: registrationForm.parishMember ?? null,
-        event: {
-          title: ev?.title || registrationForm.event.title,
-          year: ev?.year || registrationForm.event.year,
-          programId: ev?.programId || registrationForm.event.programId,
-          eventType: ev?.eventType || registrationForm.event.eventType,
-        },
-        contacts: registrationForm.contacts.map((c) => ({
-          name: c.name,
-          relationship: c.relationship,
-          phone: c.phone,
-        })),
-        children: (registrationForm.children || [])
-          .filter((c) => c.childId)
-          .map((c) => ({
-            childId: c.childId,
-            saintName: c.saintName,
-            fullName: c.fullName,
-            dob: c.dob,
-            allergies: c.allergies,
-            status: c.status || 'pending',
-          })),
-        payments: (registrationForm.payments || []).map((p) => ({
-          code: p.code,
-          unitAmount: Number(p.unitAmount || 0),
-          amount: Number(p.amount || 0),
-          quantity: Number(p.quantity || 0),
-          method: p.method || null,
-          txnRef: p.txnRef || null,
-          receiptNo: p.receiptNo || null,
-          receivedBy: p.receivedBy || null,
-          paidAt: p.method ? nowIso : null,
-        })),
-        acceptedBy: registrationForm.acceptedBy || null,
-        createdAt: MODE.CREATE ? nowIso : registrationForm.createdAt || nowIso,
-        updatedAt: nowIso,
-      };
+    function buildRegistrationPayload(form = registrationForm) {
+      return Mappers.Registrations.toApi(form);
     }
     async function submitRegistrationForm() {
       if (isReadOnly.value) {
@@ -1746,7 +1713,7 @@ const app = createApp({
       const payload = buildRegistrationPayload();
       if (MODE.CREATE) {
         try {
-          await API.Registrations.create(buildRegistrationPayload());
+          await API.Registrations.create(payload);
           await loadRegistrations();
           setStatus('Registration created.', 'success', 1500);
           goBackSection();
