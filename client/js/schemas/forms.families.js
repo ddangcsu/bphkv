@@ -28,6 +28,7 @@
           type: 'select',
           selOpt: () => Options.YES_NO_OPTIONS,
           default: true,
+          api: { fromApi: (v) => Boolean(v), toApi: (v) => Boolean(v) },
         },
         {
           col: 'parishNumber',
@@ -66,7 +67,13 @@
         default: '',
       },
       { col: 'email', label: 'Email Address', type: 'text', default: '' },
-      { col: 'isEmergency', label: 'Primary Contact', type: 'checkbox', default: false },
+      {
+        col: 'isEmergency',
+        label: 'Primary Contact',
+        type: 'checkbox',
+        default: false,
+        api: { fromApi: (v) => Boolean(v), toApi: (v) => Boolean(v) },
+      },
     ],
     children: [
       { col: 'childId', label: 'Child ID', type: 'text', show: false, default: () => Util.Format.makeId('S') },
@@ -90,6 +97,7 @@
         label: 'Name Exception',
         type: 'checkbox',
         default: false,
+        api: { fromApi: (v) => Boolean(v), toApi: (v) => Boolean(v) },
         show: (ctx) => Ctx.needsNameException(ctx),
       },
       {

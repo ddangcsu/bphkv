@@ -19,12 +19,6 @@ const STORAGE_KEYS = {
 
 const app = createApp({
   setup() {
-    /**
-     * De-reference utilities helper
-     */
-    const { normPhone, formatUSPhone, makeId, formatMoney } = Util.Format;
-    const { getByPath, setDefault, evalMaybe, deepClone, getCurrentSchoolYear } = Util.Helpers;
-
     //
     // Core setup settings (mostly lookup options)
     //
@@ -39,28 +33,6 @@ const app = createApp({
     });
 
     Schema.Options.setLiveSetupRef(setup);
-
-    /**
-     * Define OPTIONS
-     */
-    const YES_NO_OPTIONS = computed(() => Schema.Options.YES_NO_OPTIONS);
-    const REG_STATUS_OPTIONS = computed(() => Schema.Options.REG_STATUS_OPTIONS);
-    const PROGRAM_OPTIONS = computed(() => Schema.Options.PROGRAM_OPTIONS);
-    const RELATIONSHIP_OPTIONS = computed(() => Schema.Options.RELATIONSHIP_OPTIONS);
-    const FEE_CODES = computed(() => Schema.Options.FEE_CODES);
-    const EVENT_TYPES = computed(() => Schema.Options.EVENT_TYPES);
-    const LEVEL_OPTIONS = computed(() => Schema.Options.LEVEL_OPTIONS);
-    const PAYMENT_METHOD_OPTIONS = computed(() => Schema.Options.PAYMENT_METHOD_OPTIONS);
-    const VOLUNTEERS_OPTIONS = computed(() => Schema.Options.VOLUNTEERS_OPTIONS);
-    const YEAR_OPTIONS = computed(() => Schema.Options.YEAR_OPTIONS);
-
-    /**
-     * Define ENUMS
-     */
-    const PROGRAM = Schema.Options.ENUMS.PROGRAM;
-    const EVENT = Schema.Options.ENUMS.EVENT;
-    const LEVEL = Schema.Options.ENUMS.LEVEL;
-    const METHOD = Schema.Options.ENUMS.METHOD;
 
     async function loadSetup({ showStatusIfActive = false } = {}) {
       try {
@@ -86,6 +58,33 @@ const app = createApp({
         setStatus('Save failed.', 'error', 2000);
       }
     }
+
+    /**
+     * Define OPTIONS
+     */
+    const YES_NO_OPTIONS = computed(() => Schema.Options.YES_NO_OPTIONS);
+    const PROGRAM_OPTIONS = computed(() => Schema.Options.PROGRAM_OPTIONS);
+    const RELATIONSHIP_OPTIONS = computed(() => Schema.Options.RELATIONSHIP_OPTIONS);
+    const FEE_CODES = computed(() => Schema.Options.FEE_CODES);
+    const EVENT_TYPES = computed(() => Schema.Options.EVENT_TYPES);
+    const LEVEL_OPTIONS = computed(() => Schema.Options.LEVEL_OPTIONS);
+    const PAYMENT_METHOD_OPTIONS = computed(() => Schema.Options.PAYMENT_METHOD_OPTIONS);
+    const VOLUNTEERS_OPTIONS = computed(() => Schema.Options.VOLUNTEERS_OPTIONS);
+    const YEAR_OPTIONS = computed(() => Schema.Options.YEAR_OPTIONS);
+
+    /**
+     * Define ENUMS
+     */
+    const PROGRAM = Schema.Options.ENUMS.PROGRAM;
+    const EVENT = Schema.Options.ENUMS.EVENT;
+    const LEVEL = Schema.Options.ENUMS.LEVEL;
+    const METHOD = Schema.Options.ENUMS.METHOD;
+
+    /**
+     * De-reference utilities helper
+     */
+    const { normPhone, formatUSPhone, formatMoney } = Util.Format;
+    const { getByPath, setDefault, getCurrentSchoolYear } = Util.Helpers;
 
     // =========================================================
     // GLOBAL UI / STATUS
@@ -183,19 +182,19 @@ const app = createApp({
     const breadcrumbs = computed(() => {
       if (SECTION.FAMILIES) {
         return [
-          { label: 'Families', onClick: goFamilyList },
+          { label: 'Families', onClick: () => switchSection(SECTION_NAMES.FAMILIES) },
           { label: MODE.LIST ? 'Browse Families' : MODE.CREATE ? 'Create Family' : 'Edit Family' },
         ];
       }
       if (SECTION.EVENTS) {
         return [
-          { label: 'Events', onClick: goEventList },
+          { label: 'Events', onClick: () => switchSection(SECTION_NAMES.EVENTS) },
           { label: MODE.LIST ? 'Browse Events' : MODE.CREATE ? 'Create Event' : 'Edit Event' },
         ];
       }
       if (SECTION.REGISTRATIONS) {
         return [
-          { label: 'Registrations', onClick: goRegistrationList },
+          { label: 'Registrations', onClick: () => switchSection(SECTION_NAMES.REGISTRATIONS) },
           {
             label: MODE.LIST ? 'Browse Registrations' : MODE.CREATE ? 'Create Registration' : 'Edit Registration',
           },
@@ -203,7 +202,7 @@ const app = createApp({
       }
       if (SECTION.ROSTERS) {
         return [
-          { label: 'Rosters', onClick: goRosterList },
+          { label: 'Rosters', onClick: switchSection(SECTION_NAMES.ROSTERS) },
           {
             label: MODE.LIST ? 'Enrollment Rosters' : '',
           },
@@ -321,40 +320,29 @@ const app = createApp({
     const isVisible = Util.Helpers.isVisible;
     const fieldClass = Util.Helpers.fieldClass;
     const getFieldDisabled = Util.Helpers.getFieldDisabled;
-
-    function isNonNegativeNumber(val) {
-      if (val === null || val === undefined || val === '') return false;
-      if (typeof val !== 'number' || !Number.isFinite(val)) return false;
-      return val >= 0;
-    }
+    const isNonNegativeNumber = Util.Helpers.isNonNegativeNumber;
+    const maskLast4 = Util.Format.maskLast4;
+    const computeAgeByYear = Util.Helpers.computeAgeByYear;
+    const displayChildNameAndAge = Util.Format.displayChildNameAndAge;
 
     function displayEventFees(evt) {
       return evt.fees?.length > 0 ? evt.fees.map((item) => item.code + '-$' + String(item.amount)).join(' / ') : '—';
     }
-
-    const maskLast4 = (s = '') => {
-      const d = normPhone(s);
-      return d ? `•${d.slice(-4)}` : '';
-    };
 
     // =========================================================
     // FAMILIES
     // =========================================================
     const familySearch = ref('');
     const editingFamilyId = ref(null);
-
     const familyRows = ref([]);
-    function normalizeFamilyRow(f) {
-      return { ...f };
-    }
 
     async function loadFamilies({ showStatusIfActive = false } = {}) {
       try {
         const list = await API.Families.list();
-        familyRows.value = list.map(normalizeFamilyRow);
-
+        familyRows.value = list;
         if (showStatusIfActive && SECTION.FAMILIES) setStatus('Families loaded.', 'info', 1200);
       } catch {
+        setStatus('Error encountered loading Families list', 'error', 3000);
         familyRows.value = [];
       }
     }
@@ -568,10 +556,6 @@ const app = createApp({
 
     // nav
 
-    function goFamilyList() {
-      switchSection(SECTION_NAMES.FAMILIES, MODE_NAMES.LIST);
-      familySearch.value = '';
-    }
     function beginCreateFamily() {
       Object.assign(familyForm, newFamilyForm());
       hydrateFamilyErrors();
@@ -636,18 +620,6 @@ const app = createApp({
       });
     });
 
-    const computeAgeByYear = Util.Helpers.computeAgeByYear;
-
-    function displayChildNameAndAge(child) {
-      const ln = (child?.lastName ?? '').trim();
-      const fn = (child?.firstName ?? '').trim();
-      const mn = (child?.middle ?? '').trim();
-      // Use array to join it
-      const name = [ln, [fn, mn].filter(Boolean).join(' ')].filter(Boolean).join(', ');
-      const age = computeAgeByYear(child?.dob);
-      return age == null ? name : `${name} - ${age} yo`;
-    }
-
     async function addFamilyContact() {
       if (isReadOnly.value) return;
       familyForm.contacts.push(newFamilyContact());
@@ -693,13 +665,7 @@ const app = createApp({
       setStatus('Form reset.', 'info', 1200);
     }
 
-    function buildFamilyPayload(form = familyForm) {
-      const payload = Mappers.Families.toApi(form);
-      if (!payload.id && form?.id) payload.id = form.id;
-      return payload;
-    }
-
-    function submitFamilyForm() {
+    async function submitFamilyForm() {
       if (isReadOnly.value) {
         setStatus('Read-only mode: cannot save.', 'warn', 1800);
         return;
@@ -709,44 +675,38 @@ const app = createApp({
         setStatus('Error found. Please fix errors before trying to save', 'error', 3500);
         return;
       }
+
+      if (!familyForm.id?.trim()) {
+        setStatus('Family ID is missing from form.', 'error', 2000);
+        return;
+      }
+
       if (!isFamilyDirty.value) {
         setStatus('No changes to save.', 'warn', 1500);
         return;
       }
-      saveFamilyRecord();
+      await saveFamily();
     }
 
-    async function saveFamilyRecord() {
-      if (!familyForm.id?.trim()) {
-        setStatus('Family ID is required.', 'error', 2000);
-        return;
-      }
+    async function saveFamily() {
       setStatus('Saving Family data...');
-      const payload = buildFamilyPayload();
-      if (MODE.CREATE) {
-        try {
-          await API.Families.create(payload);
-          await loadFamilies();
-          setStatus('Family created.', 'success', 1500);
-          await nextTick();
-          goBackSection();
-        } catch (e) {
-          setStatus('Create failed.', 'error', 3000);
-          console.error(e);
-        }
-        return;
-      }
+      const payload = Mappers.Families.toApi(familyForm);
 
-      const patch = { ...payload };
-      delete patch.id;
       try {
-        await API.Families.update(editingFamilyId.value, patch);
+        if (MODE.CREATE) {
+          await API.Families.create(payload);
+          setStatus('Family created.', 'success', 1500);
+        } else {
+          const patch = { ...payload };
+          delete patch.id;
+          await API.Families.update(editingFamilyId.value, patch);
+          setStatus('Family updated.', 'success', 1500);
+        }
         await loadFamilies();
-        setStatus('Family updated.', 'success', 1500);
         await nextTick();
         goBackSection();
       } catch (e) {
-        setStatus('Update failed.', 'error', 3000);
+        setStatus('Create failed.', 'error', 3000);
         console.error(e);
       }
     }
@@ -877,10 +837,6 @@ const app = createApp({
         return matchesQ && byProg && byLevel && byYear;
       });
     });
-
-    function goEventList() {
-      switchSection(SECTION_NAMES.EVENTS, MODE_NAMES.LIST);
-    }
 
     function beginCreateEvent() {
       Object.assign(eventForm, newEventForm());
@@ -1018,12 +974,6 @@ const app = createApp({
     }
     const canSaveEvent = computed(() => quickCheckEventForm());
 
-    function buildEventPayload(form = eventForm) {
-      const payload = Mappers.Events.toApi(form);
-      if (!payload.id && form?.id) payload.id = form.id;
-      return payload;
-    }
-
     async function submitEventForm() {
       if (isReadOnly.value) {
         setStatus('Read-only mode: cannot save.', 'warn', 1800);
@@ -1039,31 +989,28 @@ const app = createApp({
         setStatus('Please fix errors before saving.', 'error', 2500);
         return;
       }
-      const payload = buildEventPayload();
 
-      if (MODE.CREATE) {
-        try {
-          await API.Events.create(buildEventPayload());
-          await loadEvents();
+      await saveEvent();
+    }
+
+    async function saveEvent() {
+      setStatus('Saving Event...');
+      const payload = Mappers.Events.toApi(eventForm);
+      try {
+        if (MODE.CREATE) {
+          await API.Events.create(payload);
           setStatus('Event created.', 'success', 1500);
-          goBackSection();
-        } catch (err) {
-          console.error(err);
-          setStatus('Create failed.', 'error', 3000);
-        }
-      } else {
-        try {
-          const id = editingEventId.value;
-          const patchPayload = { ...payload };
-          delete patchPayload.id;
-          await API.Events.update(id, patchPayload);
-          await loadEvents();
+        } else {
+          const patch = { ...payload };
+          delete patch.id;
+          await API.Events.update(editingEventId.value, patch);
           setStatus('Event updated.', 'success', 1500);
-          goBackSection();
-        } catch (err) {
-          console.error(err);
-          setStatus('Update failed.', 'error', 3000);
         }
+        await loadEvents();
+        goBackSection();
+      } catch (err) {
+        console.error(err);
+        setStatus('Failed to save Event.', 'error', 3000);
       }
     }
 
@@ -1244,10 +1191,6 @@ const app = createApp({
       });
     });
 
-    function goRegistrationList() {
-      switchSection(SECTION_NAMES.REGISTRATIONS, MODE_NAMES.LIST);
-    }
-
     function beginCreateRegistration() {
       Object.assign(registrationForm, newRegistrationForm());
       registrationErrors.main = {};
@@ -1312,18 +1255,6 @@ const app = createApp({
       setStatus(`Editing ${apiReg.id}`, 'info', 1200);
     }
 
-    /*
-    function beginEditRegistration(r) {
-      const snap = deepClone(r);
-      editingRegistrationId.value = snap.id;
-
-      Object.assign(registrationForm, newRegistrationForm(), snap);
-      snapshotRegistrationForm();
-      switchSection(SECTION_NAMES.REGISTRATIONS, MODE_NAMES.EDIT);
-      setStatus(`Editing ${r.id}`, 'info', 1200);
-    }
-
-    */
     // Children selection logic for the "Add Child" button
     // Reuses the same rules as `childRegistrationOptions`
     // (no family → none, non-PC event → none, PF-only prereqs → all,
@@ -1692,9 +1623,6 @@ const app = createApp({
 
     const canSaveRegistration = computed(() => quickCheckRegistration());
 
-    function buildRegistrationPayload(form = registrationForm) {
-      return Mappers.Registrations.toApi(form);
-    }
     async function submitRegistrationForm() {
       if (isReadOnly.value) {
         setStatus('Read-only mode: cannot save.', 'warn', 1800);
@@ -1710,30 +1638,28 @@ const app = createApp({
         setStatus('Please fix errors before saving.', 'error', 2500);
         return;
       }
-      const payload = buildRegistrationPayload();
-      if (MODE.CREATE) {
-        try {
+
+      await saveRegistration();
+    }
+
+    async function saveRegistration() {
+      setStatus('Saving Registration...');
+      const payload = Mappers.Registrations.toApi(registrationForm);
+      try {
+        if (MODE.CREATE) {
           await API.Registrations.create(payload);
-          await loadRegistrations();
           setStatus('Registration created.', 'success', 1500);
-          goBackSection();
-        } catch (e) {
-          console.error(e);
-          setStatus('Create failed.', 'error', 3000);
-        }
-      } else {
-        try {
-          const id = editingRegistrationId.value;
+        } else {
           const patch = { ...payload };
           delete patch.id;
-          await API.Registrations.update(id, patch);
-          await loadRegistrations();
+          await API.Registrations.update(editingRegistrationId.value, patch);
           setStatus('Registration updated.', 'success', 1500);
-          goBackSection();
-        } catch (e) {
-          console.error(e);
-          setStatus('Update failed.', 'error', 3000);
         }
+        await loadRegistrations();
+        goBackSection();
+      } catch (e) {
+        console.error(e);
+        setStatus('Failed to save Registration.', 'error', 3000);
       }
     }
 
@@ -1763,10 +1689,6 @@ const app = createApp({
       rosterFilter.year = '';
       rosterFilter.age = '';
       rosterSearch.value = '';
-    }
-
-    function goRosterList() {
-      switchSection(SECTION_NAMES.ROSTERS, MODE_NAMES.LIST);
     }
 
     const eventOptionsForRoster = computed(() => {
@@ -2125,7 +2047,6 @@ const app = createApp({
       ageOptions,
       ageGroupLabelTNTT,
       resetRosterFilters,
-      goRosterList,
 
       showContactsModal,
       contactsModal,

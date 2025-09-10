@@ -65,6 +65,23 @@
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
 
+  const maskLast4 = (s = '') => {
+    const d = normPhone(s);
+    return d ? `•${d.slice(-4)}` : '';
+  };
+
+  function displayChildNameAndAge(child) {
+    if (typeof child !== 'object') return null;
+
+    const ln = (child?.lastName ?? '').trim();
+    const fn = (child?.firstName ?? '').trim();
+    const mn = (child?.middle ?? '').trim();
+    // Use array to join it
+    const name = [ln, [fn, mn].filter(Boolean).join(' ')].filter(Boolean).join(', ');
+    const age = computeAgeByYear(child?.dob);
+    return age == null ? name : `${name} - ${age} yo`;
+  }
+
   // ------------------------------
   // Generic helpers (data/object)
   // ------------------------------
@@ -263,6 +280,12 @@
     return isoLocalString(new Date());
   }
 
+  function isNonNegativeNumber(val) {
+    if (val === null || val === undefined || val === '') return false;
+    if (typeof val !== 'number' || !Number.isFinite(val)) return false;
+    return val >= 0;
+  }
+
   // Public surface (non-breaking shape)
   root.Format = {
     randInt,
@@ -275,6 +298,8 @@
     capitalize,
     codeToLabel,
     ageGroupLabelTNTT,
+    maskLast4,
+    displayChildNameAndAge,
   };
   root.Helpers = {
     getByPath,
@@ -295,5 +320,6 @@
     stringToList,
     toNumber,
     isoNowLocal,
+    isNonNegativeNumber,
   };
 })(typeof window !== 'undefined' ? (window.Util ? window : (window.Util = {}) && window) : globalThis);

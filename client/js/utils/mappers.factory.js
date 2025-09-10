@@ -4,16 +4,71 @@
   const U = global.Util || (global.Util = {});
   const Helpers = U.Helpers || (U.Helpers = {});
 
-  // add near the top
-  function isMissing(v) {
-    return v === undefined || v === null || (typeof v === 'number' && Number.isNaN(v));
+  function cloneIfObject(valueToClone) {
+    const isObjectLike = valueToClone && typeof valueToClone === 'object';
+    return isObjectLike ? JSON.parse(JSON.stringify(valueToClone)) : valueToClone;
   }
 
   function getWithDefault(rawValue, defaultValue) {
-    if (isMissing(rawValue)) {
-      return typeof defaultValue === 'function' ? defaultValue() : defaultValue;
+    const isMissing = rawValue === undefined || rawValue === null;
+    if (!isMissing) return rawValue;
+
+    const resolvedDefault = typeof defaultValue === 'function' ? defaultValue() : defaultValue;
+
+    return cloneIfObject(resolvedDefault);
+  }
+
+  /**
+   * compute a minimal deep diff between two values.
+   * - If arrays differ at all, returns the entire new array.
+   * - If objects differ, returns an object with only changed keys.
+   * - For primitives (and mismatched types), returns the new value.
+   * - Returns `undefined` if there is no difference.
+   */
+  function diffDeep(previousValue, nextValue) {
+    if (previousValue === nextValue) return undefined;
+
+    const prevTag = Object.prototype.toString.call(previousValue);
+    const nextTag = Object.prototype.toString.call(nextValue);
+
+    // Different types → replace wholesale
+    if (prevTag !== nextTag) return cloneIfObject(nextValue);
+
+    // Arrays: replace if any element differs (simple + predictable)
+    if (nextTag === '[object Array]') {
+      const prevArray = previousValue || [];
+      const nextArray = nextValue || [];
+
+      if (prevArray.length !== nextArray.length) return cloneIfObject(nextArray);
+
+      for (let index = 0; index < nextArray.length; index++) {
+        const elementDiff = diffDeep(prevArray[index], nextArray[index]);
+        if (elementDiff !== undefined) return cloneIfObject(nextArray);
+      }
+      return undefined;
     }
-    return rawValue;
+
+    // Objects: recurse by keys
+    if (nextTag === '[object Object]') {
+      const diffResult = {};
+      const allKeys = new Set([...Object.keys(previousValue || {}), ...Object.keys(nextValue || {})]);
+
+      let hasChanges = false;
+      for (const key of allKeys) {
+        const valueDiff = diffDeep(
+          previousValue ? previousValue[key] : undefined,
+          nextValue ? nextValue[key] : undefined,
+        );
+        if (valueDiff !== undefined) {
+          hasChanges = true;
+          diffResult[key] = valueDiff;
+        }
+      }
+      return hasChanges ? diffResult : undefined;
+    }
+
+    // Primitive or anything else → replace
+    return cloneIfObject(nextValue);
   }
 
   function getApiKey(fieldMeta) {
@@ -335,5 +390,50 @@
     }
 
     return { toUi, toApi };
+  };
+
+  Helpers.makeFamilyPatchFromSchema = function makeFamilyPatchFromSchema(
+    familySchema,
+    originalApiObject,
+    updatedUiObject,
+  ) {
+    const mapperFactory = Helpers.makeFamilyMappersFromSchema;
+    if (typeof mapperFactory !== 'function') return {};
+    const { toApi } = mapperFactory(familySchema);
+
+    const previousApi = originalApiObject || {};
+    const nextApi = toApi(updatedUiObject || {});
+    const delta = diffDeep(previousApi, nextApi);
+    return delta || {};
+  };
+
+  Helpers.makeEventPatchFromSchema = function makeEventPatchFromSchema(
+    eventSchema,
+    originalApiObject,
+    updatedUiObject,
+  ) {
+    const mapperFactory = Helpers.makeEventMappersFromSchema;
+    if (typeof mapperFactory !== 'function') return {};
+    const { toApi } = mapperFactory(eventSchema);
+
+    const previousApi = originalApiObject || {};
+    const nextApi = toApi(updatedUiObject || {});
+    const delta = diffDeep(previousApi, nextApi);
+    return delta || {};
+  };
+
+  Helpers.makeRegistrationPatchFromSchema = function makeRegistrationPatchFromSchema(
+    regSchema,
+    originalApiObject,
+    updatedUiObject,
+  ) {
+    const mapperFactory = Helpers.makeRegistrationMappersFromSchema;
+    if (typeof mapperFactory !== 'function') return {};
+    const { toApi } = mapperFactory(regSchema);
+
+    const previousApi = originalApiObject || {};
+    const nextApi = toApi(updatedUiObject || {});
+    const delta = diffDeep(previousApi, nextApi);
+    return delta || {};
   };
 })(typeof window !== 'undefined' ? window : globalThis);
