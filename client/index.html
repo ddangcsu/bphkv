@@ -82,6 +82,31 @@
                 Clear
               </button>
             </div>
+            <div class="toolbar">
+              <!-- Page size selector -->
+              <div class="pager toolbar-row">
+                <label>Rows:
+                  <select v-model.number="familyPageSize">
+                    <option v-for="n in familyPageSizeOptions" :key="n" :value="n">
+                      {{ n === 0 ? 'All' : n }}
+                    </option>
+                  </select>
+                </label>
+
+                <span class="ml-2">
+                  {{ familyTotalRows ? (familyPageStart + 1) : 0 }}–{{ Math.min(familyPageEnd, familyTotalRows) }}
+                  of {{ familyTotalRows }}
+                </span>
+
+                <div class="pager-buttons">
+                  <button @click="goFamilyFirst" :disabled="familyPage <= 1">« First</button>
+                  <button @click="goFamilyPrev" :disabled="familyPage <= 1">‹ Prev</button>
+                  <span class="ml-2">Page {{ familyPage }} / {{ familyTotalPages }}</span>
+                  <button @click="goFamilyNext" :disabled="familyPage >= familyTotalPages">Next ›</button>
+                  <button @click="goFamilyLast" :disabled="familyPage >= familyTotalPages">Last »</button>
+                </div>
+              </div>
+            </div>
             <table class="table">
               <thead>
                 <tr>
@@ -97,7 +122,7 @@
                 </tr>
               </thead>
               <tbody>
-                <template v-for="f in filteredFamilyRows" :key="f.id">
+                <template v-for="f in pagedFamilies" :key="f.id">
                   <tr>
                     <td>{{ f.id }}</td>
                     <td class="badge" :data-variant="codeToLabel(f.parishMember, YES_NO_OPTIONS)">{{

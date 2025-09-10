@@ -347,6 +347,73 @@ const app = createApp({
       }
     }
 
+    const filteredFamilyRows = computed(() => {
+      if (!familySearch.value) return familyRows.value;
+      const q = familySearch.value.toLowerCase();
+      const qDigits = normPhone(familySearch.value);
+      return familyRows.value.filter((f) => {
+        const hitsTop =
+          (f.id || '').toLowerCase().includes(q) ||
+          (f.parishNumber || '').toLowerCase().includes(q) ||
+          (f.address?.city || '').toLowerCase().includes(q);
+        const hitsContacts = (f.contacts || []).some(
+          (c) =>
+            (c.lastName || '').toLowerCase().includes(q) ||
+            (c.firstName || '').toLowerCase().includes(q) ||
+            (c.middle || '').toLowerCase().includes(q) ||
+            [c.lastName, [c.firstName, c.middle].join(' ')].join(', ').toLowerCase().includes(q) ||
+            [c.lastName, c.firstName, c.middle].join(' ').toLowerCase().includes(q) ||
+            (c.email || '').toLowerCase().includes(q) ||
+            (qDigits && normPhone(c.phone).includes(qDigits)),
+        );
+        return hitsTop || hitsContacts;
+      });
+    });
+
+    /**
+     * FAMILIES LIST PAGINATION
+     */
+    // ---- Families pagination state
+    const familyPageSizeOptions = [5, 10, 15, 0]; // 0 = All
+    const familyPageSize = ref(10);
+    const familyPage = ref(1);
+
+    const familyTotalRows = computed(() => filteredFamilyRows.value.length);
+    const familyIsAll = computed(() => familyPageSize.value === 0);
+    const familyTotalPages = computed(() =>
+      familyIsAll.value ? 1 : Math.max(1, Math.ceil(familyTotalRows.value / familyPageSize.value)),
+    );
+
+    const familyPageStart = computed(() => (familyIsAll.value ? 0 : (familyPage.value - 1) * familyPageSize.value));
+    const familyPageEnd = computed(() =>
+      familyIsAll.value ? familyTotalRows.value : familyPageStart.value + familyPageSize.value,
+    );
+
+    const pagedFamilies = computed(() =>
+      familyIsAll.value
+        ? filteredFamilyRows.value
+        : filteredFamilyRows.value.slice(familyPageStart.value, familyPageEnd.value),
+    );
+
+    // Reset to page 1 whenever the dataset or page size changes
+    watch([filteredFamilyRows, familyPageSize], () => {
+      familyPage.value = 1;
+    });
+
+    // Simple pager actions
+    function goFamilyFirst() {
+      familyPage.value = 1;
+    }
+    function goFamilyPrev() {
+      familyPage.value = Math.max(1, familyPage.value - 1);
+    }
+    function goFamilyNext() {
+      familyPage.value = Math.min(familyTotalPages.value, familyPage.value + 1);
+    }
+    function goFamilyLast() {
+      familyPage.value = familyTotalPages.value;
+    }
+
     const contactDisplay = (f, one = false) => {
       const contacts = Array.isArray(f.contacts) ? f.contacts : [];
       if (!contacts.length) return '—';
@@ -596,29 +663,6 @@ const app = createApp({
     const parentLastNamesDisplay = computed(() =>
       [...parentLastNameSet.value].map((e) => Util.Format.capitalize(e)).join(' / '),
     );
-
-    const filteredFamilyRows = computed(() => {
-      if (!familySearch.value) return familyRows.value;
-      const q = familySearch.value.toLowerCase();
-      const qDigits = normPhone(familySearch.value);
-      return familyRows.value.filter((f) => {
-        const hitsTop =
-          (f.id || '').toLowerCase().includes(q) ||
-          (f.parishNumber || '').toLowerCase().includes(q) ||
-          (f.address?.city || '').toLowerCase().includes(q);
-        const hitsContacts = (f.contacts || []).some(
-          (c) =>
-            (c.lastName || '').toLowerCase().includes(q) ||
-            (c.firstName || '').toLowerCase().includes(q) ||
-            (c.middle || '').toLowerCase().includes(q) ||
-            [c.lastName, [c.firstName, c.middle].join(' ')].join(', ').toLowerCase().includes(q) ||
-            [c.lastName, c.firstName, c.middle].join(' ').toLowerCase().includes(q) ||
-            (c.email || '').toLowerCase().includes(q) ||
-            (qDigits && normPhone(c.phone).includes(qDigits)),
-        );
-        return hitsTop || hitsContacts;
-      });
-    });
 
     async function addFamilyContact() {
       if (isReadOnly.value) return;
@@ -1981,6 +2025,20 @@ const app = createApp({
       addFamilyNote,
       removeFamilyNote,
       contactDisplay,
+      // pagination list
+
+      familyPageSizeOptions,
+      familyPageSize,
+      familyPage,
+      familyTotalRows,
+      familyTotalPages,
+      familyPageStart,
+      familyPageEnd,
+      pagedFamilies,
+      goFamilyFirst,
+      goFamilyPrev,
+      goFamilyNext,
+      goFamilyLast,
 
       // events
       eventSearch,
