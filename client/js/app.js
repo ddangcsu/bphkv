@@ -12,9 +12,9 @@
 const { createApp, ref, reactive, computed, onMounted, watch, nextTick } = Vue;
 
 const STORAGE_KEYS = {
-  section: "ui.currentSection",
-  mode: "ui.currentMode",
-  fromSection: "ui.fromSection",
+  section: 'ui.currentSection',
+  mode: 'ui.currentMode',
+  fromSection: 'ui.fromSection',
 };
 
 const app = createApp({
@@ -38,12 +38,12 @@ const app = createApp({
       try {
         const data = await API.Setup.getOrSeed();
         Object.assign(setup, data);
-        if (showStatusIfActive) setStatus("Setup loaded.", "info", 1200);
+        if (showStatusIfActive) setStatus('Setup loaded.', 'info', 1200);
       } catch (e) {
-        console.error("Failed to load setup:", e);
+        console.error('Failed to load setup:', e);
         // As a last resort, use fallback in-memory so app still works
         Object.assign(setup, Schema.Setup.FALLBACK_SETUP);
-        setStatus("Using default setup (load failed).", "warn", 1500);
+        setStatus('Using default setup (load failed).', 'warn', 1500);
       }
     }
 
@@ -51,11 +51,11 @@ const app = createApp({
       const payload = { ...JSON.parse(JSON.stringify(setup)) };
       try {
         await API.Setup.update(payload);
-        setStatus("Settings saved.", "success", 1200);
+        setStatus('Settings saved.', 'success', 1200);
         await loadSetup({ showStatusIfActive: false });
       } catch (e) {
-        console.error("saveSetup failed:", e);
-        setStatus("Save failed.", "error", 2000);
+        console.error('saveSetup failed:', e);
+        setStatus('Save failed.', 'error', 2000);
       }
     }
 
@@ -92,17 +92,17 @@ const app = createApp({
 
     // === Enum Modes / Sections ===
     const MODE_NAMES = Object.freeze({
-      LIST: "list",
-      CREATE: "create",
-      EDIT: "edit",
+      LIST: 'list',
+      CREATE: 'create',
+      EDIT: 'edit',
     });
 
     const SECTION_NAMES = Object.freeze({
-      FAMILIES: "families",
-      EVENTS: "events",
-      REGISTRATIONS: "registrations",
-      ROSTERS: "rosters",
-      SETTINGS: "settings",
+      FAMILIES: 'families',
+      EVENTS: 'events',
+      REGISTRATIONS: 'registrations',
+      ROSTERS: 'rosters',
+      SETTINGS: 'settings',
     });
 
     const currentSection = ref(sessionStorage.getItem(STORAGE_KEYS.section) || SECTION_NAMES.FAMILIES);
@@ -114,8 +114,8 @@ const app = createApp({
     const fromSection = ref(sessionStorage.getItem(STORAGE_KEYS.fromSection) || SECTION_NAMES.FAMILIES);
     watch(fromSection, (v) => sessionStorage.setItem(STORAGE_KEYS.fromSection, v));
 
-    const READONLY = ref(JSON.parse(sessionStorage.getItem("ui.readonly") || "false"));
-    watch(READONLY, (v) => sessionStorage.setItem("ui.readonly", JSON.stringify(!!v)));
+    const READONLY = ref(JSON.parse(sessionStorage.getItem('ui.readonly') || 'false'));
+    watch(READONLY, (v) => sessionStorage.setItem('ui.readonly', JSON.stringify(!!v)));
 
     function mapFlags(enumObj, sourceRef) {
       const map = {};
@@ -135,7 +135,7 @@ const app = createApp({
     const isReadOnly = computed(() => READONLY.value && currentMode.value === MODE_NAMES.EDIT);
 
     function isKnownSection(s) {
-      return typeof s === "string" && Object.values(SECTION_NAMES).includes(s);
+      return typeof s === 'string' && Object.values(SECTION_NAMES).includes(s);
     }
     // Update your existing switchSection so it *optionally* takes a mode
     function switchSection(s, mode = MODE_NAMES.LIST, { rememberFrom = true } = {}) {
@@ -157,24 +157,24 @@ const app = createApp({
     }
 
     const BURGER_MENU = [
-      { id: SECTION_NAMES.FAMILIES, label: "Families Data", icon: "fa-solid fa-people-roof", onClick: switchSection },
-      { id: SECTION_NAMES.EVENTS, label: "Events Setup", icon: "fa-regular fa-calendar-days", onClick: switchSection },
+      { id: SECTION_NAMES.FAMILIES, label: 'Families Data', icon: 'fa-solid fa-people-roof', onClick: switchSection },
+      { id: SECTION_NAMES.EVENTS, label: 'Events Setup', icon: 'fa-regular fa-calendar-days', onClick: switchSection },
       {
         id: SECTION_NAMES.REGISTRATIONS,
-        label: "Registrations",
-        icon: "fa-solid fa-address-card",
+        label: 'Registrations',
+        icon: 'fa-solid fa-address-card',
         onClick: switchSection,
       },
       {
         id: SECTION_NAMES.ROSTERS,
-        label: "Enrollment Rosters",
-        icon: "fa-solid fa-clipboard-list",
+        label: 'Enrollment Rosters',
+        icon: 'fa-solid fa-clipboard-list',
         onClick: switchSection,
       },
       {
         id: SECTION_NAMES.SETTINGS,
-        label: "Settings",
-        icon: "fa-solid fa-sliders",
+        label: 'Settings',
+        icon: 'fa-solid fa-sliders',
         onClick: () => switchSection(SECTION_NAMES.SETTINGS, MODE_NAMES.EDIT),
       },
     ];
@@ -182,53 +182,53 @@ const app = createApp({
     const breadcrumbs = computed(() => {
       if (SECTION.FAMILIES) {
         return [
-          { label: "Families", onClick: () => switchSection(SECTION_NAMES.FAMILIES) },
-          { label: MODE.LIST ? "Browse Families" : MODE.CREATE ? "Create Family" : "Edit Family" },
+          { label: 'Families', onClick: () => switchSection(SECTION_NAMES.FAMILIES) },
+          { label: MODE.LIST ? 'Browse Families' : MODE.CREATE ? 'Create Family' : 'Edit Family' },
         ];
       }
       if (SECTION.EVENTS) {
         return [
-          { label: "Events", onClick: () => switchSection(SECTION_NAMES.EVENTS) },
-          { label: MODE.LIST ? "Browse Events" : MODE.CREATE ? "Create Event" : "Edit Event" },
+          { label: 'Events', onClick: () => switchSection(SECTION_NAMES.EVENTS) },
+          { label: MODE.LIST ? 'Browse Events' : MODE.CREATE ? 'Create Event' : 'Edit Event' },
         ];
       }
       if (SECTION.REGISTRATIONS) {
         return [
-          { label: "Registrations", onClick: () => switchSection(SECTION_NAMES.REGISTRATIONS) },
+          { label: 'Registrations', onClick: () => switchSection(SECTION_NAMES.REGISTRATIONS) },
           {
-            label: MODE.LIST ? "Browse Registrations" : MODE.CREATE ? "Create Registration" : "Edit Registration",
+            label: MODE.LIST ? 'Browse Registrations' : MODE.CREATE ? 'Create Registration' : 'Edit Registration',
           },
         ];
       }
       if (SECTION.ROSTERS) {
         return [
-          { label: "Rosters", onClick: switchSection(SECTION_NAMES.ROSTERS) },
+          { label: 'Rosters', onClick: switchSection(SECTION_NAMES.ROSTERS) },
           {
-            label: MODE.LIST ? "Enrollment Rosters" : "",
+            label: MODE.LIST ? 'Enrollment Rosters' : '',
           },
         ];
       }
       if (SECTION.SETTINGS) {
         return [
-          { label: "Settings", onClick: () => switchSection(SECTION_NAMES.SETTINGS, MODE_NAMES.EDIT) },
-          { label: "Edit Options" },
+          { label: 'Settings', onClick: () => switchSection(SECTION_NAMES.SETTINGS, MODE_NAMES.EDIT) },
+          { label: 'Edit Options' },
         ];
       }
     });
 
-    const status = reactive({ text: "", variant: "info", visible: false });
+    const status = reactive({ text: '', variant: 'info', visible: false });
 
     const statusIcon = computed(
       () =>
         ({
-          success: "fa-solid fa-circle-check",
-          warn: "fa-solid fa-triangle-exclamation",
-          error: "fa-solid fa-circle-exclamation",
-          info: "fa-solid fa-circle-info",
-        }[status.variant] || "fa-solid fa-circle-info")
+          success: 'fa-solid fa-circle-check',
+          warn: 'fa-solid fa-triangle-exclamation',
+          error: 'fa-solid fa-circle-exclamation',
+          info: 'fa-solid fa-circle-info',
+        }[status.variant] || 'fa-solid fa-circle-info'),
     );
 
-    function setStatus(text, variant = "info", ms = 2000) {
+    function setStatus(text, variant = 'info', ms = 2000) {
       status.text = text;
       status.variant = variant;
       status.visible = true;
@@ -257,20 +257,20 @@ const app = createApp({
         syncEnum(LEVEL, LEVEL_OPTIONS.value || []);
         syncEnum(METHOD, PAYMENT_METHOD_OPTIONS.value || []);
       },
-      { deep: true, immediate: true }
+      { deep: true, immediate: true },
     );
 
     // Build program-aware options from VOLUNTEERS_OPTIONS
-    function volunteersFor(programId = "") {
+    function volunteersFor(programId = '') {
       const all = VOLUNTEERS_OPTIONS.value || [];
-      const pid = String(programId || "").trim();
+      const pid = String(programId || '').trim();
 
       // Merge GLOBAL (no programId) + program-specific; dedupe by value
       const merged = new Map();
       for (const r of all) {
         if (!r) continue;
-        const rpid = String(r.program || "").trim(); // "" means global
-        if (rpid === "" || rpid === pid) {
+        const rpid = String(r.program || '').trim(); // "" means global
+        if (rpid === '' || rpid === pid) {
           const value = r.value;
           const label = r.label ?? String(value);
           merged.set(String(value), { value, label });
@@ -291,19 +291,19 @@ const app = createApp({
     const codeToLabel = Util.Format.codeToLabel;
 
     function relativeDisplayValue(row, fld, rd) {
-      if (!row || !fld || !rd) return "";
+      if (!row || !fld || !rd) return '';
       const src = RD_SOURCES[rd.rdSource];
-      if (!src) return "";
+      if (!src) return '';
       const list = src() || [];
       const controlValue = row[fld.col];
-      if (!controlValue) return "";
+      if (!controlValue) return '';
 
-      const keyProp = rd.rdKey || "id";
+      const keyProp = rd.rdKey || 'id';
       const match = list.find((item) => item && item[keyProp] === controlValue);
-      if (!match) return "";
+      if (!match) return '';
 
       const raw = getByPath(match, rd.rdCol);
-      if (raw == null) return "";
+      if (raw == null) return '';
 
       if (rd.map) return codeToLabel(raw, rd.map);
       return String(raw);
@@ -326,13 +326,12 @@ const app = createApp({
     const displayChildNameAndAge = Util.Format.displayChildNameAndAge;
 
     function displayEventFees(evt) {
-      return evt.fees?.length > 0 ? evt.fees.map((item) => item.code + "-$" + String(item.amount)).join(" / ") : "—";
+      return evt.fees?.length > 0 ? evt.fees.map((item) => item.code + '-$' + String(item.amount)).join(' / ') : '—';
     }
 
     // =========================================================
     // FAMILIES
     // =========================================================
-    const familySearch = ref("");
     const editingFamilyId = ref(null);
     const familyRows = ref([]);
 
@@ -340,64 +339,53 @@ const app = createApp({
       try {
         const list = await API.Families.list();
         familyRows.value = list;
-        if (showStatusIfActive && SECTION.FAMILIES) setStatus("Families loaded.", "info", 1200);
+        if (showStatusIfActive && SECTION.FAMILIES) setStatus('Families loaded.', 'info', 1200);
       } catch {
-        setStatus("Error encountered loading Families list", "error", 3000);
+        setStatus('Error encountered loading Families list', 'error', 3000);
         familyRows.value = [];
       }
     }
 
-    const filteredFamilyRows = computed(() => {
-      if (!familySearch.value) return familyRows.value;
-      const q = familySearch.value.toLowerCase();
-      const qDigits = normPhone(familySearch.value);
-      return familyRows.value.filter((f) => {
-        const hitsTop =
-          (f.id || "").toLowerCase().includes(q) ||
-          (f.parishNumber || "").toLowerCase().includes(q) ||
-          (f.address?.city || "").toLowerCase().includes(q);
-        const hitsContacts = (f.contacts || []).some(
-          (c) =>
-            (c.lastName || "").toLowerCase().includes(q) ||
-            (c.firstName || "").toLowerCase().includes(q) ||
-            (c.middle || "").toLowerCase().includes(q) ||
-            [c.lastName, [c.firstName, c.middle].join(" ")].join(", ").toLowerCase().includes(q) ||
-            [c.lastName, c.firstName, c.middle].join(" ").toLowerCase().includes(q) ||
-            (c.email || "").toLowerCase().includes(q) ||
-            (qDigits && normPhone(c.phone).includes(qDigits))
-        );
-        return hitsTop || hitsContacts;
+    // Define text filter for family
+    const familiesTextFilter = Util.Helpers.createTextFilter((row, raw, terms, utils) => {
+      const parts = [row.id, row.parishNumber, row.address?.city];
+      (row.contacts || []).forEach((c) => {
+        //const fn1 = [c.lastName, [c.firstName, c.middle].join(' ')].join(', '); // last, first middle
+        //const fn2 = [c.lastName, c.middle, c.firstName].join(' '); // last middle first
+        //const fn3 = [c.firstName, c.lastName].join(' '); // first last
+        parts.push(c.lastName, c.firstName, c.middle, c.email, Util.Format.normPhone(c.phone));
       });
+      /* We skip search by child name for now
+      (row.children || []).forEach((kid) => parts.push(kid.firstName, kid.lastName, kid.middle, kid.saintName));
+      */
+      return utils.includesAllTerms(utils.normalize(parts.filter(Boolean).join(' ')), terms);
     });
 
-    /**
-     * FAMILIES LIST PAGINATION
-     */
-    // One pager instance for Families
-    const familiesPager = Util.Helpers.createPager({ source: filteredFamilyRows });
+    const filteredFamilyRows = computed(() => familiesTextFilter.applyTo(familyRows.value));
 
-    // ---- Families pagination state
+    // Create a family list pagination instance
+    const familiesPager = Util.Helpers.createPager({ source: filteredFamilyRows });
 
     const contactDisplay = (f, one = false) => {
       const contacts = Array.isArray(f.contacts) ? f.contacts : [];
-      if (!contacts.length) return "—";
+      if (!contacts.length) return '—';
 
       // Prioritize the first 2 among Father / Mother / Guardian
-      const prioritized = contacts.filter((c) => PARENT_RELATIONSHIPS.has((c.relationship || "").trim()));
-      const others = contacts.filter((c) => !PARENT_RELATIONSHIPS.has((c.relationship || "").trim()));
+      const prioritized = contacts.filter((c) => PARENT_RELATIONSHIPS.has((c.relationship || '').trim()));
+      const others = contacts.filter((c) => !PARENT_RELATIONSHIPS.has((c.relationship || '').trim()));
       const pick = [...prioritized, ...others].slice(0, 2);
       const result = pick.map((c) => {
-        if ("lastName" in c) {
-          return `${c.lastName}, ${c.firstName}${c.middle ? " " + c.middle : ""} ${maskLast4(c.phone)}`;
+        if ('lastName' in c) {
+          return `${c.lastName}, ${c.firstName}${c.middle ? ' ' + c.middle : ''} ${maskLast4(c.phone)}`;
         } else {
           return `${c.name} ${maskLast4(c.phone)}`;
         }
       });
-      return one ? result[0] : result.join(" / ");
+      return one ? result[0] : result.join(' / ');
     };
 
     function onContactPhoneInput(fieldMeta, ctx, event) {
-      const raw = event?.target?.value ?? "";
+      const raw = event?.target?.value ?? '';
       const formatted = formatUSPhone(raw);
       const target = ctx?.row || ctx?.form;
       // write-back here (meta function owns mutation)
@@ -407,15 +395,9 @@ const app = createApp({
       }
     }
 
-    const hasActiveFamilyFilter = computed(() => !!familySearch.value);
-
-    function resetFamilyFilters() {
-      familySearch.value = "";
-    }
-
     function needsNameException(ctx) {
       const target = ctx?.row || ctx?.form;
-      const last = String(target?.lastName ?? "")
+      const last = String(target?.lastName ?? '')
         .trim()
         .toLowerCase();
       return !!last && !parentLastNameSet.value.has(last);
@@ -445,37 +427,37 @@ const app = createApp({
 
     function validateFamily() {
       const s = familyForm;
-      let e = { household: {}, contacts: [], children: [], notes: [], contactErrors: "" };
+      let e = { household: {}, contacts: [], children: [], notes: [], contactErrors: '' };
 
-      if (!s.id?.trim()) e.household.id = "required";
-      if (!s.parishNumber?.trim() && s.parishMember) e.household.parishNumber = "required";
-      if (!s.address.street?.trim()) e.household.street = "required";
-      if (!s.address.city?.trim()) e.household.city = "required";
-      if (!/^\d{5}(-\d{4})?$/.test(s.address.zip || "")) e.household.zip = "must be 5 digits.";
+      if (!s.id?.trim()) e.household.id = 'required';
+      if (!s.parishNumber?.trim() && s.parishMember) e.household.parishNumber = 'required';
+      if (!s.address.street?.trim()) e.household.street = 'required';
+      if (!s.address.city?.trim()) e.household.city = 'required';
+      if (!/^\d{5}(-\d{4})?$/.test(s.address.zip || '')) e.household.zip = 'must be 5 digits.';
 
       e.contacts = s.contacts.map((c) => {
         const ce = {};
-        if (!c.lastName?.trim()) ce.lastName = "required";
-        if (!c.firstName?.trim()) ce.firstName = "required";
-        if (!c.relationship?.trim()) ce.relationship = "required";
-        if (!c.phone?.trim() || normPhone(c.phone).length !== 10) ce.phone = "required and must be 10 digit";
-        if ((c.email || "").trim() && !/^\S+@\S+\.\S+$/.test(c.email)) ce.email = "blank or valid email";
+        if (!c.lastName?.trim()) ce.lastName = 'required';
+        if (!c.firstName?.trim()) ce.firstName = 'required';
+        if (!c.relationship?.trim()) ce.relationship = 'required';
+        if (!c.phone?.trim() || normPhone(c.phone).length !== 10) ce.phone = 'required and must be 10 digit';
+        if ((c.email || '').trim() && !/^\S+@\S+\.\S+$/.test(c.email)) ce.email = 'blank or valid email';
         return ce;
       });
 
       if (!s.contacts.some((c) => PARENT_RELATIONSHIPS.has(c.relationship)))
-        e.contactErrors = "Contacts must have at least one with Father/Mother/Guardian relationship";
+        e.contactErrors = 'Contacts must have at least one with Father/Mother/Guardian relationship';
 
       e.children = s.children.map((c) => {
         const ce = {};
-        if (!c.lastName?.trim()) ce.lastName = "required";
-        if (!c.firstName?.trim()) ce.firstName = "required";
-        if (!c.dob?.trim()) ce.dob = "required.";
-        const matchesParent = parentLastNameSet.value.has((c.lastName || "").toLowerCase());
+        if (!c.lastName?.trim()) ce.lastName = 'required';
+        if (!c.firstName?.trim()) ce.firstName = 'required';
+        if (!c.dob?.trim()) ce.dob = 'required.';
+        const matchesParent = parentLastNameSet.value.has((c.lastName || '').toLowerCase());
         if (!matchesParent) {
-          if (!c.isNameException) ce.isNameException = "Check here if name exception";
-          if (!c.exceptionNotes?.trim()) ce.exceptionNotes = "required";
-          if (!(c.isNameException && c.exceptionNotes?.trim())) ce.lastName = ce.lastName || "mismatch w/ parents";
+          if (!c.isNameException) ce.isNameException = 'Check here if name exception';
+          if (!c.exceptionNotes?.trim()) ce.exceptionNotes = 'required';
+          if (!(c.isNameException && c.exceptionNotes?.trim())) ce.lastName = ce.lastName || 'mismatch w/ parents';
         }
         return ce;
       });
@@ -484,8 +466,8 @@ const app = createApp({
         s.notes?.length > 0
           ? s.notes.map((n) => {
               const ce = {};
-              if (!n.note?.trim()) ce.note = "required";
-              if (!n.updatedBy?.trim()) ce.updatedBy = "required";
+              if (!n.note?.trim()) ce.note = 'required';
+              if (!n.updatedBy?.trim()) ce.updatedBy = 'required';
               return ce;
             })
           : [];
@@ -507,20 +489,20 @@ const app = createApp({
     }
 
     // paging
-    const familyContactsMode = ref("all");
-    const familyChildrenMode = ref("all");
+    const familyContactsMode = ref('all');
+    const familyChildrenMode = ref('all');
     const familyContactsIndex = ref(0);
     const familyChildrenIndex = ref(0);
 
     const visibleFamilyContacts = computed(() => {
       if (!familyForm.contacts.length) return [];
-      if (familyContactsMode.value === "all") return familyForm.contacts.map((c, i) => ({ c, i }));
+      if (familyContactsMode.value === 'all') return familyForm.contacts.map((c, i) => ({ c, i }));
       const i = Math.min(familyContactsIndex.value, familyForm.contacts.length - 1);
       return [{ c: familyForm.contacts[i], i }];
     });
     const visibleFamilyChildren = computed(() => {
       if (!familyForm.children.length) return [];
-      if (familyChildrenMode.value === "all") return familyForm.children.map((c, i) => ({ c, i }));
+      if (familyChildrenMode.value === 'all') return familyForm.children.map((c, i) => ({ c, i }));
       const i = Math.min(familyChildrenIndex.value, familyForm.children.length - 1);
       return [{ c: familyForm.children[i], i }];
     });
@@ -543,14 +525,14 @@ const app = createApp({
       (n) => {
         if (familyContactsIndex.value > n - 1) familyContactsIndex.value = Math.max(0, n - 1);
         hydrateFamilyErrors();
-      }
+      },
     );
     watch(
       () => familyForm.children.length,
       (n) => {
         if (familyChildrenIndex.value > n - 1) familyChildrenIndex.value = Math.max(0, n - 1);
         hydrateFamilyErrors();
-      }
+      },
     );
 
     watch(
@@ -559,27 +541,27 @@ const app = createApp({
         for (const ch of familyForm.children || []) {
           if (!needsNameException({ form: familyForm, row: ch })) {
             ch.isNameException = false;
-            ch.exceptionNotes = "";
+            ch.exceptionNotes = '';
           }
         }
       },
-      { deep: true, immediate: true }
+      { deep: true, immediate: true },
     );
 
     // dirty tracking
-    const eventOriginalSnapshot = ref("");
+    const eventOriginalSnapshot = ref('');
     const isEventDirty = computed(() => JSON.stringify(eventForm) !== eventOriginalSnapshot.value);
     function snapshotEventForm() {
       eventOriginalSnapshot.value = JSON.stringify(eventForm);
     }
 
-    const registrationOriginalSnapshot = ref("");
+    const registrationOriginalSnapshot = ref('');
     const isRegistrationDirty = computed(() => JSON.stringify(registrationForm) !== registrationOriginalSnapshot.value);
     function snapshotRegistrationForm() {
       registrationOriginalSnapshot.value = JSON.stringify(registrationForm);
     }
 
-    const familyOriginalSnapshot = ref("");
+    const familyOriginalSnapshot = ref('');
     const isFamilyDirty = computed(() => JSON.stringify(familyForm) !== familyOriginalSnapshot.value);
     function snapshotFamilyForm() {
       familyOriginalSnapshot.value = JSON.stringify(familyForm);
@@ -592,12 +574,12 @@ const app = createApp({
       hydrateFamilyErrors();
       snapshotFamilyForm();
       switchSection(SECTION_NAMES.FAMILIES, MODE_NAMES.CREATE);
-      setStatus("Creating new family…", "info", 1200);
+      setStatus('Creating new family…', 'info', 1200);
     }
 
     function beginEditFamily(apiFamily) {
       if (!apiFamily || !apiFamily.id) {
-        setStatus("Nothing to edit", "warn", 1500);
+        setStatus('Nothing to edit', 'warn', 1500);
         return;
       }
       editingFamilyId.value = apiFamily.id;
@@ -606,16 +588,16 @@ const app = createApp({
       hydrateFamilyErrors();
       snapshotFamilyForm();
       switchSection(SECTION_NAMES.FAMILIES, MODE_NAMES.EDIT);
-      setStatus(`Editing ${apiFamily.id}`, "info", 1200);
+      setStatus(`Editing ${apiFamily.id}`, 'info', 1200);
     }
 
     const parentLastNameSet = computed(() => {
       const s = new Set();
       for (const c of familyForm.contacts ?? []) {
-        const rel = String(c?.relationship ?? "").trim();
+        const rel = String(c?.relationship ?? '').trim();
         if (!PARENT_RELATIONSHIPS.has(rel)) continue;
 
-        const ln = String(c?.lastName ?? "")
+        const ln = String(c?.lastName ?? '')
           .trim()
           .toLowerCase();
         if (ln) s.add(ln);
@@ -625,14 +607,14 @@ const app = createApp({
 
     // Display-friendly string
     const parentLastNamesDisplay = computed(() =>
-      [...parentLastNameSet.value].map((e) => Util.Format.capitalize(e)).join(" / ")
+      [...parentLastNameSet.value].map((e) => Util.Format.capitalize(e)).join(' / '),
     );
 
     async function addFamilyContact() {
       if (isReadOnly.value) return;
       familyForm.contacts.push(newFamilyContact());
       familyErrors.contacts.push({});
-      if (familyContactsMode.value === "single") familyContactsIndex.value = familyForm.contacts.length - 1;
+      if (familyContactsMode.value === 'single') familyContactsIndex.value = familyForm.contacts.length - 1;
       await nextTick();
     }
     function removeFamilyContact(i) {
@@ -644,7 +626,7 @@ const app = createApp({
       if (isReadOnly.value) return;
       familyForm.children.push(newFamilyChild());
       familyErrors.children.push({});
-      if (familyChildrenMode.value === "single") familyChildrenIndex.value = familyForm.children.length - 1;
+      if (familyChildrenMode.value === 'single') familyChildrenIndex.value = familyForm.children.length - 1;
       await nextTick();
     }
     function removeFamilyChild(i) {
@@ -670,51 +652,51 @@ const app = createApp({
       Object.assign(familyForm, newFamilyForm());
       hydrateFamilyErrors();
       snapshotFamilyForm();
-      setStatus("Form reset.", "info", 1200);
+      setStatus('Form reset.', 'info', 1200);
     }
 
     async function submitFamilyForm() {
       if (isReadOnly.value) {
-        setStatus("Read-only mode: cannot save.", "warn", 1800);
+        setStatus('Read-only mode: cannot save.', 'warn', 1800);
         return;
       }
 
       if (!validateFamily()) {
-        setStatus("Error found. Please fix errors before trying to save", "error", 3500);
+        setStatus('Error found. Please fix errors before trying to save', 'error', 3500);
         return;
       }
 
       if (!familyForm.id?.trim()) {
-        setStatus("Family ID is missing from form.", "error", 2000);
+        setStatus('Family ID is missing from form.', 'error', 2000);
         return;
       }
 
       if (!isFamilyDirty.value) {
-        setStatus("No changes to save.", "warn", 1500);
+        setStatus('No changes to save.', 'warn', 1500);
         return;
       }
       await saveFamily();
     }
 
     async function saveFamily() {
-      setStatus("Saving Family data...");
+      setStatus('Saving Family data...');
       const payload = Mappers.Families.toApi(familyForm);
 
       try {
         if (MODE.CREATE) {
           await API.Families.create(payload);
-          setStatus("Family created.", "success", 1500);
+          setStatus('Family created.', 'success', 1500);
         } else {
           const patch = { ...payload };
           delete patch.id;
           await API.Families.update(editingFamilyId.value, patch);
-          setStatus("Family updated.", "success", 1500);
+          setStatus('Family updated.', 'success', 1500);
         }
         await loadFamilies();
         await nextTick();
         goBackSection();
       } catch (e) {
-        setStatus("Create failed.", "error", 3000);
+        setStatus('Create failed.', 'error', 3000);
         console.error(e);
       }
     }
@@ -728,14 +710,13 @@ const app = createApp({
       try {
         const list = await API.Events.list();
         eventRows.value = list;
-        if (showStatusIfActive && SECTION.EVENTS) setStatus("Events loaded.", "info", 1200);
+        if (showStatusIfActive && SECTION.EVENTS) setStatus('Events loaded.', 'info', 1200);
       } catch (e) {
-        console.error("loadEvents failed:", e);
+        console.error('loadEvents failed:', e);
         eventRows.value = [];
       }
     }
 
-    const eventSearch = ref("");
     const eventErrors = reactive({});
     const editingEventId = ref(null);
 
@@ -754,14 +735,14 @@ const app = createApp({
       const reqType = requiredPrereqType();
       if (!reqType) return [];
       const selectedElsewhere = new Set(
-        (form?.prerequisites || []).map((p, i) => (i === index ? null : p.eventId)).filter(Boolean)
+        (form?.prerequisites || []).map((p, i) => (i === index ? null : p.eventId)).filter(Boolean),
       );
       return eventRows.value.filter(
         (ev) =>
           Number(ev.year) === Number(form?.year) &&
           ev.id !== eventForm.id &&
-          (ev.eventType || "") === reqType &&
-          !selectedElsewhere.has(ev.id)
+          (ev.eventType || '') === reqType &&
+          !selectedElsewhere.has(ev.id),
       );
     }
 
@@ -785,17 +766,17 @@ const app = createApp({
           eventForm.prerequisites = [];
         } else {
           eventForm.prerequisites = (eventForm.prerequisites || []).filter((p) => {
-            const id = (p?.eventId || "").trim();
+            const id = (p?.eventId || '').trim();
             if (!id) return true;
             const ev = eventRows.value.find((e) => e.id === id);
             if (!ev) return false;
             if (Number(ev.year) !== Number(eventForm.year)) return false;
             if (ev.id === eventForm.id) return false;
-            return (ev.eventType || "") === reqType;
+            return (ev.eventType || '') === reqType;
           });
           if (eventForm.prerequisites.length === 0) addEventPrerequisiteRow();
         }
-      }
+      },
     );
 
     function addEventFee() {
@@ -810,7 +791,7 @@ const app = createApp({
     function addEventPrerequisiteRow() {
       if (isReadOnly.value) return;
       eventForm.prerequisites.push(
-        buildFromFields(eventFields.prerequisiteRow, { ctx: { index: 0, form: eventForm } })
+        buildFromFields(eventFields.prerequisiteRow, { ctx: { index: 0, form: eventForm } }),
       );
     }
     function removeEventPrerequisiteRow(i) {
@@ -825,38 +806,40 @@ const app = createApp({
 
     const eventFilterDefs = [
       {
-        key: "programId",
-        label: "Program",
-        type: "select",
+        key: 'programId',
+        label: 'Program',
+        type: 'select',
         options: () => Schema.Options.PROGRAM_OPTIONS,
-        emptyValue: "",
+        emptyValue: '',
       },
-      { key: "year", label: "School Year", type: "select", options: () => Schema.Options.YEAR_OPTIONS, emptyValue: "" },
+      { key: 'year', label: 'School Year', type: 'select', options: () => Schema.Options.YEAR_OPTIONS, emptyValue: '' },
       {
-        key: "level",
-        label: "Level Scope",
-        type: "select",
+        key: 'level',
+        label: 'Level Scope',
+        type: 'select',
         options: () => Schema.Options.LEVEL_OPTIONS,
-        emptyValue: "",
+        emptyValue: '',
       },
       {
-        key: "eventType",
-        label: "Event Type",
-        type: "select",
+        key: 'eventType',
+        label: 'Event Type',
+        type: 'select',
         options: () => Schema.Options.EVENT_TYPES,
-        emptyValue: "",
+        emptyValue: '',
       },
     ];
 
     const eventsFilterMenu = Util.Helpers.createFilterMenu(eventFilterDefs);
 
+    // Create the text filter with an event-specific matcher on id and title
+    const eventsTextFilter = Util.Helpers.createTextFilter((row, raw, terms, utils) => {
+      const haystack = utils.normalize(`${row.id} ${row.title}`);
+      return utils.includesAllTerms(haystack, terms);
+    });
+
     const filteredEventRows = computed(() => {
       const byMenu = eventsFilterMenu.applyTo(eventRows.value);
-      const q = (eventSearch.value || "").toLowerCase();
-      return byMenu.filter((e) => {
-        const matchesQ = e.id.toLowerCase().includes(q) || (e.title || "").toLowerCase().includes(q);
-        return matchesQ;
-      });
+      return eventsTextFilter.applyTo(byMenu);
     });
 
     // Event List Pagination instance
@@ -871,12 +854,12 @@ const app = createApp({
       if (showPrerequisites.value && eventForm.prerequisites.length === 0) addEventPrerequisiteRow();
       snapshotEventForm();
       switchSection(SECTION_NAMES.EVENTS, MODE_NAMES.CREATE);
-      setStatus("Creating new event…", "info", 1200);
+      setStatus('Creating new event…', 'info', 1200);
     }
 
     function beginEditEvent(apiEvent) {
       if (!apiEvent || !apiEvent.id) {
-        setStatus("Nothing to edit", "warn", 1500);
+        setStatus('Nothing to edit', 'warn', 1500);
         return;
       }
       editingEventId.value = apiEvent.id;
@@ -886,21 +869,21 @@ const app = createApp({
       clearEventErrors();
       snapshotEventForm();
       switchSection(SECTION_NAMES.EVENTS, MODE_NAMES.EDIT);
-      setStatus(`Editing ${e.id}`, "info", 1200);
+      setStatus(`Editing ${e.id}`, 'info', 1200);
     }
 
     function validateEventForm() {
       clearEventErrors();
       const e = {};
-      if (MODE.CREATE && !eventForm.id?.trim()) e.id = "required";
+      if (MODE.CREATE && !eventForm.id?.trim()) e.id = 'required';
 
-      if (!PROGRAM_OPTIONS.value.some((o) => o.value === eventForm.programId)) e.programId = "required";
-      if (!EVENT_TYPES.value.some((o) => o.value === eventForm.eventType)) e.eventType = "required";
-      if (!eventForm.title?.trim()) e.title = "required";
-      if (!YEAR_OPTIONS.value.some((o) => Number(o.value) === Number(eventForm.year))) e.year = "year required";
-      if (!LEVEL_OPTIONS.value.some((o) => o.value === eventForm.level)) e.level = "invalid";
-      if (!eventForm.openDate) e.openDate = "required";
-      if (!eventForm.endDate) e.endDate = "required";
+      if (!PROGRAM_OPTIONS.value.some((o) => o.value === eventForm.programId)) e.programId = 'required';
+      if (!EVENT_TYPES.value.some((o) => o.value === eventForm.eventType)) e.eventType = 'required';
+      if (!eventForm.title?.trim()) e.title = 'required';
+      if (!YEAR_OPTIONS.value.some((o) => Number(o.value) === Number(eventForm.year))) e.year = 'year required';
+      if (!LEVEL_OPTIONS.value.some((o) => o.value === eventForm.level)) e.level = 'invalid';
+      if (!eventForm.openDate) e.openDate = 'required';
+      if (!eventForm.endDate) e.endDate = 'required';
 
       if (
         YEAR_OPTIONS.value.some((o) => Number(o.value) === Number(eventForm.year)) &&
@@ -912,21 +895,21 @@ const app = createApp({
         const start = new Date(eventForm.openDate);
         const end = new Date(eventForm.endDate);
 
-        if (start > end) e.openDate = "Must <= End Date";
-        if (start < boundStart) e.openDate = "Not in School Year";
-        if (end > boundEnd) e.endDate = "Not in School Year";
+        if (start > end) e.openDate = 'Must <= End Date';
+        if (start < boundStart) e.openDate = 'Not in School Year';
+        if (end > boundEnd) e.endDate = 'Not in School Year';
       }
 
       if (!Array.isArray(eventForm.fees) || eventForm.fees.length === 0) {
-        e.fees = "at least one fee";
+        e.fees = 'at least one fee';
       } else {
         for (const f of eventForm.fees) {
           if (!FEE_CODES.value.some((o) => o.value === f.code)) {
-            e.fees = "invalid fee code";
+            e.fees = 'invalid fee code';
             break;
           }
           if (!isNonNegativeNumber(f.amount)) {
-            e.fees = "fee amount ≥ 0";
+            e.fees = 'fee amount ≥ 0';
             break;
           }
         }
@@ -935,34 +918,34 @@ const app = createApp({
       const reqType = requiredPrereqType();
       if (reqType) {
         if (!Array.isArray(eventForm.prerequisites) || eventForm.prerequisites.length === 0) {
-          e.prerequisites = "at least one prerequisite";
+          e.prerequisites = 'at least one prerequisite';
         } else {
           const seen = new Set();
           for (const p of eventForm.prerequisites) {
-            const id = (p?.eventId || "").trim();
+            const id = (p?.eventId || '').trim();
             if (!id) {
-              e.prerequisites = "every prerequisite must select an event";
+              e.prerequisites = 'every prerequisite must select an event';
               break;
             }
             if (id === eventForm.id) {
-              e.prerequisites = "cannot include itself";
+              e.prerequisites = 'cannot include itself';
               break;
             }
             const ev = eventRows.value.find((x) => x.id === id);
             if (!ev) {
-              e.prerequisites = "unknown event";
+              e.prerequisites = 'unknown event';
               break;
             }
-            if ((ev.eventType || "") !== reqType) {
+            if ((ev.eventType || '') !== reqType) {
               e.prerequisites = `must be ${reqType} type`;
               break;
             }
             if (Number(ev.year) !== Number(eventForm.year)) {
-              e.prerequisites = "must match selected year";
+              e.prerequisites = 'must match selected year';
               break;
             }
             if (seen.has(id)) {
-              e.prerequisites = "no duplicates";
+              e.prerequisites = 'no duplicates';
               break;
             }
             seen.add(id);
@@ -1000,17 +983,17 @@ const app = createApp({
 
     async function submitEventForm() {
       if (isReadOnly.value) {
-        setStatus("Read-only mode: cannot save.", "warn", 1800);
+        setStatus('Read-only mode: cannot save.', 'warn', 1800);
         return;
       }
 
       if (!isEventDirty.value) {
-        setStatus("No changes to save.", "warn", 1800);
+        setStatus('No changes to save.', 'warn', 1800);
         return;
       }
 
       if (!validateEventForm()) {
-        setStatus("Please fix errors before saving.", "error", 2500);
+        setStatus('Please fix errors before saving.', 'error', 2500);
         return;
       }
 
@@ -1018,23 +1001,23 @@ const app = createApp({
     }
 
     async function saveEvent() {
-      setStatus("Saving Event...");
+      setStatus('Saving Event...');
       const payload = Mappers.Events.toApi(eventForm);
       try {
         if (MODE.CREATE) {
           await API.Events.create(payload);
-          setStatus("Event created.", "success", 1500);
+          setStatus('Event created.', 'success', 1500);
         } else {
           const patch = { ...payload };
           delete patch.id;
           await API.Events.update(editingEventId.value, patch);
-          setStatus("Event updated.", "success", 1500);
+          setStatus('Event updated.', 'success', 1500);
         }
         await loadEvents();
         goBackSection();
       } catch (err) {
         console.error(err);
-        setStatus("Failed to save Event.", "error", 3000);
+        setStatus('Failed to save Event.', 'error', 3000);
       }
     }
 
@@ -1047,20 +1030,20 @@ const app = createApp({
       try {
         const list = await API.Registrations.list();
         registrationRows.value = list;
-        if (showStatusIfActive && SECTION.REGISTRATIONS) setStatus("Registrations loaded.", "info", 1200);
+        if (showStatusIfActive && SECTION.REGISTRATIONS) setStatus('Registrations loaded.', 'info', 1200);
       } catch {
-        console.error("loadRegistrations failed:", e);
+        console.error('loadRegistrations failed:', e);
         registrationRows.value = [];
       }
     }
 
-    const registrationSearch = ref("");
+    const registrationSearch = ref('');
 
     const editingRegistrationId = ref(null);
 
     // --- Select options for eventId on Registration Form ----------------------
     const eventOptionsForRegistration = computed(() => {
-      const familyId = (registrationForm.familyId || "").trim();
+      const familyId = (registrationForm.familyId || '').trim();
 
       if (!familyId && MODE.CREATE) return [];
 
@@ -1138,7 +1121,7 @@ const app = createApp({
     // Does this family meet all prerequisites for the event (same year)?
     function familyMetPrereqs(ev, familyId) {
       const prereqIds = Array.isArray(ev?.prerequisites)
-        ? ev.prerequisites.map((p) => (typeof p === "string" ? p : p?.eventId)).filter(Boolean)
+        ? ev.prerequisites.map((p) => (typeof p === 'string' ? p : p?.eventId)).filter(Boolean)
         : [];
 
       // No prereqs → automatically OK
@@ -1149,20 +1132,22 @@ const app = createApp({
 
       const yr = Number(ev.year);
       return prereqIds.every((pid) =>
-        registrationRows.value.some((r) => r.familyId === familyId && r.eventId === pid && Number(r.event?.year) === yr)
+        registrationRows.value.some(
+          (r) => r.familyId === familyId && r.eventId === pid && Number(r.event?.year) === yr,
+        ),
       );
     }
 
     watch(
-      () => registrationForm.children.map((c) => c.childId).join(","),
+      () => registrationForm.children.map((c) => c.childId).join(','),
       () => {
         recomputePayments({ form: registrationForm });
-      }
+      },
     );
 
     // Derived helpers
     const selectedEvent = computed(() => eventRows.value.find((e) => e.id === registrationForm.eventId) || null);
-    const selectedEventLevel = computed(() => selectedEvent.value?.level || "");
+    const selectedEventLevel = computed(() => selectedEvent.value?.level || '');
 
     const familyById = (id) => familyRows.value.find((f) => f.id === id) || null;
 
@@ -1170,11 +1155,11 @@ const app = createApp({
     const familyDatalistOptions = computed(() =>
       familyRows.value.map((f) => ({
         value: f.id,
-        label: `${f.parishMember ? "Member" : "NonMember"} — ${f.contacts?.[0]?.lastName || ""}, ${
-          f.contacts?.[0]?.firstName || ""
+        label: `${f.parishMember ? 'Member' : 'NonMember'} — ${f.contacts?.[0]?.lastName || ''}, ${
+          f.contacts?.[0]?.firstName || ''
         }
-        — ${f.contacts?.[0]?.phone} - ${f.address?.city || ""}`,
-      }))
+        — ${f.contacts?.[0]?.phone} - ${f.address?.city || ''}`,
+      })),
     );
 
     /**
@@ -1182,51 +1167,46 @@ const app = createApp({
      */
     const registrationFilterDef = [
       {
-        key: "programId",
-        field: "event.programId",
-        label: "Program",
-        type: "select",
+        key: 'programId',
+        field: 'event.programId',
+        label: 'Program',
+        type: 'select',
         options: () => Schema.Options.PROGRAM_OPTIONS,
-        emptyValue: "",
+        emptyValue: '',
       },
       {
-        key: "eventType",
-        field: "event.eventType",
-        label: "Event Type",
-        type: "select",
+        key: 'eventType',
+        field: 'event.eventType',
+        label: 'Event Type',
+        type: 'select',
         options: () => Schema.Options.EVENT_TYPES,
-        emptyValue: "",
+        emptyValue: '',
       },
       {
-        key: "year",
-        field: "event.year",
-        label: "School Year",
-        type: "select",
+        key: 'year',
+        field: 'event.year',
+        label: 'School Year',
+        type: 'select',
         options: () => Schema.Options.YEAR_OPTIONS,
-        emptyValue: "",
+        emptyValue: '',
       },
     ];
 
     const registrationsFilterMenu = Util.Helpers.createFilterMenu(registrationFilterDef);
 
+    const registrationsTextFilter = Util.Helpers.createTextFilter((row, raw, terms, utils) => {
+      const parts = [row.id, row.familyId, row.event?.title];
+      (row.contacts || []).forEach((c) => parts.push(c.name, Util.Format.normPhone(c.phone)));
+      (row.payments || []).forEach((p) => parts.push(p.receiptNo));
+      (row.children || []).forEach((c) => parts.push(c.fullName));
+      return utils.includesAllTerms(utils.normalize(parts.filter(Boolean).join(' ')), terms);
+    });
+
     const filteredRegistrationRows = computed(() => {
-      const q = (registrationSearch.value || "").toLowerCase();
-      const qDigits = normPhone(registrationSearch.value);
       // Apply the filters selection first
       const byMenu = registrationsFilterMenu.applyTo(registrationRows.value);
       // Apply text search filter next
-      return byMenu.filter((r) => {
-        const hitTop =
-          (r.id || "").toLowerCase().includes(q) ||
-          (r.familyId || "").toLowerCase().includes(q) ||
-          (r.event?.title || "").toLowerCase().includes(q);
-        const hitContacts = (r.contacts || []).some(
-          (c) => (c.name || "").toLowerCase().includes(q) || (qDigits && normPhone(c.phone).includes(qDigits))
-        );
-        const hitReceipts = (r.payments || []).some((p) => (p.receiptNo || "").toLowerCase().includes(q));
-
-        return hitTop || hitContacts || hitReceipts;
-      });
+      return registrationsTextFilter.applyTo(byMenu);
     });
 
     // Registration Pager Instance
@@ -1240,21 +1220,21 @@ const app = createApp({
       editingRegistrationId.value = null;
       snapshotRegistrationForm();
       switchSection(SECTION_NAMES.REGISTRATIONS, MODE_NAMES.CREATE);
-      setStatus("Creating new registration…", "info", 1200);
+      setStatus('Creating new registration…', 'info', 1200);
     }
 
     const adminRegistration = computed(
       () =>
         eventRows.value.find(
-          (e) => e.programId === PROGRAM.BPH && e.eventType === EVENT.ADMIN && isOpenEventFilter(e)
-        ) || null
+          (e) => e.programId === PROGRAM.BPH && e.eventType === EVENT.ADMIN && isOpenEventFilter(e),
+        ) || null,
     );
 
     const tnttRegistration = computed(
       () =>
         eventRows.value.find(
-          (e) => e.programId === PROGRAM.TNTT && e.eventType === EVENT.REGISTRATION && isOpenEventFilter(e)
-        ) || null
+          (e) => e.programId === PROGRAM.TNTT && e.eventType === EVENT.REGISTRATION && isOpenEventFilter(e),
+        ) || null,
     );
 
     function getRegistrationFor(familyId, eventId) {
@@ -1267,8 +1247,8 @@ const app = createApp({
         beginEditRegistration(getRegistrationFor(f.id, adminRegistration.value.id));
       } else {
         beginCreateRegistration();
-        registrationForm.familyId = f?.id || "";
-        registrationForm.eventId = adminRegistration.value.id || "";
+        registrationForm.familyId = f?.id || '';
+        registrationForm.eventId = adminRegistration.value.id || '';
         onRegFamilyChange();
         onRegEventChange();
       }
@@ -1279,12 +1259,12 @@ const app = createApp({
         beginEditRegistration(getRegistrationFor(f.id, tnttRegistration.value.id));
       } else if (alreadyRegistered({ familyId: f.id, programId: PROGRAM.BPH, eventType: EVENT.ADMIN })) {
         beginCreateRegistration();
-        registrationForm.familyId = f?.id || "";
-        registrationForm.eventId = tnttRegistration.value.id || "";
+        registrationForm.familyId = f?.id || '';
+        registrationForm.eventId = tnttRegistration.value.id || '';
         onRegFamilyChange();
         onRegEventChange();
       } else {
-        setStatus("Must already register for ADMIN event first", "error", 3000);
+        setStatus('Must already register for ADMIN event first', 'error', 3000);
       }
     }
 
@@ -1293,7 +1273,7 @@ const app = createApp({
       Object.assign(registrationForm, newRegistrationForm(), Mappers.Registrations.toUi(apiReg || {}));
       snapshotRegistrationForm();
       switchSection(SECTION_NAMES.REGISTRATIONS, MODE_NAMES.EDIT);
-      setStatus(`Editing ${apiReg.id}`, "info", 1200);
+      setStatus(`Editing ${apiReg.id}`, 'info', 1200);
     }
 
     // Children selection logic for the "Add Child" button
@@ -1312,7 +1292,7 @@ const app = createApp({
       const form = ctx?.form || {};
 
       // 1) no family selected → no options
-      const famId = (form?.familyId || "").trim();
+      const famId = (form?.familyId || '').trim();
       if (!famId) return [];
 
       // 2) event not selected or not PC → no options
@@ -1323,12 +1303,12 @@ const app = createApp({
       const fam = familyById(famId);
       if (!fam) return [];
       const chosenElsewhere = new Set(
-        (form?.children || []).map((c, i) => (i === idx ? null : c.childId)).filter(Boolean)
+        (form?.children || []).map((c, i) => (i === idx ? null : c.childId)).filter(Boolean),
       );
 
       // Collect prerequisite ids
       const prereqIds = Array.isArray(ev?.prerequisites)
-        ? ev.prerequisites.map((p) => (typeof p === "string" ? p : p?.eventId)).filter(Boolean)
+        ? ev.prerequisites.map((p) => (typeof p === 'string' ? p : p?.eventId)).filter(Boolean)
         : [];
 
       // 3) PC event:
@@ -1350,9 +1330,9 @@ const app = createApp({
       const eligibleChildIds = new Set(
         registrationRows.value
           .filter(
-            (r) => r.familyId === famId && pcPrereqIds.has(r.eventId) && isCurrentSchoolYear(r.event) // uses r.event.year snapshot
+            (r) => r.familyId === famId && pcPrereqIds.has(r.eventId) && isCurrentSchoolYear(r.event), // uses r.event.year snapshot
           )
-          .flatMap((r) => (r.children || []).map((ch) => ch.childId).filter(Boolean))
+          .flatMap((r) => (r.children || []).map((ch) => ch.childId).filter(Boolean)),
       );
 
       return (fam.children || [])
@@ -1370,11 +1350,11 @@ const app = createApp({
       const ch = (fam?.children || []).find((c) => c.childId === row.childId);
       if (!ch) return;
 
-      row.fullName = `${ch.lastName}, ${ch.firstName}${ch.middle ? " " + ch.middle : ""}`;
+      row.fullName = `${ch.lastName}, ${ch.firstName}${ch.middle ? ' ' + ch.middle : ''}`;
       row.saintName = ch.saintName;
       row.dob = ch.dob;
       row.allergies = Array.isArray(ch.allergies) ? ch.allergies.slice() : [];
-      row.status = row.status || "pending";
+      row.status = row.status || 'pending';
 
       // keep payments in sync with selected children
       recomputePayments(ctx);
@@ -1383,12 +1363,12 @@ const app = createApp({
     function addRegChildRow() {
       if (isReadOnly.value) return;
       registrationForm.children.push({
-        childId: "",
-        fullName: "",
-        saintName: "",
-        dob: "",
+        childId: '',
+        fullName: '',
+        saintName: '',
+        dob: '',
         allergies: [],
-        status: "pending",
+        status: 'pending',
       });
       registrationErrors.children.push({});
     }
@@ -1405,16 +1385,16 @@ const app = createApp({
       if (!ev) return { ok: true };
       const prereqs = Array.isArray(ev.prerequisites) ? ev.prerequisites : [];
       if (prereqs.length === 0) return { ok: true };
-      const famId = (registrationForm.familyId || "").trim();
-      if (!famId) return { ok: false, message: "Select family to check prerequisite" };
-      const mustHaveIds = new Set(prereqs.map((p) => (typeof p === "string" ? p : p?.eventId)).filter(Boolean));
+      const famId = (registrationForm.familyId || '').trim();
+      if (!famId) return { ok: false, message: 'Select family to check prerequisite' };
+      const mustHaveIds = new Set(prereqs.map((p) => (typeof p === 'string' ? p : p?.eventId)).filter(Boolean));
       const year = Number(ev.year);
       const hasAll = Array.from(mustHaveIds).every((reqId) =>
         registrationRows.value.some(
-          (r) => r.familyId === famId && r.eventId === reqId && Number(r.event?.year) === year
-        )
+          (r) => r.familyId === famId && r.eventId === reqId && Number(r.event?.year) === year,
+        ),
       );
-      return hasAll ? { ok: true } : { ok: false, message: "Prerequisite not met for this family/year." };
+      return hasAll ? { ok: true } : { ok: false, message: 'Prerequisite not met for this family/year.' };
     }
 
     // Snapshots & payments prefills
@@ -1423,7 +1403,7 @@ const app = createApp({
       const ev = selectedEvent.value;
       form.event = ev
         ? { title: ev.title, year: ev.year, programId: ev.programId, eventType: ev.eventType }
-        : { title: "", year: "", programId: "", eventType: "" };
+        : { title: '', year: '', programId: '', eventType: '' };
     }
 
     function hydrateRegistrationContacts(ctx = { form: registrationForm }) {
@@ -1437,14 +1417,14 @@ const app = createApp({
       const contacts = Array.isArray(fam.contacts) ? fam.contacts : [];
 
       // Prioritize the first 2 among Father / Mother / Guardian
-      const prioritized = contacts.filter((c) => PARENT_RELATIONSHIPS.has((c.relationship || "").trim()));
-      const others = contacts.filter((c) => !PARENT_RELATIONSHIPS.has((c.relationship || "").trim()));
+      const prioritized = contacts.filter((c) => PARENT_RELATIONSHIPS.has((c.relationship || '').trim()));
+      const others = contacts.filter((c) => !PARENT_RELATIONSHIPS.has((c.relationship || '').trim()));
       const pick = [...prioritized, ...others].slice(0, 2);
 
       form.contacts = pick.map((c) => ({
-        name: `${c.lastName}, ${c.firstName}${c.middle ? " " + c.middle : ""}`,
-        relationship: c.relationship || "",
-        phone: formatUSPhone(c.phone || ""),
+        name: `${c.lastName}, ${c.firstName}${c.middle ? ' ' + c.middle : ''}`,
+        relationship: c.relationship || '',
+        phone: formatUSPhone(c.phone || ''),
       }));
 
       form.parishMember = !!fam.parishMember;
@@ -1477,7 +1457,7 @@ const app = createApp({
       form.payments = fees
         .filter((f) => {
           if (form.parishMember === true) {
-            return f.code !== "NPMF";
+            return f.code !== 'NPMF';
           }
           return true;
         })
@@ -1488,10 +1468,10 @@ const app = createApp({
             unitAmount: unitAmount,
             quantity: qty,
             amount: unitAmount * qty,
-            method: "",
-            txnRef: "",
-            receiptNo: "",
-            receivedBy: "",
+            method: '',
+            txnRef: '',
+            receiptNo: '',
+            receivedBy: '',
           };
         });
     }
@@ -1543,7 +1523,7 @@ const app = createApp({
       const age = computeAgeByYear(dob);
       if (age == null) return [];
       // If you created PROGRAM_STABLE or similar, prefer that constant. Fallback 'TNTT'.
-      if (programId === (PROGRAM?.TNTT || "TNTT")) {
+      if (programId === (PROGRAM?.TNTT || 'TNTT')) {
         const label = ageGroupLabelTNTT(age);
         return label ? [{ value: dob, label }] : [];
       }
@@ -1564,11 +1544,11 @@ const app = createApp({
       () => {
         const opts = eventOptionsForRegistration.value;
         if (!opts.some((o) => o.value === registrationForm.eventId)) {
-          registrationForm.eventId = "";
+          registrationForm.eventId = '';
           registrationForm.children = [];
           registrationForm.payments = [];
         }
-      }
+      },
     );
 
     watch(
@@ -1576,23 +1556,23 @@ const app = createApp({
       (pid) => {
         const allowed = new Set(volunteersFor(pid).map((o) => o.value));
         (registrationForm.payments || []).forEach((p) => {
-          if (p.receivedBy && !allowed.has(p.receivedBy)) p.receivedBy = "";
+          if (p.receivedBy && !allowed.has(p.receivedBy)) p.receivedBy = '';
         });
-      }
+      },
     );
 
     function signedRegistrationOptions(ctx = { form: registrationForm }) {
       const form = ctx?.form || {};
       const fam = familyById(form.familyId);
       return (fam?.contacts || []).map((c) => {
-        const name = `${c.lastName}, ${c.firstName}${c.middle ? " " + c.middle : ""}`;
-        return { value: name, label: `${name} (${c.relationship || "Contact"})` };
+        const name = `${c.lastName}, ${c.firstName}${c.middle ? ' ' + c.middle : ''}`;
+        return { value: name, label: `${name} (${c.relationship || 'Contact'})` };
       });
     }
 
     function receivedByOptions(ctx = { form: registrationForm }) {
       const form = ctx?.form || {};
-      return volunteersFor(selectedEvent.value?.programId || form?.event?.programId || "");
+      return volunteersFor(selectedEvent.value?.programId || form?.event?.programId || '');
     }
 
     function quickCheckRegistration() {
@@ -1615,22 +1595,22 @@ const app = createApp({
       const e = { main: {}, children: [], payments: [] };
 
       // --- main checks
-      if (!registrationForm.eventId) e.main.eventId = "required";
-      if (!registrationForm.familyId) e.main.familyId = "required";
-      if (!registrationForm.acceptedBy) e.main.acceptedBy = "required";
-      if (!registrationForm.status || registrationForm.status === "pending")
-        e.main.status = "Status must be paid or cancelled";
+      if (!registrationForm.eventId) e.main.eventId = 'required';
+      if (!registrationForm.familyId) e.main.familyId = 'required';
+      if (!registrationForm.acceptedBy) e.main.acceptedBy = 'required';
+      if (!registrationForm.status || registrationForm.status === 'pending')
+        e.main.status = 'Status must be paid or cancelled';
 
       // --- children checks (only for PC)
       if (selectedEventLevel.value === LEVEL.PER_CHILD) {
         const children = registrationForm.children || [];
 
         if (!children.some((c) => !!c.childId)) {
-          e.main.childrenRoot = "Select at least one child.";
+          e.main.childrenRoot = 'Select at least one child.';
         }
 
         // IMPORTANT: use {} for "no error" rows
-        e.children = children.map((c) => (c.childId ? {} : { childId: "required" }));
+        e.children = children.map((c) => (c.childId ? {} : { childId: 'required' }));
       } else {
         e.children = []; // clear any stale errors
         delete e.main.childrenRoot;
@@ -1640,10 +1620,10 @@ const app = createApp({
       if (registrationForm.payments) {
         e.payments = registrationForm.payments.map((p) => {
           const pe = {};
-          if (!p.method?.trim()) pe.method = "required";
-          if (!p.txnRef?.trim() && p.method?.trim() !== METHOD?.CASH) pe.txnRef = "required";
-          if (!p.receiptNo?.trim()) pe.receiptNo = "required";
-          if (!p.receivedBy?.trim()) pe.receivedBy = "required";
+          if (!p.method?.trim()) pe.method = 'required';
+          if (!p.txnRef?.trim() && p.method?.trim() !== METHOD?.CASH) pe.txnRef = 'required';
+          if (!p.receiptNo?.trim()) pe.receiptNo = 'required';
+          if (!p.receivedBy?.trim()) pe.receivedBy = 'required';
           return pe;
         });
       }
@@ -1666,17 +1646,17 @@ const app = createApp({
 
     async function submitRegistrationForm() {
       if (isReadOnly.value) {
-        setStatus("Read-only mode: cannot save.", "warn", 1800);
+        setStatus('Read-only mode: cannot save.', 'warn', 1800);
         return;
       }
 
       if (!isRegistrationDirty.value) {
-        setStatus("No changes to save.", "warn", 1800);
+        setStatus('No changes to save.', 'warn', 1800);
         return;
       }
 
       if (!validateRegistration()) {
-        setStatus("Please fix errors before saving.", "error", 2500);
+        setStatus('Please fix errors before saving.', 'error', 2500);
         return;
       }
 
@@ -1684,53 +1664,29 @@ const app = createApp({
     }
 
     async function saveRegistration() {
-      setStatus("Saving Registration...");
+      setStatus('Saving Registration...');
       const payload = Mappers.Registrations.toApi(registrationForm);
       try {
         if (MODE.CREATE) {
           await API.Registrations.create(payload);
-          setStatus("Registration created.", "success", 1500);
+          setStatus('Registration created.', 'success', 1500);
         } else {
           const patch = { ...payload };
           delete patch.id;
           await API.Registrations.update(editingRegistrationId.value, patch);
-          setStatus("Registration updated.", "success", 1500);
+          setStatus('Registration updated.', 'success', 1500);
         }
         await loadRegistrations();
         goBackSection();
       } catch (e) {
         console.error(e);
-        setStatus("Failed to save Registration.", "error", 3000);
+        setStatus('Failed to save Registration.', 'error', 3000);
       }
     }
 
     // =========================================================
     // Roster TNTT
     // =========================================================
-
-    const rosterSearch = ref("");
-    const rosterFilter = reactive({ programId: "", eventType: "", eventId: "", year: "", age: "" });
-
-    const hasActiveRosterFilter = computed(
-      () =>
-        !!(
-          rosterSearch.value ||
-          rosterFilter.programId ||
-          rosterFilter.eventType ||
-          rosterFilter.eventId ||
-          rosterFilter.year ||
-          rosterFilter.age
-        )
-    );
-
-    function resetRosterFilters() {
-      rosterFilter.programId = "";
-      rosterFilter.eventType = "";
-      rosterFilter.eventId = "";
-      rosterFilter.year = "";
-      rosterFilter.age = "";
-      rosterSearch.value = "";
-    }
 
     const eventOptionsForRoster = computed(() => {
       // Create base from eventRows
@@ -1755,9 +1711,20 @@ const app = createApp({
       return EVENT_TYPES.value?.filter((t) => t.value !== EVENT.ADMIN);
     });
 
+    const ageOptions = computed(() => {
+      const arr = [];
+      for (let i = 7; i < 18; i++) {
+        arr.push(i);
+      }
+      return arr.map((i) => ({
+        value: i,
+        label: i,
+      }));
+    });
+
     const rosterRows = computed(() =>
       registrationRows.value
-        .filter((r) => r.status === "paid")
+        .filter((r) => r.status === 'paid')
         .flatMap((r) =>
           (r.children || []).map((ch) => ({
             registrationId: r.id,
@@ -1772,62 +1739,107 @@ const app = createApp({
             fullName: ch.fullName,
             dob: ch.dob,
             age: computeAgeByYear(ch.dob),
-            grade: r.event?.programId === PROGRAM.TNTT ? ageGroupLabelTNTT(computeAgeByYear(ch.dob)) : "-",
-            allergies: ch.allergies.join(", "),
-          }))
-        )
+            grade: r.event?.programId === PROGRAM.TNTT ? ageGroupLabelTNTT(computeAgeByYear(ch.dob)) : '-',
+            allergies: ch.allergies.join(', '),
+          })),
+        ),
     );
 
+    /**
+     * Define filter menu for registrations list
+     */
+    const rosterFilterDef = [
+      {
+        key: 'programId',
+        label: 'Program',
+        type: 'select',
+        options: () => programOptionsForRoster.value,
+        emptyValue: '',
+      },
+      {
+        key: 'eventType',
+        label: 'Event Type',
+        type: 'select',
+        options: () => eventTypeOptionsForRoster.value,
+        emptyValue: '',
+      },
+      {
+        key: 'year',
+        label: 'School Year',
+        type: 'select',
+        options: () => Schema.Options.YEAR_OPTIONS,
+        emptyValue: '',
+      },
+      {
+        key: 'eventId',
+        label: 'Event',
+        type: 'select',
+        options: () => eventOptionsForRoster.value,
+      },
+      {
+        key: 'age',
+        label: 'Age',
+        type: 'select',
+        options: () => ageOptions.value,
+      },
+      {
+        key: 'allergies',
+        label: 'Allergies',
+        type: 'select',
+        options: () => {
+          return [
+            { value: 'yes', label: 'Has Food Allergies' },
+            { value: 'no', label: 'No Allergies' },
+          ];
+        },
+        matches: (row, selected) => {
+          if (!selected) return true;
+          const text = String(row?.allergies || '').trim();
+          const has = text.length > 0;
+          return selected === 'yes' ? has : !has;
+        },
+      },
+    ];
+
+    const rostersFilterMenu = Util.Helpers.createFilterMenu(rosterFilterDef);
+
+    const rostersTextFilter = Util.Helpers.createTextFilter((row, raw, terms, utils) => {
+      const parts = [row.fullName];
+      return utils.includesAllTerms(utils.normalize(parts.filter(Boolean).join(' ')), terms);
+    });
+
     const filteredRosterRows = computed(() => {
-      const q = rosterSearch.value.toLowerCase();
-      return rosterRows.value.filter((c) => {
-        const hits = (c.fullName || "").toLowerCase().includes(q);
-        const byProg = !rosterFilter.programId || c.programId === rosterFilter.programId;
-        const byYear = !rosterFilter.year || Number(c.year) === Number(rosterFilter.year);
-        const byType = !rosterFilter.eventType || c.eventType === rosterFilter.eventType;
-        const byEvent = !rosterFilter.eventId || c.eventId === rosterFilter.eventId;
-        const byAge = !rosterFilter.age || Number(c.age) === Number(rosterFilter.age);
-
-        return hits && byProg && byYear && byType && byEvent && byAge;
-      });
+      const byMenu = rostersFilterMenu.applyTo(rosterRows.value);
+      return rostersTextFilter.applyTo(byMenu);
     });
 
-    const ageOptions = computed(() => {
-      const arr = [];
-      for (let i = 7; i < 18; i++) {
-        arr.push(i);
-      }
-      return arr.map((i) => ({
-        value: i,
-        label: i,
-      }));
-    });
+    const rostersPager = Util.Helpers.createPager({ source: filteredRosterRows });
 
     // ======================= RECEIPT (view/print/email) =======================
     const showReceiptModal = ref(false);
     const receiptView = reactive({
-      id: "",
-      eventTitle: "",
-      eventTypeLabel: "",
-      programId: "",
-      year: "",
-      familyId: "",
+      id: '',
+      eventTitle: '',
+      eventTypeLabel: '',
+      programId: '',
+      year: '',
+      familyId: '',
       parishMember: null,
-      parishNumber: "",
+      parishNumber: '',
       contacts: [], // [{ name, relationship, phone, email }]
       children: [], // [{ fullName, saintName, dob }]
       payments: [], // [{ code, codeLabel, unitAmount, qty, amount, method, receiptNo, receivedBy }]
       total: 0,
-      acceptedBy: "",
-      updatedAt: "",
+      acceptedBy: '',
+      updatedAt: '',
     });
 
     function buildReceiptView(r) {
       const fam = familyById(r.familyId);
       const typeLabel = codeToLabel(r.event?.eventType, EVENT_TYPES.value, undefined, {
-        fallback: r.event?.eventType || "",
+        fallback: r.event?.eventType || '',
       });
-      const parishNumber = fam.parishMember ? fam.parishNumber : "Non-Parish";
+      const parishNumber = fam.parishMember ? fam.parishNumber : 'Non-Parish';
 
       const pays = (r.payments || []).map((p) => ({
         code: p.code,
@@ -1835,15 +1847,15 @@ const app = createApp({
         unitAmount: Number(p.unitAmount || p.amount || 0),
         qty: Number(p.quantity || 1),
         amount: Number(p.amount || 0),
-        method: p.method || "",
-        txnRef: p.txnRef || "",
-        receiptNo: p.receiptNo || "",
-        receivedBy: p.receivedBy || "",
+        method: p.method || '',
+        txnRef: p.txnRef || '',
+        receiptNo: p.receiptNo || '',
+        receivedBy: p.receivedBy || '',
       }));
 
       Object.assign(receiptView, {
         id: r.id,
-        eventTitle: r.event?.title || "",
+        eventTitle: r.event?.title || '',
         eventTypeLabel: typeLabel,
         programId: r.event?.programId,
         year: r.event?.year,
@@ -1853,15 +1865,15 @@ const app = createApp({
         status: r.status,
         contacts: getPrimaryContactsForFamily(fam),
         children: (r.children || []).map((c) => ({
-          fullName: c.fullName || "",
-          saintName: c.saintName || "",
+          fullName: c.fullName || '',
+          saintName: c.saintName || '',
           age: computeAgeByYear(c.dob),
-          grade: r.event?.programId === PROGRAM.TNTT ? ageGroupLabelTNTT(computeAgeByYear(c.dob)) : " - ",
+          grade: r.event?.programId === PROGRAM.TNTT ? ageGroupLabelTNTT(computeAgeByYear(c.dob)) : ' - ',
         })),
         payments: pays,
         total: pays.reduce((sum, p) => sum + Number(p.amount || 0), 0),
-        acceptedBy: r.acceptedBy || "",
-        updatedAt: (r.updatedAt || r.createdAt || "").slice(0, 10),
+        acceptedBy: r.acceptedBy || '',
+        updatedAt: (r.updatedAt || r.createdAt || '').slice(0, 10),
       });
     }
 
@@ -1872,7 +1884,7 @@ const app = createApp({
 
     function openReceiptById(regId) {
       const r = registrationRows.value.find((x) => x.id === regId);
-      if (!r) return setStatus("Registration not found.", "warn", 1800);
+      if (!r) return setStatus('Registration not found.', 'warn', 1800);
       openReceipt(r);
     }
 
@@ -1880,56 +1892,56 @@ const app = createApp({
       showReceiptModal.value = false;
     }
 
-    function printReceipt(selector = "#receipt-sheet") {
+    function printReceipt(selector = '#receipt-sheet') {
       const src = document.querySelector(selector);
-      const dest = document.getElementById("print-root");
+      const dest = document.getElementById('print-root');
       if (!src || !dest) {
-        setStatus("Receipt not ready to print.", "warn", 1500);
+        setStatus('Receipt not ready to print.', 'warn', 1500);
         return;
       }
       // Clone the current rendered HTML into the print root
       dest.innerHTML = src.outerHTML;
 
       // Optional: strip any screen-only controls in the clone
-      dest.querySelectorAll("[data-no-print]").forEach((el) => el.remove());
+      dest.querySelectorAll('[data-no-print]').forEach((el) => el.remove());
 
       // Fire print
       window.print();
 
       // Cleanup after a moment so the DOM stays light
       setTimeout(() => {
-        dest.innerHTML = "";
+        dest.innerHTML = '';
       }, 500);
     }
 
     // ---- Roster "Contacts" modal ----
     const showContactsModal = ref(false);
     const contactsModal = reactive({
-      familyId: "",
-      childName: "",
-      age: "",
-      allergies: "",
+      familyId: '',
+      childName: '',
+      age: '',
+      allergies: '',
       contacts: [], // [{ name, relationship, phone }]
     });
 
     function getPrimaryContactsForFamily(f) {
       const contacts = Array.isArray(f?.contacts) ? f.contacts : [];
-      const prioritized = contacts.filter((c) => PARENT_RELATIONSHIPS.has((c.relationship || "").trim()));
-      const others = contacts.filter((c) => !PARENT_RELATIONSHIPS.has((c.relationship || "").trim()));
+      const prioritized = contacts.filter((c) => PARENT_RELATIONSHIPS.has((c.relationship || '').trim()));
+      const others = contacts.filter((c) => !PARENT_RELATIONSHIPS.has((c.relationship || '').trim()));
       const pick = [...prioritized, ...others].slice(0, 3); // show up to 3
       return pick.map((c) => ({
-        name: `${c.lastName}, ${c.firstName}${c.middle ? " " + c.middle : ""}`,
-        relationship: c.relationship || "",
-        phone: formatUSPhone(c.phone || ""),
+        name: `${c.lastName}, ${c.firstName}${c.middle ? ' ' + c.middle : ''}`,
+        relationship: c.relationship || '',
+        phone: formatUSPhone(c.phone || ''),
       }));
     }
 
     function openChildContactsModal(row) {
       const fam = familyById(row.familyId);
-      contactsModal.familyId = row.familyId || "";
-      contactsModal.childName = row.fullName || "";
-      contactsModal.allergies = row.allergies || "";
-      contactsModal.age = row.age || "";
+      contactsModal.familyId = row.familyId || '';
+      contactsModal.childName = row.fullName || '';
+      contactsModal.allergies = row.allergies || '';
+      contactsModal.age = row.age || '';
       contactsModal.contacts = fam ? getPrimaryContactsForFamily(fam) : [];
       showContactsModal.value = true;
     }
@@ -1992,15 +2004,12 @@ const app = createApp({
 
       // families
       familyFields,
-      familySearch,
       filteredFamilyRows,
       familyForm,
       familyErrors,
       familyContactsMode,
       familyContactsIndex,
       visibleFamilyContacts,
-      resetFamilyFilters,
-      hasActiveFamilyFilter,
       nextFamilyContact,
       prevFamilyContact,
       displayChildNameAndAge,
@@ -2024,9 +2033,9 @@ const app = createApp({
       contactDisplay,
       // pagination list
       familiesPager,
+      familiesTextFilter,
 
       // events
-      eventSearch,
       eventFields,
       eventForm,
       eventErrors,
@@ -2045,6 +2054,7 @@ const app = createApp({
       // Event List
       eventPager,
       eventsFilterMenu,
+      eventsTextFilter,
 
       // registrations
       registrationRows,
@@ -2069,6 +2079,7 @@ const app = createApp({
       // Registrations List
       registrationPager,
       registrationsFilterMenu,
+      registrationsTextFilter,
 
       // receipt
       showReceiptModal,
@@ -2080,21 +2091,14 @@ const app = createApp({
       formatMoney,
 
       // rosters
-      rosterSearch,
-      rosterFilter,
-      filteredRosterRows,
-      hasActiveRosterFilter,
-      eventOptionsForRoster,
-      programOptionsForRoster,
-      eventTypeOptionsForRoster,
-      ageOptions,
-      ageGroupLabelTNTT,
-      resetRosterFilters,
-
       showContactsModal,
       contactsModal,
       openChildContactsModal,
       closeChildContactsModal,
+      // List pager and filters
+      rostersPager,
+      rostersFilterMenu,
+      rostersTextFilter,
 
       // settings
       setup,
@@ -2106,4 +2110,4 @@ const app = createApp({
   },
 });
 
-app.mount("#app");
+app.mount('#app');

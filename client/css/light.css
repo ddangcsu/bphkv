@@ -70,22 +70,22 @@ body {
   background: #f8fafc;
   color: #334155;
 }
-.status[data-variant="success"] {
+.status[data-variant='success'] {
   background: #ecfdf5;
   border-color: #a7f3d0;
   color: #065f46;
 }
-.status[data-variant="warn"] {
+.status[data-variant='warn'] {
   background: #fffbeb;
   border-color: #fde68a;
   color: #92400e;
 }
-.status[data-variant="error"] {
+.status[data-variant='error'] {
   background: #fef2f2;
   border-color: #fecaca;
   color: #991b1b;
 }
-.status[data-variant="info"] {
+.status[data-variant='info'] {
   background: #eff6ff;
   border-color: #bfdbfe;
   color: #1e3a8a;
@@ -209,10 +209,10 @@ table.table tbody tr:nth-child(even) {
   text-transform: capitalize;
   font-weight: 600;
 }
-.badge[data-variant="Yes"] {
+.badge[data-variant='Yes'] {
   color: var(--accent);
 }
-.badge[data-variant="No"] {
+.badge[data-variant='No'] {
   color: var(--danger);
 }
 
@@ -272,11 +272,11 @@ table.table tbody tr:nth-child(even) {
 
 /* Interactions only when enabled */
 @supports (color(from white oklch l c h)) {
-  .btn:not(:disabled, [aria-disabled="true"], .is-disabled):is(:hover, :focus-visible) {
+  .btn:not(:disabled, [aria-disabled='true'], .is-disabled):is(:hover, :focus-visible) {
     background: color(from var(--btn-bg) oklch calc(l * var(--hover-darken)) c h);
     border-color: color(from var(--btn-border) oklch calc(l * var(--hover-darken)) c h);
   }
-  .btn:not(:disabled, [aria-disabled="true"], .is-disabled):active {
+  .btn:not(:disabled, [aria-disabled='true'], .is-disabled):active {
     background: color(from var(--btn-bg) oklch calc(l * var(--active-darken)) c h);
     border-color: color(from var(--btn-border) oklch calc(l * var(--active-darken)) c h);
   }
@@ -284,24 +284,24 @@ table.table tbody tr:nth-child(even) {
 
 /* Fallback for older browsers (no relative color syntax) */
 @supports not (color(from white oklch l c h)) {
-  .btn:not(:disabled, [aria-disabled="true"], .is-disabled):is(:hover, :focus-visible) {
+  .btn:not(:disabled, [aria-disabled='true'], .is-disabled):is(:hover, :focus-visible) {
     background: color-mix(in oklch, var(--btn-bg) var(--hover-mix), black);
     border-color: color-mix(in oklch, var(--btn-border) var(--hover-mix), black);
   }
-  .btn:not(:disabled, [aria-disabled="true"], .is-disabled):active {
+  .btn:not(:disabled, [aria-disabled='true'], .is-disabled):active {
     background: color-mix(in oklch, var(--btn-bg) var(--active-mix), black);
     border-color: color-mix(in oklch, var(--btn-border) var(--active-mix), black);
   }
 }
 
 /* Focus ring */
-.btn:not(:disabled, [aria-disabled="true"], .is-disabled):focus-visible {
+.btn:not(:disabled, [aria-disabled='true'], .is-disabled):focus-visible {
   outline: none;
   box-shadow: 0 0 0 3px var(--focus);
 }
 
 /* Disabled: inert */
-.btn:is(:disabled, [aria-disabled="true"], .is-disabled) {
+.btn:is(:disabled, [aria-disabled='true'], .is-disabled) {
   background: #cecfcf;
   color: #fff;
   border-color: #cecfcf;
@@ -519,7 +519,7 @@ table.table tbody tr:nth-child(even) {
   box-shadow: 0 1px 0 var(--card), 0 -1px 0 rgba(0, 0, 0, 0.02) inset;
 }
 .formtabs .active::after {
-  content: "";
+  content: '';
   position: absolute;
   left: 0;
   right: 0;
@@ -577,20 +577,20 @@ table.table tbody tr:nth-child(even) {
 
 /* put a red asterisk before any .error element's text */
 .error::before {
-  content: "*";
+  content: '*';
   color: #d00;
   font-weight: 700;
   margin-right: 0.25em; /* adds a little space */
 }
 
 /* Checkbox (stacked label) */
-label:has(> input[type="checkbox"]) {
+label:has(> input[type='checkbox']) {
   display: inline-flex;
   flex-direction: column;
   align-items: center;
   gap: 10px;
 }
-label:has(> input[type="checkbox"]) input {
+label:has(> input[type='checkbox']) input {
   margin: 0;
 }
 .check-lg {
@@ -747,10 +747,10 @@ label:has(> input[type="checkbox"]) input {
 }
 
 /* Limit checkbox click target to the box itself (stacked checkbox labels) */
-label:has(> input[type="checkbox"]) {
+label:has(> input[type='checkbox']) {
   pointer-events: none; /* clicking the label won't toggle */
 }
-label:has(> input[type="checkbox"]) > input[type="checkbox"] {
+label:has(> input[type='checkbox']) > input[type='checkbox'] {
   pointer-events: auto; /* clicking the checkbox still works */
 }
 
@@ -803,7 +803,7 @@ textarea.input[readonly] {
 /* ===== Dark theme: 1:1 with your light.css ===== */
 /* Enable with: <html data-theme="dark"> */
 
-:root[data-theme="dark"] {
+:root[data-theme='dark'] {
   /* variables only — everything else below just overrides your hard-coded light colors */
   --bg: #0b1220;
   --card: #0f172a;
@@ -818,255 +818,255 @@ textarea.input[readonly] {
 }
 
 /* Global surfaces already use vars, just ensure body/card look right */
-:root[data-theme="dark"] body {
+:root[data-theme='dark'] body {
   background: var(--bg);
   color: var(--text);
 }
-:root[data-theme="dark"] .card,
-:root[data-theme="dark"] .subpanel,
-:root[data-theme="dark"] .row,
-:root[data-theme="dark"] .menu-panel,
-:root[data-theme="dark"] .form .panel,
-:root[data-theme="dark"] .topbar {
+:root[data-theme='dark'] .card,
+:root[data-theme='dark'] .subpanel,
+:root[data-theme='dark'] .row,
+:root[data-theme='dark'] .menu-panel,
+:root[data-theme='dark'] .form .panel,
+:root[data-theme='dark'] .topbar {
   background: var(--card);
   border-color: var(--border);
   color: var(--text);
 }
 
 /* Softer shadow on dark */
-:root[data-theme="dark"] .card {
+:root[data-theme='dark'] .card {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
 }
 
 /* TABLE header (light hard-code: #dceaf8) */
-:root[data-theme="dark"] .table thead th {
+:root[data-theme='dark'] .table thead th {
   background: #111827;
   color: var(--text);
   border-color: var(--border);
 }
 
 /* TABLE zebra rows (light hard-codes: #ffffff / #edf2fb) */
-:root[data-theme="dark"] table.table tbody tr:nth-child(odd) {
+:root[data-theme='dark'] table.table tbody tr:nth-child(odd) {
   background: #0f172a;
 }
-:root[data-theme="dark"] table.table tbody tr:nth-child(even) {
+:root[data-theme='dark'] table.table tbody tr:nth-child(even) {
   background: #0b1220;
 }
 
 /* ROW zebra (light hard-codes: #edf2fb / #ffffff) */
-:root[data-theme="dark"] .row:nth-child(odd) {
+:root[data-theme='dark'] .row:nth-child(odd) {
   background: #0f172a;
 }
-:root[data-theme="dark"] .row:nth-child(even) {
+:root[data-theme='dark'] .row:nth-child(even) {
   background: #0b1220;
 }
 
 /* STATUS (light hard-codes) */
-:root[data-theme="dark"] .status {
+:root[data-theme='dark'] .status {
   background: #0f172a; /* instead of #f8fafc */
   color: #cbd5e1; /* was #334155 */
   border-color: transparent;
 }
-:root[data-theme="dark"] .status[data-variant="success"] {
+:root[data-theme='dark'] .status[data-variant='success'] {
   background: #052e2a;
   color: #34d399;
 }
-:root[data-theme="dark"] .status[data-variant="warn"] {
+:root[data-theme='dark'] .status[data-variant='warn'] {
   background: #2a2105;
   color: #fbbf24;
 }
-:root[data-theme="dark"] .status[data-variant="error"] {
+:root[data-theme='dark'] .status[data-variant='error'] {
   background: #2a0b0b;
   color: #f87171;
 }
-:root[data-theme="dark"] .status[data-variant="info"] {
+:root[data-theme='dark'] .status[data-variant='info'] {
   background: #0a1b36;
   color: #93c5fd;
 }
 
 /* ITEM HEADER (light hard-code: #e6e6f8) */
-:root[data-theme="dark"] .item-header,
-:root[data-theme="dark"] .subpanel > .item-header,
-:root[data-theme="dark"] .row > .item-header,
-:root[data-theme="dark"] .form .panel > fieldset > .item-header {
+:root[data-theme='dark'] .item-header,
+:root[data-theme='dark'] .subpanel > .item-header,
+:root[data-theme='dark'] .row > .item-header,
+:root[data-theme='dark'] .form .panel > fieldset > .item-header {
   background: #1f2937;
   color: var(--text);
   border-color: var(--border);
 }
 
 /* FORMTABS (light hard-codes: #f8fafc, #d9dcf6, #a8b2f6) */
-:root[data-theme="dark"] .formtabs {
+:root[data-theme='dark'] .formtabs {
   border-bottom-color: var(--border);
 }
-:root[data-theme="dark"] .formtabs button {
+:root[data-theme='dark'] .formtabs button {
   background: #111827; /* base */
   color: var(--muted);
   border-color: var(--border-strong);
 }
-:root[data-theme="dark"] .formtabs button:hover {
+:root[data-theme='dark'] .formtabs button:hover {
   background: #1b2330; /* hover (was #d9dcf6) */
   color: var(--text);
 }
-:root[data-theme="dark"] .formtabs .active {
+:root[data-theme='dark'] .formtabs .active {
   background: #27314a; /* active (was #a8b2f6) */
   color: var(--text);
   border-color: var(--border-strong);
   box-shadow: 0 1px 0 var(--card), 0 -1px 0 rgba(255, 255, 255, 0.02) inset;
 }
-:root[data-theme="dark"] .formtabs .active::after {
+:root[data-theme='dark'] .formtabs .active::after {
   background: var(--card);
 }
 
 /* INPUTS (borders already from vars; placeholder contrast) */
-:root[data-theme="dark"] .input {
+:root[data-theme='dark'] .input {
   background: #0b1220;
   border-color: var(--border-strong);
   color: var(--text);
 }
-:root[data-theme="dark"] .input::placeholder,
-:root[data-theme="dark"] textarea.input::placeholder {
+:root[data-theme='dark'] .input::placeholder,
+:root[data-theme='dark'] textarea.input::placeholder {
   color: #74839a;
 }
 
 /* DISABLED/READONLY inputs parity on dark */
-:root[data-theme="dark"] .input:disabled,
-:root[data-theme="dark"] select.input:disabled,
-:root[data-theme="dark"] textarea.input:disabled {
+:root[data-theme='dark'] .input:disabled,
+:root[data-theme='dark'] select.input:disabled,
+:root[data-theme='dark'] textarea.input:disabled {
   background: #111827;
   border-color: #2b3340;
   color: #9aa0a6;
   -webkit-text-fill-color: #9aa0a6;
 }
-:root[data-theme="dark"] .input:disabled::placeholder,
-:root[data-theme="dark"] textarea.input:disabled::placeholder {
+:root[data-theme='dark'] .input:disabled::placeholder,
+:root[data-theme='dark'] textarea.input:disabled::placeholder {
   color: #6b7280;
 }
-:root[data-theme="dark"] .input[readonly],
-:root[data-theme="dark"] textarea.input[readonly] {
+:root[data-theme='dark'] .input[readonly],
+:root[data-theme='dark'] textarea.input[readonly] {
   background: #0e1626;
   border-color: #233046;
   color: #c0cad6;
 }
 
 /* BUTTONS (your system uses CSS vars; only adjust disabled hard-code #cecfcf) */
-:root[data-theme="dark"] .btn:is(:disabled, [aria-disabled="true"], .is-disabled) {
+:root[data-theme='dark'] .btn:is(:disabled, [aria-disabled='true'], .is-disabled) {
   background: #2b2f36;
   color: #9aa0a6;
   border-color: #2b2f36;
 }
 
 /* SEGMENTED control (light hard-codes: white base + #9fb4fa active) */
-:root[data-theme="dark"] .seg {
+:root[data-theme='dark'] .seg {
   border-color: var(--border-strong);
 }
-:root[data-theme="dark"] .seg > button {
+:root[data-theme='dark'] .seg > button {
   background: #111827;
   color: var(--text);
 }
-:root[data-theme="dark"] .seg > button.seg-active {
+:root[data-theme='dark'] .seg > button.seg-active {
   background: #27314a;
   color: #e5e7eb;
 }
 
 /* TABLE inline links maintain brand */
-:root[data-theme="dark"] .table a.link {
+:root[data-theme='dark'] .table a.link {
   color: var(--primary);
 }
 
 /* Checkboxes (keep accent, just tweak when disabled) */
-:root[data-theme="dark"] .check-lg {
+:root[data-theme='dark'] .check-lg {
   accent-color: #7aa2ff;
 }
-:root[data-theme="dark"] .check-lg:disabled {
+:root[data-theme='dark'] .check-lg:disabled {
   filter: none;
   opacity: 0.6;
 }
 
 /* Menu panel shadow reads nicer on dark */
-:root[data-theme="dark"] .menu-panel {
+:root[data-theme='dark'] .menu-panel {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
 }
-:root[data-theme="dark"] .btn {
+:root[data-theme='dark'] .btn {
   --btn-bg: #1e293b; /* slate background */
   --btn-fg: var(--text); /* light text */
   --btn-border: #475569; /* brighter slate border for visibility */
 }
 
 /* Primary */
-:root[data-theme="dark"] .btn.primary {
+:root[data-theme='dark'] .btn.primary {
   --btn-bg: var(--primary);
   --btn-fg: #fff;
   --btn-border: var(--primary);
 }
 
 /* Secondary */
-:root[data-theme="dark"] .btn.secondary {
+:root[data-theme='dark'] .btn.secondary {
   --btn-bg: #0f172a; /* deep background */
   --btn-fg: var(--text);
   --btn-border: #475569; /* slightly lighter than base for contrast */
 }
-:root[data-theme="dark"] .btn.secondary:hover,
-:root[data-theme="dark"] .btn.secondary:focus-visible {
+:root[data-theme='dark'] .btn.secondary:hover,
+:root[data-theme='dark'] .btn.secondary:focus-visible {
   --btn-bg: #1e293b;
   --btn-border: #64748b; /* hover → even more visible border */
 }
 
 /* Accent */
-:root[data-theme="dark"] .btn.accent {
+:root[data-theme='dark'] .btn.accent {
   --btn-bg: var(--accent);
   --btn-fg: #fff;
   --btn-border: var(--accent);
 }
 
 /* Danger */
-:root[data-theme="dark"] .btn.danger {
+:root[data-theme='dark'] .btn.danger {
   --btn-bg: var(--danger);
   --btn-fg: #fff;
   --btn-border: var(--danger);
 }
 
 /* Disabled */
-:root[data-theme="dark"] .btn:is(:disabled, [aria-disabled="true"], .is-disabled) {
+:root[data-theme='dark'] .btn:is(:disabled, [aria-disabled='true'], .is-disabled) {
   --btn-bg: #2b2f36;
   --btn-fg: #9aa0a6;
   --btn-border: #4b5563; /* visible muted border */
 }
 
 /* ==== Dark mode: native control fixes ==== */
-:root[data-theme="dark"] .input,
-:root[data-theme="dark"] select.input,
-:root[data-theme="dark"] textarea.input,
-:root[data-theme="dark"] input.input {
+:root[data-theme='dark'] .input,
+:root[data-theme='dark'] select.input,
+:root[data-theme='dark'] textarea.input,
+:root[data-theme='dark'] input.input {
   /* let the browser draw date pickers, spinners, etc. for dark */
   color-scheme: dark;
 }
 
 /* DATE PICKER (Chromium/WebKit) ------------------------- */
 /* make the calendar icon visible on dark backgrounds */
-:root[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator {
+:root[data-theme='dark'] input[type='date']::-webkit-calendar-picker-indicator {
   filter: invert(0.9) brightness(1.2) saturate(1.1);
   opacity: 0.95;
 }
 
 /* keep the text segments readable */
-:root[data-theme="dark"] input[type="date"]::-webkit-datetime-edit,
-:root[data-theme="dark"] input[type="date"]::-webkit-datetime-edit-fields-wrapper,
-:root[data-theme="dark"] input[type="date"]::-webkit-datetime-edit-text,
-:root[data-theme="dark"] input[type="date"]::-webkit-datetime-edit-year-field,
-:root[data-theme="dark"] input[type="date"]::-webkit-datetime-edit-month-field,
-:root[data-theme="dark"] input[type="date"]::-webkit-datetime-edit-day-field {
+:root[data-theme='dark'] input[type='date']::-webkit-datetime-edit,
+:root[data-theme='dark'] input[type='date']::-webkit-datetime-edit-fields-wrapper,
+:root[data-theme='dark'] input[type='date']::-webkit-datetime-edit-text,
+:root[data-theme='dark'] input[type='date']::-webkit-datetime-edit-year-field,
+:root[data-theme='dark'] input[type='date']::-webkit-datetime-edit-month-field,
+:root[data-theme='dark'] input[type='date']::-webkit-datetime-edit-day-field {
   color: var(--text);
   background: transparent;
 }
 
 /* optional: clearer hover on the calendar icon */
-:root[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator:hover {
+:root[data-theme='dark'] input[type='date']::-webkit-calendar-picker-indicator:hover {
   filter: invert(1) brightness(1.3);
 }
 
 /* NUMBER STEPPERS (Chromium/WebKit) --------------------- */
-:root[data-theme="dark"] input[type="number"]::-webkit-outer-spin-button,
-:root[data-theme="dark"] input[type="number"]::-webkit-inner-spin-button {
+:root[data-theme='dark'] input[type='number']::-webkit-outer-spin-button,
+:root[data-theme='dark'] input[type='number']::-webkit-inner-spin-button {
   /* lighten the arrows so they don't disappear */
   filter: invert(0.9) brightness(1.2);
 }
@@ -1075,7 +1075,7 @@ textarea.input[readonly] {
 /* (FF hides steppers by default; if you *want* that, keep this.
    If you want steppers, REMOVE this block.) */
 @-moz-document url-prefix() {
-  :root[data-theme="dark"] input[type="number"] {
+  :root[data-theme='dark'] input[type='number'] {
     /* default FF look is already readable with color-scheme: dark */
     /* uncomment to hide steppers:
     -moz-appearance: textfield;
@@ -1084,8 +1084,8 @@ textarea.input[readonly] {
 }
 
 /* DISABLED PLACEHOLDER contrast (optional tidy-up) */
-:root[data-theme="dark"] .input:disabled::placeholder,
-:root[data-theme="dark"] textarea.input:disabled::placeholder {
+:root[data-theme='dark'] .input:disabled::placeholder,
+:root[data-theme='dark'] textarea.input:disabled::placeholder {
   color: #7a8699;
 }
 
@@ -1211,7 +1211,7 @@ textarea.input[readonly] {
   #print-root svg,
   #print-root canvas,
   #print-root video,
-  #print-root i[class*="fa-"] {
+  #print-root i[class*='fa-'] {
     filter: grayscale(100%) contrast(105%) !important;
   }
 
@@ -1222,7 +1222,7 @@ textarea.input[readonly] {
   }
 
   /* Watermark: keep your logic, but purely B/W and lighter for laser printers */
-  #print-root .print-page[data-watermark]:not([data-watermark=""])::before {
+  #print-root .print-page[data-watermark]:not([data-watermark=''])::before {
     content: attr(data-watermark);
     position: fixed; /* stays centered on the page */
     top: 40%;
@@ -1279,7 +1279,7 @@ textarea.input[readonly] {
   border-radius: 8px;
   padding: 12px;
   margin-top: 6px;
-  min-width: 350px;
+  min-width: 400px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
 }
 .filter-row {

@@ -31,7 +31,7 @@
             <h4 class="crumb-text">
               <template v-for="(c,i) in breadcrumbs" :key="i">
                 <template v-if="i>0"> &gt; </template>
-                <a v-if="c.onClick" class="link" href="#" @click.prevent="c.onClick">{{ c.label }}</a>
+                <a tabindex="-1" v-if="c.onClick" class="link" href="#" @click.prevent="c.onClick">{{ c.label }}</a>
                 <span v-else>{{ c.label }}</span>
               </template>
             </h4>
@@ -101,10 +101,12 @@
                     </button>
                   </div>
                 </div>
-                <input v-model.trim="familySearch" class="input" placeholder="Search familyId, contact name/phone/email, city..." />
-                <button tabindex="-1" class="btn small" type="button" @click="resetFamilyFilters" :disabled="!hasActiveFamilyFilter" title="Clear filters">
-                  Clear
-                </button>
+                <!-- Filter text search -->
+                <input
+                  v-model.trim="familiesTextFilter.querySearch"
+                  class="input"
+                  placeholder="Search family by id, parishNumber, city, Contact name/phone/email ..." />
+                <button tabindex="-1" class="btn small" type="button" @click="familiesTextFilter.clear()" title="Clear filters">Clear</button>
               </div>
               <table class="table list">
                 <thead>
@@ -606,19 +608,19 @@
                   </span>
 
                   <div class="pager-buttons">
-                    <button @click="eventPager.goFirst" :disabled="eventPager.page <= 1 || eventPager.isAll">
+                    <button tabindex="-1" @click="eventPager.goFirst" :disabled="eventPager.page <= 1 || eventPager.isAll">
                       <i class="fa fa-angle-double-left"></i>
                     </button>
-                    <button @click="eventPager.goPrev" :disabled="eventPager.page <= 1 || eventPager.isAll">
+                    <button tabindex="-1" @click="eventPager.goPrev" :disabled="eventPager.page <= 1 || eventPager.isAll">
                       <i class="fa fa-angle-left"></i>
                     </button>
                   </div>
                   <span>Page {{ eventPager.page }} / {{ eventPager.totalPages }}</span>
                   <div class="pager-buttons">
-                    <button @click="eventPager.goNext" :disabled="eventPager.page >= eventPager.totalPages || eventPager.isAll">
+                    <button tabindex="-1" @click="eventPager.goNext" :disabled="eventPager.page >= eventPager.totalPages || eventPager.isAll">
                       <i class="fa fa-angle-right"></i>
                     </button>
-                    <button @click="eventPager.goLast" :disabled="eventPager.page >= eventPager.totalPages || eventPager.isAll">
+                    <button tabindex="-1" @click="eventPager.goLast" :disabled="eventPager.page >= eventPager.totalPages || eventPager.isAll">
                       <i class="fa fa-angle-double-right"></i>
                     </button>
                   </div>
@@ -626,12 +628,12 @@
 
                 <!-- Filter menu button + popover -->
                 <div class="filter-trigger">
-                  <button class="btn" @click="eventsFilterMenu.toggle()">
+                  <button tabindex="-1" class="btn" @click="eventsFilterMenu.toggle()">
                     <i class="fa-solid fa-filter"></i>
                     <span v-if="eventsFilterMenu.activeCount">({{ eventsFilterMenu.activeCount }})</span>
                   </button>
-
-                  <div v-show="eventsFilterMenu.isOpen" class="filter-popover" @click.stop>
+                  <div v-if="eventsFilterMenu.isOpen" class="clickout-overlay" @click="eventsFilterMenu.close()"></div>
+                  <div v-if="eventsFilterMenu.isOpen" class="filter-popover" @click.stop>
                     <div class="item-header compact bordered">
                       <h4 class="title">Event Filter</h4>
                     </div>
@@ -645,16 +647,23 @@
                       </select>
                     </div>
                     <div class="filter-actions">
-                      <button class="btn" @click="eventsFilterMenu.clear()">Clear</button>
-                      <button class="btn" @click="eventsFilterMenu.close()">Close</button>
+                      <button tabindex="-1" class="btn" @click="eventsFilterMenu.clear()">Clear</button>
+                      <button tabindex="-1" class="btn" @click="eventsFilterMenu.close()">Close</button>
                     </div>
                   </div>
                 </div>
 
                 <!-- Filter text search -->
-                <input v-model.trim="eventSearch" class="input" placeholder="Search by id, title, type, program, year…" />
+                <input v-model.trim="eventsTextFilter.querySearch" class="input" placeholder="Search events by ID or Description..." />
 
-                <button tabindex="-1" class="btn small" type="button" @click="eventsFilterMenu.clear()" title="Clear Program/Level/Year filters">Clear</button>
+                <button
+                  tabindex="-1"
+                  class="btn small"
+                  type="button"
+                  @click="eventsFilterMenu.clear() && eventsTextFilter.clear()"
+                  title="Clear Program/Level/Year filters">
+                  Clear
+                </button>
               </div>
 
               <table class="table">
@@ -938,14 +947,15 @@
                     </button>
                   </div>
                 </div>
+
                 <!-- Filter menu button + popover -->
                 <div class="filter-trigger">
                   <button class="btn" @click="registrationsFilterMenu.toggle()">
                     <i class="fa-solid fa-filter"></i>
                     <span v-if="registrationsFilterMenu.activeCount">({{ registrationsFilterMenu.activeCount }})</span>
                   </button>
-
-                  <div v-show="registrationsFilterMenu.isOpen" class="filter-popover" @click.stop>
+                  <div v-if="registrationsFilterMenu.isOpen" class="clickout-overlay" @click="registrationsFilterMenu.close()"></div>
+                  <div v-if="registrationsFilterMenu.isOpen" class="filter-popover" @click.stop>
                     <div class="item-header compact bordered">
                       <h4 class="title">Registrations Filter</h4>
                     </div>
@@ -964,12 +974,20 @@
                     </div>
                   </div>
                 </div>
+
                 <!-- Filter text search -->
                 <input
-                  v-model.trim="registrationSearch"
+                  v-model.trim="registrationsTextFilter.querySearch"
                   class="input"
-                  placeholder="Search by Registration Id, Family ID, Event Name, Contacts Name/Phone, receiptNo …" />
-                <button tabindex="-1" class="btn small" type="button" @click="registrationsFilterMenu.clear()" title="Clear filters">Clear</button>
+                  placeholder="Search registration by id, familyId, event, contact name/phone, child name, receipt .." />
+                <button
+                  tabindex="-1"
+                  class="btn small"
+                  type="button"
+                  @click="registrationsFilterMenu.clear() && registrationsTextFilter.clear()"
+                  title="Clear filters">
+                  Clear
+                </button>
               </div>
 
               <table class="table">
@@ -1493,55 +1511,75 @@
           <section v-if="MODE.LIST" class="page">
             <div class="card">
               <div class="toolbar">
-                <input v-model.trim="rosterSearch" class="input" placeholder="Search child name…" />
-
-                <div class="toolbar-filters">
-                  <!-- School Year -->
-                  <label class="toolbar-filter">
-                    <span>Year</span>
-                    <select class="input" v-model="rosterFilter.year">
-                      <option value="">All years</option>
-                      <option v-for="opt in YEAR_OPTIONS" :key="String(opt.value)" :value="opt.value">{{ opt.label }}</option>
+                <!-- Page size selector -->
+                <div class="pager">
+                  <label class="nowrap">
+                    Rows Per Page:
+                    <select class="pager-size" v-model.number="rostersPager.pageSize">
+                      <option v-for="n in rostersPager.options" :key="n" :value="n">{{ n === rostersPager.allSentinel ? "All": n }}</option>
                     </select>
                   </label>
 
-                  <!-- Program -->
-                  <label class="toolbar-filter">
-                    <span>Program</span>
-                    <select class="input" v-model="rosterFilter.programId">
-                      <option value="">All programs</option>
-                      <option v-for="opt in programOptionsForRoster" :key="String(opt.value)" :value="opt.value">{{ formatOptionLabel(opt) }}</option>
-                    </select>
-                  </label>
+                  <span>
+                    {{ rostersPager.totalRows ? (rostersPager.isAll ? 1 : rostersPager.pageStart + 1) : 0 }}–{{ rostersPager.isAll ? rostersPager.totalRows :
+                    Math.min(rostersPager.pageEnd, rostersPager.totalRows) }} of {{ rostersPager.totalRows }}
+                  </span>
 
-                  <!-- Event Type -->
-                  <label class="toolbar-filter">
-                    <span>Type</span>
-                    <select class="input" v-model="rosterFilter.eventType">
-                      <option value="">All types</option>
-                      <option v-for="opt in eventTypeOptionsForRoster" :key="String(opt.value)" :value="opt.value">{{ formatOptionLabel(opt) }}</option>
-                    </select>
-                  </label>
-
-                  <!-- Event -->
-                  <label class="toolbar-filter">
-                    <span>Event</span>
-                    <select class="input" v-model="rosterFilter.eventId">
-                      <option value="">All events</option>
-                      <option v-for="opt in eventOptionsForRoster" :key="String(opt.value)" :value="opt.value">{{ formatOptionLabel(opt) }}</option>
-                    </select>
-                  </label>
-
-                  <!-- Age -->
-                  <label class="toolbar-filter">
-                    <span>Age</span>
-                    <select class="input" v-model="rosterFilter.age">
-                      <option value="">All Ages</option>
-                      <option v-for="opt in ageOptions" :key="String(opt.value)" :value="opt.value">{{ opt.label }}</option>
-                    </select>
-                  </label>
+                  <div class="pager-buttons">
+                    <button tabindex="-1" @click="rostersPager.goFirst" :disabled="rostersPager.page <= 1 || rostersPager.isAll">
+                      <i class="fa fa-angle-double-left"></i>
+                    </button>
+                    <button tabindex="-1" @click="rostersPager.goPrev" :disabled="rostersPager.page <= 1 || rostersPager.isAll">
+                      <i class="fa fa-angle-left"></i>
+                    </button>
+                  </div>
+                  <span>Page {{ rostersPager.page }} / {{ rostersPager.totalPages }}</span>
+                  <div class="pager-buttons">
+                    <button tabindex="-1" @click="rostersPager.goNext" :disabled="rostersPager.page >= rostersPager.totalPages || rostersPager.isAll">
+                      <i class="fa fa-angle-right"></i>
+                    </button>
+                    <button tabindex="-1" @click="rostersPager.goLast" :disabled="rostersPager.page >= rostersPager.totalPages || rostersPager.isAll">
+                      <i class="fa fa-angle-double-right"></i>
+                    </button>
+                  </div>
                 </div>
-                <button tabindex="-1" class="btn small" type="button" @click="resetRosterFilters" :disabled="!hasActiveRosterFilter" title="Clear filters">
+
+                <!-- Filter menu button + popover -->
+                <div class="filter-trigger">
+                  <button tabindex="-1" class="btn" @click="rostersFilterMenu.toggle()">
+                    <i class="fa-solid fa-filter"></i>
+                    <span v-if="rostersFilterMenu.activeCount">({{ rostersFilterMenu.activeCount }})</span>
+                  </button>
+                  <div v-if="rostersFilterMenu.isOpen" class="clickout-overlay" @click="rostersFilterMenu.close()"></div>
+                  <div v-if="rostersFilterMenu.isOpen" class="filter-popover" @click.stop>
+                    <div class="item-header compact bordered">
+                      <h4 class="title">Rosters Filter</h4>
+                    </div>
+                    <div class="filter-row" v-for="def in rostersFilterMenu.definitions" :key="def.key">
+                      <label class="text-sm">{{ def.label }}</label>
+                      <select class="input" v-if="def.type==='select'" v-model="rostersFilterMenu.state[def.key]">
+                        <option :value="def.emptyValue ?? ''">All</option>
+                        <option v-for="opt in (typeof def.options === 'function' ? def.options() : def.options)" :key="opt.value" :value="opt.value">
+                          {{ opt.label }}
+                        </option>
+                      </select>
+                    </div>
+                    <div class="filter-actions">
+                      <button tabindex="-1" class="btn" @click="rostersFilterMenu.clear()">Clear</button>
+                      <button tabindex="-1" class="btn" @click="rostersFilterMenu.close()">Close</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Filter text search -->
+                <input v-model.trim="rostersTextFilter.querySearch" class="input" placeholder="Search roster child name..." />
+
+                <button
+                  tabindex="-1"
+                  class="btn small"
+                  type="button"
+                  @click="rostersFilterMenu.clear() && rostersTextFilter.clear()"
+                  title="Clear Rosters filters">
                   Clear
                 </button>
               </div>
@@ -1560,7 +1598,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="r in filteredRosterRows" :key="r.registrationId + '-' + r.childId">
+                  <tr v-for="r in rostersPager.items" :key="r.registrationId + '-' + r.childId">
                     <td>{{ r.programId }}</td>
                     <td>{{ codeToLabel(r.year, YEAR_OPTIONS) }}</td>
                     <td>{{ codeToLabel(r.eventType, EVENT_TYPES) }}</td>
@@ -1974,7 +2012,7 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <!-- Vue 3 -->
     <!--
-    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script> 
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 
