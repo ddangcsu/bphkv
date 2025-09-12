@@ -106,6 +106,7 @@
           EVENT: buildEnumMap(s.eventTypes),
           LEVEL: buildEnumMap(s.levels),
           METHOD: buildEnumMap(s.paymentMethods),
+          FEE: buildEnumMap(s.feeCodes),
         };
       },
     },

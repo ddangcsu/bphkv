@@ -19,7 +19,7 @@
           label: 'Family ID',
           type: 'text',
           placeholder: '',
-          default: () => Util.Format.makeId('F'),
+          default: () => Util.Helpers.makeId('F'),
           disabled: true,
           show: true,
           required: true,
@@ -96,7 +96,7 @@
       },
     ],
     children: [
-      { col: 'childId', label: 'Child ID', type: 'text', show: false, default: () => Util.Format.makeId('S') },
+      { col: 'childId', label: 'Child ID', type: 'text', show: false, default: () => Util.Helpers.makeId('S') },
       {
         col: 'lastName',
         label: 'Last Name',
@@ -111,7 +111,16 @@
       { col: 'firstName', label: 'First Name', type: 'text', default: '', required: true },
       { col: 'middle', label: 'Middle', type: 'text', default: '' },
       { col: 'saintName', label: 'Saint Name', type: 'text', default: '', required: true },
-      { col: 'dob', label: 'Date of Birth', type: 'date', default: '', required: true },
+      {
+        col: 'dob',
+        label: 'Date of Birth',
+        type: 'date',
+        default: '',
+        required: true,
+        api: {
+          fromApi: (v) => (v || '').slice(0, 10),
+        },
+      },
       {
         col: 'allergies',
         label: 'Allergies (comma)',
@@ -174,21 +183,21 @@
     return familyFields;
   }
 
-  Families.newContact = function () {
-    return Util.Helpers.buildFromFields(familyFields.contacts);
+  Families.newContact = function ({ ctx = {}, overrides = {} } = {}) {
+    return Util.Helpers.buildFromFields(familyFields.contacts, { ctx, overrides });
   };
 
-  Families.newChild = function () {
-    return Util.Helpers.buildFromFields(familyFields.children);
+  Families.newChild = function ({ ctx = {}, overrides = {} } = {}) {
+    return Util.Helpers.buildFromFields(familyFields.children, { ctx, overrides });
   };
 
-  Families.newNote = function () {
-    return Util.Helpers.buildFromFields(familyFields.notes);
+  Families.newNote = function ({ ctx = {}, overrides = {} } = {}) {
+    return Util.Helpers.buildFromFields(familyFields.notes, { ctx, overrides });
   };
 
-  Families.new = function () {
-    const main = Util.Helpers.buildFromFields(familyFields.household.main);
-    const address = Util.Helpers.buildFromFields(familyFields.household.address);
+  Families.new = function ({ ctx = {}, overrides = {} } = {}) {
+    const main = Util.Helpers.buildFromFields(familyFields.household.main, { ctx, overrides });
+    const address = Util.Helpers.buildFromFields(familyFields.household.address, { ctx, overrides });
     return {
       ...main,
       address: { ...address },

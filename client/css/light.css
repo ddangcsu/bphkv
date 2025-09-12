@@ -11,8 +11,8 @@
   --border: #e5e7eb;
   --border-strong: #d1d5db;
   --primary: #2563eb;
-  --accent: #017a54;
-  --danger: #aa0202;
+  --accent: #33a7fa;
+  --danger: #f9a9a9;
   --focus: #93c5fd;
 }
 
@@ -496,7 +496,7 @@ table.table tbody tr:nth-child(even) {
   border-bottom: none;
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
-  padding: 8px 36px;
+  padding: 8px 10px;
   font-size: 0.95rem;
   border-radius: 12px 12px 0 0;
   margin-bottom: 0;
@@ -1273,7 +1273,7 @@ textarea.input[readonly] {
 .filter-popover {
   position: absolute;
   top: 100%;
-  z-index: 40;
+  z-index: 200;
   background: #fff;
   border: 1px solid #ddd;
   border-radius: 8px;
@@ -1284,7 +1284,7 @@ textarea.input[readonly] {
 }
 .filter-row {
   display: grid;
-  grid-template-columns: 100px 1fr;
+  grid-template-columns: 120px 1fr;
   gap: 8px;
   align-items: center;
   margin-bottom: 8px;
@@ -1297,4 +1297,8 @@ textarea.input[readonly] {
 }
 .filter-actions button {
   padding: 6px 10px;
+}
+
+.text-sm {
+  font-size: small;
 }

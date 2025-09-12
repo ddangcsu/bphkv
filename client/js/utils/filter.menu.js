@@ -57,6 +57,8 @@
           const isUnset = Array.isArray(value) ? value.length === 0 : value === empty || value === '' || value == null;
           if (isUnset) return true;
 
+          if (def?.bypass) return true;
+
           if (typeof def.matches === 'function') return def.matches(row, value, state);
 
           let rowValue;

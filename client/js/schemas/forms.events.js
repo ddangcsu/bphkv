@@ -19,7 +19,7 @@
         label: 'Event ID',
         type: 'text',
         placeholder: 'Self Generated',
-        default: () => Util.Format.makeId('E'),
+        default: () => Util.Helpers.makeId('E'),
         disabled: true,
         required: true,
       },
@@ -114,9 +114,17 @@
     return eventFields;
   }
 
-  Events.new = function () {
-    const base = Util.Helpers.buildFromFields(eventFields.main);
-    return { ...base, prerequisites: [], fees: [] };
+  Events.newFee = function ({ ctx = {}, overrides = {} } = {}) {
+    return Util.Helpers.buildFromFields(eventFields.feeRow, { ctx, overrides });
+  };
+
+  Events.newPreq = function ({ ctx = {}, overrides = {} } = {}) {
+    return Util.Helpers.buildFromFields(eventFields.prerequisiteRow, { ctx, overrides });
+  };
+
+  Events.new = function ({ ctx = {}, overrides = {} } = {}) {
+    const base = Util.Helpers.buildFromFields(eventFields.main, { ctx, overrides });
+    return { ...base, fees: [Events.newFee()], prerequisites: [] };
   };
 
   forms.Events = Events;

@@ -72,7 +72,7 @@
                 <!-- Page size selector -->
                 <div class="pager">
                   <label class="nowrap">
-                    Rows Per Page:
+                    Rows:
                     <select class="pager-size" v-model.number="familiesPager.pageSize">
                       <option v-for="n in familiesPager.options" :key="n" :value="n">{{ n === familiesPager.allSentinel ? "All": n }}</option>
                     </select>
@@ -101,14 +101,42 @@
                     </button>
                   </div>
                 </div>
+
+                <!-- Filter menu button + popover -->
+                <div class="filter-trigger">
+                  <button tabindex="-1" class="btn" @click="familiesFilterMenu.toggle()">
+                    <i class="fa-solid fa-filter"></i>
+                    <span v-if="familiesFilterMenu.activeCount">({{ familiesFilterMenu.activeCount }})</span>
+                  </button>
+                  <div v-if="familiesFilterMenu.isOpen" class="clickout-overlay" @click="familiesFilterMenu.close()"></div>
+                  <div v-if="familiesFilterMenu.isOpen" class="filter-popover" @click.stop>
+                    <div class="item-header compact bordered">
+                      <h4 class="title">Family Filter</h4>
+                    </div>
+                    <div class="filter-row" v-for="def in familiesFilterMenu.definitions" :key="def.key">
+                      <label class="text-sm">{{ def.label }}</label>
+                      <select class="input" v-if="def.type==='select'" v-model="familiesFilterMenu.state[def.key]">
+                        <option :value="def.emptyValue ?? ''">All</option>
+                        <option v-for="opt in familiesFilterMenu.opt(def)" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+                      </select>
+                    </div>
+                    <div class="filter-actions">
+                      <button tabindex="-1" class="btn" @click="familiesFilterMenu.clear()">Clear</button>
+                      <button tabindex="-1" class="btn" @click="familiesFilterMenu.close()">Close</button>
+                    </div>
+                  </div>
+                </div>
+
                 <!-- Filter text search -->
                 <input
                   v-model.trim="familiesTextFilter.querySearch"
                   class="input"
                   placeholder="Search family by id, parishNumber, city, Contact name/phone/email ..." />
-                <button tabindex="-1" class="btn small" type="button" @click="familiesTextFilter.clear()" title="Clear filters">Clear</button>
+                <button tabindex="-1" class="btn small" type="button" @click="familiesTextFilter.clear() && familiesFilterMenu.clear()" title="Clear filters">
+                  Clear
+                </button>
               </div>
-              <table class="table list">
+              <table class="table">
                 <thead>
                   <tr>
                     <th>Family ID</th>
@@ -512,7 +540,7 @@
                 <!-- Page size selector -->
                 <div class="pager">
                   <label class="nowrap">
-                    Rows Per Page:
+                    Rows:
                     <select class="pager-size" v-model.number="eventPager.pageSize">
                       <option v-for="n in eventPager.options" :key="n" :value="n">{{ n === eventPager.allSentinel ? "All": n }}</option>
                     </select>
@@ -823,7 +851,7 @@
                 <!-- Page size selector -->
                 <div class="pager">
                   <label class="nowrap">
-                    Rows Per Page:
+                    Rows:
                     <select class="pager-size" v-model.number="registrationPager.pageSize">
                       <option v-for="n in registrationPager.options" :key="n" :value="n">{{ n === registrationPager.allSentinel ? "All": n }}</option>
                     </select>
@@ -953,12 +981,7 @@
                   <button v-show="MODE.EDIT" type="button" class="btn" @click="READONLY = !READONLY">
                     <i :class="READONLY ? 'fa-solid fa-lock' : 'fa-solid fa-lock-open'"></i>
                   </button>
-                  <button
-                    tabindex="-1"
-                    type="button"
-                    class="btn primary"
-                    :disabled="isReadOnly || !canSaveRegistration || !isRegistrationDirty"
-                    @click="submitRegistrationForm">
+                  <button tabindex="-1" type="button" class="btn primary" :disabled="isReadOnly || !isRegistrationDirty" @click="submitRegistrationForm">
                     <i class="fa-solid fa-floppy-disk"></i><span> Save</span>
                   </button>
                   <button tabindex="-1" type="button" class="btn" @click="goBackSection"><i class="fa-solid fa-xmark"></i><span> Cancel</span></button>
@@ -978,7 +1001,7 @@
                     v-show="isVisible(fld, {mode: currentMode, form: registrationForm})"
                     :for="`reg-${fld.col}`">
                     {{ fld.label }}
-                    <small class="error" v-if="registrationErrors?.main?.[fld.col]">{{ registrationErrors.main[fld.col] }}</small>
+                    <small class="error" v-if="registrationErrors?.[fld.col]">{{ registrationErrors[fld.col] }}</small>
 
                     <template v-if="fld.type === 'select'">
                       <select
@@ -1081,7 +1104,6 @@
                 <div class="item-header compact bordered">
                   <h4 class="title">Children Enrollment</h4>
                   <div class="spacer"></div>
-                  <small class="error" v-if="registrationErrors?.main?.childrenRoot">{{ registrationErrors?.main?.childrenRoot }}</small>
                   <div class="actions">
                     <button
                       tabindex="-1"
@@ -1110,7 +1132,7 @@
                     <template v-for="cf in registrationFields.childrenRow" :key="cf.col">
                       <label :for="`reg-child-${i}-${cf.col}`" v-show="isVisible(cf, {mode: currentMode, form: registrationForm, row, index: i})">
                         {{ cf.label }}
-                        <small class="error" v-if="registrationErrors?.children?.[i]?.[cf.col]">{{ registrationErrors.children[i]?.[cf.col] }}</small>
+                        <small class="error" v-if="registrationErrors?.children?.[i]?.[cf.col]">{{ registrationErrors.children[i][cf.col] }}</small>
                         <template v-if="cf.type === 'select'">
                           <select
                             class="input"
@@ -1129,8 +1151,9 @@
                             </option>
                           </select>
                         </template>
-                        <template v-else-if="cf.type === 'text'">
+                        <template v-else>
                           <input
+                            :type="cf.type || 'text'"
                             class="input"
                             :id="`reg-child-${i}-${cf.col}`"
                             :name="`registration.children[${i}].${cf.col}`"
@@ -1154,7 +1177,7 @@
                     <template v-for="pf in registrationFields.paymentsRow" :key="pf.col">
                       <label :for="`reg-pay-${i}-${pf.col}`" v-show="isVisible(pf, {mode: currentMode, form: registrationForm, row: p, index: i})">
                         {{ pf.label }}
-                        <small class="error" v-if="registrationErrors?.payments[i]?.[pf.col]">{{ registrationErrors?.payments[i]?.[pf.col] }}</small>
+                        <small class="error" v-if="registrationErrors?.payments[i]?.[pf.col]">{{ registrationErrors.payments[i][pf.col] }}</small>
                         <template v-if="pf.type==='select'">
                           <select
                             class="input"
@@ -1202,7 +1225,7 @@
                     :for="`reg-meta-${mf.col}`"
                     v-show="isVisible(mf, {mode: currentMode, form: registrationForm})">
                     {{ mf.label }}
-                    <small class="error" v-if="registrationErrors?.main?.[mf.col]">{{ registrationErrors?.main?.[mf.col] }}</small>
+                    <small class="error" v-if="registrationErrors?.[mf.col]">{{ registrationErrors[mf.col] }}</small>
                     <template v-if="mf.type==='select'">
                       <select
                         class="input"
@@ -1417,7 +1440,7 @@
                 <!-- Page size selector -->
                 <div class="pager">
                   <label class="nowrap">
-                    Rows Per Page:
+                    Rows:
                     <select class="pager-size" v-model.number="rosterPager.pageSize">
                       <option v-for="n in rosterPager.options" :key="n" :value="n">{{ n === rosterPager.allSentinel ? "All": n }}</option>
                     </select>

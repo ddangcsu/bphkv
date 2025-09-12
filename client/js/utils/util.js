@@ -45,7 +45,7 @@
 
   const normPhone = (s = '') => String(s || '').replace(/\D+/g, '');
 
-  function formatUSPhone(raw = '') {
+  function phone(raw = '') {
     const d = normPhone(raw).slice(0, 10);
     if (!d) return '';
     if (d.length < 4) return `(${d}`;
@@ -327,12 +327,8 @@
 
   // Public surface (non-breaking shape)
   root.Format = {
-    randInt,
-    groupDigits,
-    randomNumericString,
-    makeId,
     normPhone,
-    formatUSPhone,
+    phone,
     formatMoney,
     capitalize,
     codeToLabel,
@@ -341,6 +337,7 @@
     displayChildNameAndAge,
   };
   root.Helpers = {
+    makeId,
     getByPath,
     setDefault,
     buildFromFields,

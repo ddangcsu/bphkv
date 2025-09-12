@@ -26,7 +26,7 @@
         placeholder: '',
         disabled: true,
         show: true,
-        default: () => Util.Format.makeId('R'),
+        default: () => Util.Helpers.makeId('R'),
         required: true,
       },
       {
@@ -139,13 +139,14 @@
         col: 'allergies',
         label: 'Allergies',
         type: 'text',
-        default: '',
+        default: [],
         disabled: true,
         transform: (v) => (Array.isArray(v) ? v.join(', ') : ''),
         api: {
           toApi: (v) => Util.Helpers.stringToList(v),
         },
       },
+      { col: 'status', label: 'Child Status', type: 'text', default: 'pending', show: false, disabled: true },
     ],
     paymentsRow: [
       { col: 'code', label: 'Fee Type', type: 'select', default: '', selOpt: () => Options.FEE_CODES, disabled: true },
@@ -207,10 +208,26 @@
     return registrationFields;
   }
 
-  Registrations.new = function () {
-    const main = Util.Helpers.buildFromFields(registrationFields.main);
-    const meta = Util.Helpers.buildFromFields(registrationFields.meta);
-    const event = Util.Helpers.buildFromFields(registrationFields.eventSnapshot);
+  Registrations.newEvent = function ({ ctx = {}, overrides = {} } = {}) {
+    return Util.Helpers.buildFromFields(registrationFields.eventSnapshot, { ctx, overrides });
+  };
+
+  Registrations.newContact = function ({ ctx = {}, overrides = {} } = {}) {
+    return Util.Helpers.buildFromFields(registrationFields.contactSnapshot, { ctx, overrides });
+  };
+
+  Registrations.newChild = function ({ ctx = {}, overrides = {} } = {}) {
+    return Util.Helpers.buildFromFields(registrationFields.childrenRow, { ctx, overrides });
+  };
+
+  Registrations.newPayment = function ({ ctx = {}, overrides = {} } = {}) {
+    return Util.Helpers.buildFromFields(registrationFields.paymentsRow, { ctx, overrides });
+  };
+
+  Registrations.new = function ({ ctx = {}, overrides = {} } = {}) {
+    const main = Util.Helpers.buildFromFields(registrationFields.main, { ctx, overrides });
+    const meta = Util.Helpers.buildFromFields(registrationFields.meta, { ctx, overrides });
+    const event = Util.Helpers.buildFromFields(registrationFields.eventSnapshot, { ctx, overrides });
 
     return {
       ...main,
