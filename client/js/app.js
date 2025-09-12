@@ -418,7 +418,7 @@ const app = createApp({
     const newFamilyForm = Schema.Forms.Families.new;
 
     const familyForm = reactive(newFamilyForm());
-    const familyErrors = reactive({ household: {}, contacts: [{}], children: [{}], notes: [{}] });
+    const familyErrors = ref({});
 
     const validateFamily = () => {
       const errors = {};
@@ -436,11 +436,14 @@ const app = createApp({
       if (!familyForm.contacts.some((c) => Schema.Options.PARENTS.has(c.relationship)))
         errors.contactErrors = 'Contacts must have at least one with Father/Mother/Guardian relationship';
 
-      familyErrors.household = { ...errors.main, ...errors.address };
-      familyErrors.contacts = errors.contacts;
-      familyErrors.children = errors.children;
-      familyErrors.notes = errors.notes;
-      familyErrors.contactErrors = errors.contactErrors;
+      familyErrors.value = {
+        ...errors.main,
+        address: errors.address,
+        contacts: errors.contacts,
+        children: errors.children,
+        notes: errors.notes,
+        contactErrors: errors.contactErrors,
+      };
 
       const noHouseHoldErrors = Object.keys(errors.main).length === 0 && Object.keys(errors.address).length === 0;
       const noContactsErrors =
@@ -455,27 +458,24 @@ const app = createApp({
       validateFamily();
     }
 
-    // Monitor to clear isNameException and exceptionNotes
-    watch(
-      () => familyForm.children,
-      () => {
-        for (const ch of familyForm.children || []) {
-          if (!needsNameException({ form: familyForm, row: ch })) {
-            ch.isNameException = false;
-            ch.exceptionNotes = '';
-          }
+    function normalizeNameExceptions() {
+      for (const child of familyForm.children || []) {
+        // Only write if we actually need to change something to avoid extra re-renders
+        if (!needsNameException({ form: familyForm, row: child })) {
+          if (child.isNameException) child.isNameException = false;
+          if (child.exceptionNotes) child.exceptionNotes = '';
         }
+      }
+    }
+
+    Vue.watch(
+      () => familyForm,
+      () => {
+        normalizeNameExceptions(); // keep the form normalized
+        hydrateFamilyErrors(); // then recompute interactive errors
       },
       { deep: true, immediate: true },
     );
-
-    // Interactive error on the form as user input
-    Vue.watch(() => familyForm.parishMember, hydrateFamilyErrors);
-    Vue.watch(() => familyForm.parishNumber, hydrateFamilyErrors);
-    Vue.watch(() => familyForm.address, hydrateFamilyErrors, { deep: true });
-    Vue.watch(() => familyForm.contacts, hydrateFamilyErrors, { deep: true });
-    Vue.watch(() => familyForm.children, hydrateFamilyErrors, { deep: true });
-    Vue.watch(() => familyForm.notes, hydrateFamilyErrors, { deep: true });
 
     // dirty tracking
     const eventOriginalSnapshot = ref('');
@@ -625,12 +625,8 @@ const app = createApp({
       }
     }
 
-    const eventErrors = reactive({});
+    const eventErrors = ref({});
     const editingEventId = ref(null);
-
-    function clearEventErrors() {
-      for (const k of Object.keys(eventErrors)) delete eventErrors[k];
-    }
 
     // EVENTS_META
     const eventCtx = { availablePrerequisiteOptions };
@@ -666,6 +662,7 @@ const app = createApp({
       return null; // ADM => none
     }
 
+    // Watch the year/id/eventType to determine if we need prerequisite or not
     watch(
       () => [eventForm.year, eventForm.id, eventForm.eventType],
       () => {
@@ -755,7 +752,7 @@ const app = createApp({
 
     function beginCreateEvent() {
       Object.assign(eventForm, newEventForm());
-      clearEventErrors();
+      hydrateEventErrors();
       editingEventId.value = null;
 
       if (eventForm.fees.length === 0) addEventFee();
@@ -774,24 +771,32 @@ const app = createApp({
       const ui = Mappers.Events.toUi(apiEvent || {});
       Object.assign(eventForm, newEventForm(), ui);
 
-      clearEventErrors();
+      hydrateEventErrors();
       snapshotEventForm();
       switchSection(SECTION_NAMES.EVENTS, MODE_NAMES.EDIT);
       setStatus(`Editing ${e.id}`, 'info', 1200);
     }
 
-    function validateEventForm() {
-      clearEventErrors();
+    function validateEvent_Old() {
+      hydrateEventErrors();
       const e = {};
-      if (MODE.CREATE && !eventForm.id?.trim()) e.id = 'required';
+    }
 
-      if (!PROGRAM_OPTIONS.value.some((o) => o.value === eventForm.programId)) e.programId = 'required';
-      if (!EVENT_TYPES.value.some((o) => o.value === eventForm.eventType)) e.eventType = 'required';
-      if (!eventForm.title?.trim()) e.title = 'required';
-      if (!YEAR_OPTIONS.value.some((o) => Number(o.value) === Number(eventForm.year))) e.year = 'year required';
-      if (!LEVEL_OPTIONS.value.some((o) => o.value === eventForm.level)) e.level = 'invalid';
-      if (!eventForm.openDate) e.openDate = 'required';
-      if (!eventForm.endDate) e.endDate = 'required';
+    const validateEvent = () => {
+      const errors = {};
+      // main
+      errors.main = Util.Helpers.validateFields(eventFields.main, eventForm, { form: eventForm });
+      // arrays
+      errors.fees = Util.Helpers.validateRowArray(eventFields.feeRow, eventForm.fees, { form: eventForm });
+      errors.prerequisites = Util.Helpers.validateRowArray(eventFields.prerequisiteRow, eventForm.prerequisites, {
+        form: eventForm,
+      });
+      // Custom item
+      if (!Array.isArray(eventForm.fees) || eventForm.fees.length === 0) {
+        errors.feeErrors = 'Event must have at least one fee entry';
+      }
+      if (requiredPrereqType() && (!Array.isArray(eventForm.prerequisites) || eventForm.prerequisites.length === 0))
+        errors.preqErrors = 'Event required at least one prerequisite';
 
       if (
         YEAR_OPTIONS.value.some((o) => Number(o.value) === Number(eventForm.year)) &&
@@ -802,92 +807,32 @@ const app = createApp({
         const boundEnd = new Date(Number(eventForm.year) + 1, 6, 0, 23, 59, 59, 999); // June 30 end-of-day
         const start = new Date(eventForm.openDate);
         const end = new Date(eventForm.endDate);
-
-        if (start > end) e.openDate = 'Must <= End Date';
-        if (start < boundStart) e.openDate = 'Not in School Year';
-        if (end > boundEnd) e.endDate = 'Not in School Year';
+        if (start > end) errors.main.openDate = 'Must <= End Date';
+        if (start < boundStart) errors.main.openDate = 'Not in School Year';
+        if (end > boundEnd) errors.main.endDate = 'Not in School Year';
       }
 
-      if (!Array.isArray(eventForm.fees) || eventForm.fees.length === 0) {
-        e.fees = 'at least one fee';
-      } else {
-        for (const f of eventForm.fees) {
-          if (!FEE_CODES.value.some((o) => o.value === f.code)) {
-            e.fees = 'invalid fee code';
-            break;
-          }
-          if (!isNonNegativeNumber(f.amount)) {
-            e.fees = 'fee amount ≥ 0';
-            break;
-          }
-        }
-      }
+      eventErrors.value = {
+        ...errors.main,
+        fees: errors.fees,
+        prerequisites: errors.prerequisites,
+        feeErrors: errors.feeErrors,
+        preqErrors: errors.preqErrors,
+      };
 
-      const reqType = requiredPrereqType();
-      if (reqType) {
-        if (!Array.isArray(eventForm.prerequisites) || eventForm.prerequisites.length === 0) {
-          e.prerequisites = 'at least one prerequisite';
-        } else {
-          const seen = new Set();
-          for (const p of eventForm.prerequisites) {
-            const id = (p?.eventId || '').trim();
-            if (!id) {
-              e.prerequisites = 'every prerequisite must select an event';
-              break;
-            }
-            if (id === eventForm.id) {
-              e.prerequisites = 'cannot include itself';
-              break;
-            }
-            const ev = eventRows.value.find((x) => x.id === id);
-            if (!ev) {
-              e.prerequisites = 'unknown event';
-              break;
-            }
-            if ((ev.eventType || '') !== reqType) {
-              e.prerequisites = `must be ${reqType} type`;
-              break;
-            }
-            if (Number(ev.year) !== Number(eventForm.year)) {
-              e.prerequisites = 'must match selected year';
-              break;
-            }
-            if (seen.has(id)) {
-              e.prerequisites = 'no duplicates';
-              break;
-            }
-            seen.add(id);
-          }
-        }
-      } else {
-        eventForm.prerequisites = [];
-      }
+      const mainErrors = Object.keys(errors.main).length === 0 && !errors.feeErrors && !errors.preqErrors;
+      const feeErrors = (errors.fees || []).every((obj) => !obj || Object.keys(obj).length === 0);
+      const prereqErrors = (errors.prerequisites || []).every((obj) => !obj || Object.keys(obj).length === 0);
 
-      Object.assign(eventErrors, e);
-      return Object.keys(e).length === 0;
+      return mainErrors && feeErrors && prereqErrors;
+    };
+
+    function hydrateEventErrors() {
+      validateEvent();
     }
 
-    function quickCheckEventForm() {
-      if (MODE.CREATE && !eventForm.id?.trim()) return false;
-      if (!PROGRAM_OPTIONS.value.some((o) => o.value === eventForm.programId)) return false;
-      if (!EVENT_TYPES.value.some((o) => o.value === eventForm.eventType)) return false;
-      if (!eventForm.title?.trim()) return false;
-      if (!YEAR_OPTIONS.value.some((o) => Number(o.value) === Number(eventForm.year))) return false;
-      if (!LEVEL_OPTIONS.value.some((o) => o.value === eventForm.level)) return false;
-      if (!eventForm.openDate || !eventForm.endDate) return false;
-      if (!Array.isArray(eventForm.fees) || eventForm.fees.length === 0) return false;
-      if (!eventForm.fees.every((f) => FEE_CODES.value.some((o) => o.value === f.code) && Number(f.amount) >= 0))
-        return false;
-
-      const reqType = requiredPrereqType();
-      if (reqType) {
-        if (!Array.isArray(eventForm.prerequisites) || eventForm.prerequisites.length === 0) return false;
-        const first = eventForm.prerequisites[0];
-        if (!first?.eventId) return false;
-      }
-      return true;
-    }
-    const canSaveEvent = computed(() => quickCheckEventForm());
+    // Interactive error on the form as user input
+    Vue.watch(() => eventForm, hydrateEventErrors, { deep: true, immediate: true });
 
     async function submitEventForm() {
       if (isReadOnly.value) {
@@ -900,7 +845,7 @@ const app = createApp({
         return;
       }
 
-      if (!validateEventForm()) {
+      if (!validateEvent()) {
         setStatus('Please fix errors before saving.', 'error', 2500);
         return;
       }
@@ -1191,7 +1136,7 @@ const app = createApp({
     const availableChildOptions = computed(() => {
       // pass an index that does not match any row so ALL currently
       // selected children are excluded from options
-      return childRegistrationOptions(null, { index: -1 });
+      return childRegistrationOptions(null, { form: registrationForm, index: -1 });
     });
 
     // selOpt for childId (understands { form: <row>, index })
@@ -1961,7 +1906,6 @@ const app = createApp({
       addEventPrerequisiteRow,
       removeEventPrerequisiteRow,
       showPrerequisites,
-      canSaveEvent,
       submitEventForm,
       beginCreateEvent,
       beginEditEvent,

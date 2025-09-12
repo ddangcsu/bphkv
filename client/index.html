@@ -199,7 +199,7 @@
                       :for="`household-${f.col}`"
                       v-show="isVisible(f, {mode: currentMode, form: familyForm})">
                       {{ f.label }}
-                      <small class="error" v-if="familyErrors?.household?.[f.col]">{{ familyErrors.household[f.col] }}</small>
+                      <small class="error" v-if="familyErrors?.[f.col]">{{ familyErrors[f.col] }}</small>
 
                       <template v-if="f.type === 'select'">
                         <select
@@ -217,21 +217,9 @@
                         </select>
                       </template>
 
-                      <template v-else-if="f.type === 'checkbox'">
-                        <input
-                          class="check-lg"
-                          type="checkbox"
-                          :id="`household-${f.col}`"
-                          :name="`family.${f.col}`"
-                          :disabled="getFieldDisabled(f, {mode: currentMode, form: familyForm, isReadOnly})"
-                          v-model="familyForm[f.col]"
-                          @input="onFormFieldInput(f, {mode: currentMode, form: familyForm }, $event)"
-                          @change="onFormFieldChange(f, {mode: currentMode, form: familyForm }, $event)" />
-                      </template>
-
                       <template v-else>
                         <input
-                          class="input"
+                          :class="f.type === 'checkbox' ? 'check-lg': 'input'"
                           :type="f.type || 'text'"
                           :id="`household-${f.col}`"
                           :name="`family.${f.col}`"
@@ -251,7 +239,7 @@
                       :for="`household-address-${f.col}`"
                       v-show="isVisible(f, {mode: currentMode, form: familyForm})">
                       {{ f.label }}
-                      <small class="error" v-if="familyErrors?.household?.[f.col]">{{ familyErrors.household[f.col] }}</small>
+                      <small class="error" v-if="familyErrors?.address?.[f.col]">{{ familyErrors.address[f.col] }}</small>
 
                       <template v-if="f.type === 'select'">
                         <select
@@ -639,7 +627,7 @@
                   <button v-show="MODE.EDIT" type="button" class="btn" @click="READONLY = !READONLY">
                     <i :class="READONLY ? 'fa-solid fa-lock' : 'fa-solid fa-lock-open'"></i>
                   </button>
-                  <button tabindex="-1" type="button" class="btn primary" :disabled="isReadOnly || !canSaveEvent || !isEventDirty" @click="submitEventForm">
+                  <button tabindex="-1" type="button" class="btn primary" :disabled="isReadOnly || !isEventDirty" @click="submitEventForm">
                     <i class="fa-solid fa-floppy-disk"></i><span> Save</span>
                   </button>
                   <button tabindex="-1" type="button" class="btn secondary" @click="goBackSection">
@@ -675,21 +663,9 @@
                       </select>
                     </template>
 
-                    <template v-else-if="fld.type === 'checkbox'">
-                      <input
-                        class="check-lg"
-                        type="checkbox"
-                        v-model="eventForm[fld.col]"
-                        :id="`event-${fld.col}`"
-                        :name="`event.${fld.col}`"
-                        :disabled="getFieldDisabled(fld, {mode: currentMode, form: eventForm, isReadOnly})"
-                        @input="onFormFieldInput(fld, {mode: currentMode, form: eventForm }, $event)"
-                        @change="onFormFieldChange(fld, {mode: currentMode, form: eventForm }, $event)" />
-                    </template>
-
                     <template v-else>
                       <input
-                        class="input"
+                        :class="fld.type === 'checkbox'? 'check-lg': 'input'"
                         :type="fld.type || 'text'"
                         v-model.trim="eventForm[fld.col]"
                         :id="`event-${fld.col}`"
@@ -730,6 +706,8 @@
                       :for="`event-fee-${i}-${rf.col}`"
                       v-show="isVisible(rf, {mode: currentMode, form: eventForm, row, index: i})">
                       {{ rf.label }}
+                      <small class="error" v-if="eventErrors?.fees?.[i]?.[rf.col]">{{ eventErrors.fees[i][rf.col] }}</small>
+
                       <template v-if="rf.type==='select'">
                         <select
                           class="input"
@@ -748,6 +726,7 @@
                           </option>
                         </select>
                       </template>
+
                       <template v-else>
                         <input
                           class="input"
@@ -762,8 +741,8 @@
                       </template>
                     </label>
                   </div>
-                  <small class="error" v-if="eventErrors.fees">{{ eventErrors.fees }}</small>
                 </div>
+                <small class="error" v-if="eventErrors?.feeErrors">{{ eventErrors.feeErrors }}</small>
               </section>
 
               <!-- Prerequisites: shown for non-ADM only -->
@@ -797,6 +776,7 @@
                     <template v-for="pf in eventFields.prerequisiteRow" :key="pf.col">
                       <label :for="`event-prereq-${i}-${pf.col}`" v-show="isVisible(pf, {mode: currentMode, form: eventForm, row:p, index: i})">
                         {{ pf.label }}
+                        <small class="error" v-if="eventErrors?.prerequisites?.[i]?.[pf.col]">{{ eventErrors.prerequisites[i][pf.col] }}</small>
                         <select
                           class="input"
                           v-model="p[pf.col]"
@@ -826,10 +806,9 @@
                           :value="relativeDisplayValue(p, pf, rd)" />
                       </label>
                     </template>
-
-                    <small class="error" v-if="eventErrors.prerequisites">{{ eventErrors.prerequisites }}</small>
                   </div>
                 </div>
+                <small class="error" v-if="eventErrors?.preqErrors">{{ eventErrors.preqErrors }}</small>
               </section>
             </form>
           </section>

@@ -27,6 +27,7 @@
         disabled: true,
         show: true,
         default: () => Util.Format.makeId('R'),
+        required: true,
       },
       {
         col: 'familyId',
@@ -36,12 +37,14 @@
         placeholder: 'Start typing ID or name…',
         onChange: (fieldMeta, ctx, event) => Ctx.onRegFamilyChange(ctx),
         disabled: () => Ctx.MODE.EDIT,
+        required: true,
       },
       {
         col: 'eventId',
         label: 'Registration Event',
         type: 'select',
         default: '',
+        required: true,
         selOpt: () => {
           const src = Ctx.eventOptionsForRegistration;
           return typeof src === 'function' ? src() || [] : (src && src.value) || src || [];
@@ -95,11 +98,19 @@
       { col: 'phone', label: 'Phone', type: 'text', default: '', disabled: true },
     ],
     meta: [
-      { col: 'status', label: 'Status', type: 'select', default: '', selOpt: () => Options.REG_STATUS_OPTIONS },
+      {
+        col: 'status',
+        label: 'Status',
+        type: 'select',
+        default: '',
+        required: true,
+        selOpt: () => Options.REG_STATUS_OPTIONS,
+      },
       {
         col: 'acceptedBy',
         label: 'Accepted & Signed By',
         type: 'select',
+        required: true,
         default: '',
         selOpt: (fieldMeta, ctx) => Ctx.signedRegistrationOptions(ctx),
       },
@@ -110,6 +121,7 @@
         label: 'Child Name',
         type: 'select',
         default: '',
+        required: true,
         selOpt: (fieldMeta, ctx) => Ctx.childRegistrationOptions(fieldMeta, ctx),
         onChange: (fieldMeta, ctx, event) => Ctx.hydrateChildSnapshot(fieldMeta, ctx),
       },
@@ -162,20 +174,29 @@
         disabled: true,
         api: { toApi: (v) => Util.Helpers.toNumber(v) },
       },
-      { col: 'method', label: 'Method', type: 'select', default: '', selOpt: () => Options.PAYMENT_METHOD_OPTIONS },
+      {
+        col: 'method',
+        label: 'Method',
+        type: 'select',
+        default: '',
+        required: true,
+        selOpt: () => Options.PAYMENT_METHOD_OPTIONS,
+      },
       {
         col: 'txnRef',
         label: 'Ref/Check #',
         type: 'text',
         default: '',
+        required: true,
         show: ({ row }) => (row?.method || '') !== Options.ENUMS.METHOD?.CASH,
       },
-      { col: 'receiptNo', label: 'Receipt #', type: 'text', default: '' },
+      { col: 'receiptNo', label: 'Receipt #', type: 'text', default: '', required: true },
       {
         col: 'receivedBy',
         label: 'Received By',
         type: 'select',
         default: '',
+        required: true,
         selOpt: (fieldMeta, ctx) => Ctx.receivedByOptions(ctx),
       },
     ],
