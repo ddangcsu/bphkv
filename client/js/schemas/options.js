@@ -3,6 +3,11 @@
   'use strict';
   const root = global.Schema || (global.Schema = {});
 
+  let _live = null;
+  function setLiveSetupRef(ref) {
+    _live = ref;
+  }
+
   const YES_NO_OPTIONS = [
     { value: true, label: 'Yes' },
     { value: false, label: 'No' },
@@ -22,11 +27,6 @@
       arr.push({ value: y, label: `${String(y)}-${String(y + 1).slice(2)}` });
     }
     return arr;
-  }
-
-  let _live = null;
-  function setLiveSetupRef(ref) {
-    _live = ref;
   }
 
   const arr = (a) => (Array.isArray(a) ? a : []);
@@ -51,6 +51,13 @@
   };
 
   Object.defineProperties(Options, {
+    PARENTS: {
+      get() {
+        const list = arr(_live?.relationships);
+        const parentOnly = list.filter((r) => r?.isParent === true);
+        return new Set(parentOnly.map((r) => String(r?.value ?? '').trim()).filter(Boolean));
+      },
+    },
     PROGRAM_OPTIONS: {
       get() {
         return arr(_live?.programs);

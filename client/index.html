@@ -304,24 +304,6 @@
                 <div class="item-header compact bordered">
                   <h4 class="title">Contacts Information</h4>
                   <div class="spacer"></div>
-                  <div class="pager" v-if="familyContactsMode==='single'">
-                    <button tabindex="-1" type="button" class="btn small" @click="prevFamilyContact" :disabled="familyContactsIndex===0">◀</button>
-                    <span class="pager-status">{{ familyContactsIndex+1 }} / {{ familyForm.contacts.length }}</span>
-                    <button
-                      tabindex="-1"
-                      type="button"
-                      class="btn small"
-                      @click="nextFamilyContact"
-                      :disabled="familyContactsIndex>=familyForm.contacts.length-1">
-                      ▶
-                    </button>
-                  </div>
-                  <div class="seg">
-                    <button tabindex="-1" type="button" :class="{ 'seg-active': familyContactsMode==='single' }" @click="familyContactsMode='single'">
-                      One
-                    </button>
-                    <button tabindex="-1" type="button" :class="{ 'seg-active': familyContactsMode==='all' }" @click="familyContactsMode='all'">All</button>
-                  </div>
                   <div class="actions">
                     <button tabindex="-1" type="button" class="btn small accent" :disabled="isReadOnly" @click="addFamilyContact">
                       <i class="fa-solid fa-plus"></i>
@@ -329,14 +311,14 @@
                   </div>
                 </div>
                 <!-- Contacts Row -->
-                <div v-for="row in visibleFamilyContacts" :key="'c'+row.i" class="row">
+                <div v-for="(row, i) in familyForm.contacts" :key="'c'+i" class="row">
                   <div class="row-actions">
                     <button
                       tabindex="-1"
                       type="button"
                       class="btn small danger"
                       :disabled="isReadOnly"
-                      @click="removeFamilyContact(row.i)"
+                      @click="removeFamilyContact(i)"
                       v-if="familyForm.contacts.length>1">
                       <i class="fa-solid fa-minus"></i>
                     </button>
@@ -346,58 +328,46 @@
                     <label
                       v-for="f in familyFields.contacts"
                       :key="f.col"
-                      :for="`contact-${row.i}-${f.col}`"
-                      v-show="isVisible(f, {mode: currentMode, form: familyForm, row: row.c, index: row.i})">
+                      :for="`contact-${i}-${f.col}`"
+                      v-show="isVisible(f, {mode: currentMode, form: familyForm, row, index: i})">
                       {{ f.label }}
-                      <small class="error" v-if="familyErrors?.contacts?.[row.i]?.[f.col]">{{ familyErrors.contacts[row.i][f.col] }}</small>
-
+                      <small class="error" v-if="familyErrors?.contacts?.[i]?.[f.col]">{{ familyErrors.contacts[i][f.col] }}</small>
+                      <!-- select type field -->
                       <template v-if="f.type === 'select'">
                         <select
                           class="input"
-                          :id="`contact-${row.i}-${f.col}`"
-                          :name="`family.contacts[${row.i}].${f.col}`"
-                          :disabled="getFieldDisabled(f, {mode: currentMode, form: familyForm, row: row.c, index: row.i, isReadOnly})"
-                          v-model="row.c[f.col]"
-                          @input="onFormFieldInput(f, {mode: currentMode, form: familyForm, row: row.c, index: row.i }, $event)"
-                          @change="onFormFieldChange(f, {mode: currentMode, form: familyForm, row: row.c, index: row.i }, $event)">
+                          :id="`contact-${i}-${f.col}`"
+                          :name="`family.contacts[${i}].${f.col}`"
+                          :disabled="getFieldDisabled(f, {mode: currentMode, form: familyForm, row, index: i, isReadOnly})"
+                          v-model="row[f.col]"
+                          @input="onFormFieldInput(f, {mode: currentMode, form: familyForm, row, index: i }, $event)"
+                          @change="onFormFieldChange(f, {mode: currentMode, form: familyForm, row, index: i }, $event)">
                           <option disabled value="">-- choose --</option>
                           <option
-                            v-for="opt in getOptions(f, {mode: currentMode, form: familyForm, row: row.c, index: row.i})"
+                            v-for="opt in getOptions(f, {mode: currentMode, form: familyForm, row, index: i })"
                             :key="String(opt.value)"
                             :value="opt.value">
                             {{ formatOptionLabel(opt) }}
                           </option>
                         </select>
                       </template>
-
-                      <template v-else-if="f.type === 'checkbox'">
-                        <input
-                          class="check-lg"
-                          type="checkbox"
-                          :id="`contact-${row.i}-${f.col}`"
-                          :name="`family.contacts[${row.i}].${f.col}`"
-                          :disabled="getFieldDisabled(f, {mode: currentMode, form: familyForm, row: row.c, index: row.i, isReadOnly})"
-                          v-model="row.c[f.col]"
-                          @input="onFormFieldInput(f, {mode: currentMode, form: familyForm, row: row.c, index: row.i }, $event)"
-                          @change="onFormFieldChange(f, {mode: currentMode, form: familyForm, row: row.c, index: row.i }, $event)" />
-                      </template>
-
+                      <!-- all other type fields -->
                       <template v-else>
                         <input
-                          class="input"
+                          :class="f.type === 'checkbox' ? 'check-lg': 'input'"
                           :type="f.type || 'text'"
-                          :id="`contact-${row.i}-${f.col}`"
-                          :name="`family.contacts[${row.i}].${f.col}`"
-                          :disabled="getFieldDisabled(f, {mode: currentMode, form: familyForm, row: row.c, index: row.i, isReadOnly})"
-                          v-model.trim="row.c[f.col]"
+                          :id="`contact-${i}-${f.col}`"
+                          :name="`family.contacts[${i}].${f.col}`"
+                          :disabled="getFieldDisabled(f, {mode: currentMode, form: familyForm, row, index: i, isReadOnly})"
+                          v-model.trim="row[f.col]"
                           :placeholder="f.placeholder"
-                          @input="onFormFieldInput(f, {mode: currentMode, form: familyForm, row: row.c, index: row.i }, $event)"
-                          @change="onFormFieldChange(f, {mode: currentMode, form: familyForm, row: row.c, index: row.i }, $event)" />
+                          @input="onFormFieldInput(f, {mode: currentMode, form: familyForm, row, index: i }, $event)"
+                          @change="onFormFieldChange(f, {mode: currentMode, form: familyForm, row, index: i }, $event)" />
                       </template>
                     </label>
                   </div>
-                  <small class="error" v-if="familyErrors?.contactErrors">{{familyErrors?.contactErrors }}</small>
                 </div>
+                <small class="error" v-if="familyErrors?.contactErrors">{{familyErrors?.contactErrors }}</small>
               </section>
 
               <!-- Children -->
@@ -406,24 +376,6 @@
                 <div class="item-header compact bordered">
                   <h4 class="title">Children Information</h4>
                   <div class="spacer"></div>
-                  <div class="pager" v-if="familyChildrenMode==='single'">
-                    <button tabindex="-1" type="button" class="btn small" @click="prevFamilyChild" :disabled="familyChildrenIndex===0">◀</button>
-                    <span class="pager-status">{{ familyChildrenIndex+1 }} / {{ familyForm.children.length }}</span>
-                    <button
-                      tabindex="-1"
-                      type="button"
-                      class="btn small"
-                      @click="nextFamilyChild"
-                      :disabled="familyChildrenIndex>=familyForm.children.length-1">
-                      ▶
-                    </button>
-                  </div>
-                  <div class="seg">
-                    <button tabindex="-1" type="button" :class="{ 'seg-active': familyChildrenMode==='single' }" @click="familyChildrenMode='single'">
-                      One
-                    </button>
-                    <button tabindex="-1" type="button" :class="{ 'seg-active': familyChildrenMode==='all' }" @click="familyChildrenMode='all'">All</button>
-                  </div>
                   <div class="actions">
                     <button tabindex="-1" type="button" class="btn small accent" :disabled="isReadOnly" @click="addFamilyChild">
                       <i class="fa-solid fa-plus"></i>
@@ -431,10 +383,10 @@
                   </div>
                 </div>
 
-                <div class="row" v-for="row in visibleFamilyChildren" :key="'k'+row.i">
+                <div class="row" v-for="(row, i) in familyForm.children" :key="'ck'+i">
                   <div class="item-header compact">
                     <div class="title">
-                      <span>ID: {{row.c.childId}} - {{displayChildNameAndAge(row.c)}}</span>
+                      <span>ID: {{row.childId}} - {{displayChildNameAndAge(row)}}</span>
                     </div>
                     <div class="row-actions">
                       <button
@@ -442,7 +394,7 @@
                         type="button"
                         class="btn small danger"
                         :disabled="isReadOnly"
-                        @click="removeFamilyChild(row.i)"
+                        @click="removeFamilyChild(i)"
                         v-if="familyForm.children.length>1">
                         <i class="fa-solid fa-minus"></i>
                       </button>
@@ -453,53 +405,41 @@
                     <label
                       v-for="f in familyFields.children"
                       :key="f.col"
-                      :for="`child-${row.i}-${f.col}`"
-                      v-show="isVisible(f, {mode: currentMode, form: familyForm, row: row.c, index: row.i })">
+                      :for="`child-${i}-${f.col}`"
+                      v-show="isVisible(f, {mode: currentMode, form: familyForm, row, index: i })">
                       {{ f.label }}
-                      <small class="error" v-if="familyErrors?.children?.[row.i]?.[f.col]">{{ familyErrors.children[row.i][f.col] }}</small>
-
+                      <small class="error" v-if="familyErrors?.children?.[i]?.[f.col]">{{ familyErrors.children[i][f.col] }}</small>
+                      <!-- select type field -->
                       <template v-if="f.type === 'select'">
                         <select
                           class="input"
-                          :id="`child-${row.i}-${f.col}`"
-                          :name="`family.children[${row.i}].${f.col}`"
-                          :disabled="getFieldDisabled(f, {mode: currentMode, form: familyForm, row: row.c, index: row.i, isReadOnly})"
-                          v-model="row.c[f.col]"
-                          @input="onFormFieldInput(f, {mode: currentMode, form: familyForm, row: row.c, index: row.i }, $event)"
-                          @change="onFormFieldChange(f, {mode: currentMode, form: familyForm, row: row.c, index: row.i }, $event)">
+                          :id="`child-${i}-${f.col}`"
+                          :name="`family.children[${i}].${f.col}`"
+                          :disabled="getFieldDisabled(f, {mode: currentMode, form: familyForm, row, index: i, isReadOnly})"
+                          v-model="row[f.col]"
+                          @input="onFormFieldInput(f, {mode: currentMode, form: familyForm, row, index: i }, $event)"
+                          @change="onFormFieldChange(f, {mode: currentMode, form: familyForm, row, index: i }, $event)">
                           <option disabled value="">-- choose --</option>
                           <option
-                            v-for="opt in getOptions(f, {mode: currentMode, form: familyForm, row: row.c, index: row.i })"
+                            v-for="opt in getOptions(f, {mode: currentMode, form: familyForm, row, index: i })"
                             :key="String(opt.value)"
                             :value="opt.value">
                             {{ formatOptionLabel(opt) }}
                           </option>
                         </select>
                       </template>
-
-                      <template v-else-if="f.type === 'checkbox'">
-                        <input
-                          class="check-lg"
-                          type="checkbox"
-                          :id="`child-${row.i}-${f.col}`"
-                          :name="`family.children[${row.i}].${f.col}`"
-                          :disabled="getFieldDisabled(f, {mode: currentMode, form: familyForm, row: row.c, index: row.i, isReadOnly })"
-                          v-model="row.c[f.col]"
-                          @input="onFormFieldInput(f, {mode: currentMode, form: familyForm, row: row.c, index: row.i }, $event)"
-                          @change="onFormFieldChange(f, {mode: currentMode, form: familyForm, row: row.c, index: row.i }, $event)" />
-                      </template>
-
+                      <!-- All other type fields -->
                       <template v-else>
                         <input
-                          class="input"
+                          :class="f.type === 'checkbox' ? 'check-lg' : 'input'"
                           :type="f.type || 'text'"
-                          :id="`child-${row.i}-${f.col}`"
-                          :name="`family.children[${row.i}].${f.col}`"
-                          :disabled="getFieldDisabled(f, {mode: currentMode, form: familyForm, row: row.c, index: row.i, isReadOnly })"
-                          v-model.trim="row.c[f.col]"
+                          :id="`child-${i}-${f.col}`"
+                          :name="`family.children[${i}].${f.col}`"
+                          :disabled="getFieldDisabled(f, {mode: currentMode, form: familyForm, row, index: i, isReadOnly })"
+                          v-model.trim="row[f.col]"
                           :placeholder="f.placeholder"
-                          @input="onFormFieldInput(f, {mode: currentMode, form: familyForm, row: row.c, index: row.i }, $event)"
-                          @change="onFormFieldChange(f, {mode: currentMode, form: familyForm, row: row.c, index: row.i }, $event)" />
+                          @input="onFormFieldInput(f, {mode: currentMode, form: familyForm, row, index: i }, $event)"
+                          @change="onFormFieldChange(f, {mode: currentMode, form: familyForm, row, index: i }, $event)" />
                       </template>
                     </label>
                   </div>
@@ -535,7 +475,7 @@
                       v-show="isVisible(f, {mode: currentMode, form: familyForm, row: n, index: i })">
                       {{ f.label }}
                       <small class="error" v-if="familyErrors?.notes?.[i]?.[f.col]">{{ familyErrors.notes[i][f.col] }}</small>
-
+                      <!-- select type field -->
                       <template v-if="f.type === 'select'">
                         <select
                           class="input"
@@ -555,21 +495,9 @@
                         </select>
                       </template>
 
-                      <template v-else-if="f.type === 'checkbox'">
-                        <input
-                          class="check-lg"
-                          type="checkbox"
-                          :id="`note-${i}-${f.col}`"
-                          :name="`family.notes[${i}].${f.col}`"
-                          :disabled="getFieldDisabled(f, {mode: currentMode, form: familyForm, row: n, index: i, isReadOnly})"
-                          v-model="n[f.col]"
-                          @input="onFormFieldInput(f, {mode: currentMode, form: familyForm, row: n, index: i }, $event)"
-                          @change="onFormFieldChange(f, {mode: currentMode, form: familyForm, row: n, index: i }, $event)" />
-                      </template>
-
                       <template v-else>
                         <input
-                          class="input"
+                          :class="f.type === 'checkbox' ? 'check-lg':'input'"
                           :type="f.type || 'text'"
                           :id="`note-${i}-${f.col}`"
                           :name="`family.note[${i}].${f.col}`"
@@ -641,9 +569,7 @@
                       <label class="text-sm">{{ def.label }}</label>
                       <select class="input" v-if="def.type==='select'" v-model="eventsFilterMenu.state[def.key]">
                         <option :value="def.emptyValue ?? ''">All</option>
-                        <option v-for="opt in (typeof def.options === 'function' ? def.options() : def.options)" :key="opt.value" :value="opt.value">
-                          {{ opt.label }}
-                        </option>
+                        <option v-for="opt in eventsFilterMenu.opt(def)" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
                       </select>
                     </div>
                     <div class="filter-actions">
@@ -963,9 +889,7 @@
                       <label class="text-sm">{{ def.label }}</label>
                       <select class="input" v-if="def.type==='select'" v-model="registrationsFilterMenu.state[def.key]">
                         <option :value="def.emptyValue ?? ''">All</option>
-                        <option v-for="opt in (typeof def.options === 'function' ? def.options() : def.options)" :key="opt.value" :value="opt.value">
-                          {{ opt.label }}
-                        </option>
+                        <option v-for="opt in registrationsFilterMenu.opt(def)" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
                       </select>
                     </div>
                     <div class="filter-actions">
@@ -1515,30 +1439,30 @@
                 <div class="pager">
                   <label class="nowrap">
                     Rows Per Page:
-                    <select class="pager-size" v-model.number="rostersPager.pageSize">
-                      <option v-for="n in rostersPager.options" :key="n" :value="n">{{ n === rostersPager.allSentinel ? "All": n }}</option>
+                    <select class="pager-size" v-model.number="rosterPager.pageSize">
+                      <option v-for="n in rosterPager.options" :key="n" :value="n">{{ n === rosterPager.allSentinel ? "All": n }}</option>
                     </select>
                   </label>
 
                   <span>
-                    {{ rostersPager.totalRows ? (rostersPager.isAll ? 1 : rostersPager.pageStart + 1) : 0 }}–{{ rostersPager.isAll ? rostersPager.totalRows :
-                    Math.min(rostersPager.pageEnd, rostersPager.totalRows) }} of {{ rostersPager.totalRows }}
+                    {{ rosterPager.totalRows ? (rosterPager.isAll ? 1 : rosterPager.pageStart + 1) : 0 }}–{{ rosterPager.isAll ? rosterPager.totalRows :
+                    Math.min(rosterPager.pageEnd, rosterPager.totalRows) }} of {{ rosterPager.totalRows }}
                   </span>
 
                   <div class="pager-buttons">
-                    <button tabindex="-1" @click="rostersPager.goFirst" :disabled="rostersPager.page <= 1 || rostersPager.isAll">
+                    <button tabindex="-1" @click="rosterPager.goFirst" :disabled="rosterPager.page <= 1 || rosterPager.isAll">
                       <i class="fa fa-angle-double-left"></i>
                     </button>
-                    <button tabindex="-1" @click="rostersPager.goPrev" :disabled="rostersPager.page <= 1 || rostersPager.isAll">
+                    <button tabindex="-1" @click="rosterPager.goPrev" :disabled="rosterPager.page <= 1 || rosterPager.isAll">
                       <i class="fa fa-angle-left"></i>
                     </button>
                   </div>
-                  <span>Page {{ rostersPager.page }} / {{ rostersPager.totalPages }}</span>
+                  <span>Page {{ rosterPager.page }} / {{ rosterPager.totalPages }}</span>
                   <div class="pager-buttons">
-                    <button tabindex="-1" @click="rostersPager.goNext" :disabled="rostersPager.page >= rostersPager.totalPages || rostersPager.isAll">
+                    <button tabindex="-1" @click="rosterPager.goNext" :disabled="rosterPager.page >= rosterPager.totalPages || rosterPager.isAll">
                       <i class="fa fa-angle-right"></i>
                     </button>
-                    <button tabindex="-1" @click="rostersPager.goLast" :disabled="rostersPager.page >= rostersPager.totalPages || rostersPager.isAll">
+                    <button tabindex="-1" @click="rosterPager.goLast" :disabled="rosterPager.page >= rosterPager.totalPages || rosterPager.isAll">
                       <i class="fa fa-angle-double-right"></i>
                     </button>
                   </div>
@@ -1546,39 +1470,37 @@
 
                 <!-- Filter menu button + popover -->
                 <div class="filter-trigger">
-                  <button tabindex="-1" class="btn" @click="rostersFilterMenu.toggle()">
+                  <button tabindex="-1" class="btn" @click="rosterFilterMenu.toggle()">
                     <i class="fa-solid fa-filter"></i>
-                    <span v-if="rostersFilterMenu.activeCount">({{ rostersFilterMenu.activeCount }})</span>
+                    <span v-if="rosterFilterMenu.activeCount">({{ rosterFilterMenu.activeCount }})</span>
                   </button>
-                  <div v-if="rostersFilterMenu.isOpen" class="clickout-overlay" @click="rostersFilterMenu.close()"></div>
-                  <div v-if="rostersFilterMenu.isOpen" class="filter-popover" @click.stop>
+                  <div v-if="rosterFilterMenu.isOpen" class="clickout-overlay" @click="rosterFilterMenu.close()"></div>
+                  <div v-if="rosterFilterMenu.isOpen" class="filter-popover" @click.stop>
                     <div class="item-header compact bordered">
                       <h4 class="title">Rosters Filter</h4>
                     </div>
-                    <div class="filter-row" v-for="def in rostersFilterMenu.definitions" :key="def.key">
+                    <div class="filter-row" v-for="def in rosterFilterMenu.definitions" :key="def.key">
                       <label class="text-sm">{{ def.label }}</label>
-                      <select class="input" v-if="def.type==='select'" v-model="rostersFilterMenu.state[def.key]">
+                      <select class="input" v-if="def.type==='select'" v-model="rosterFilterMenu.state[def.key]">
                         <option :value="def.emptyValue ?? ''">All</option>
-                        <option v-for="opt in (typeof def.options === 'function' ? def.options() : def.options)" :key="opt.value" :value="opt.value">
-                          {{ opt.label }}
-                        </option>
+                        <option v-for="opt in rosterFilterMenu.opt(def)" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
                       </select>
                     </div>
                     <div class="filter-actions">
-                      <button tabindex="-1" class="btn" @click="rostersFilterMenu.clear()">Clear</button>
-                      <button tabindex="-1" class="btn" @click="rostersFilterMenu.close()">Close</button>
+                      <button tabindex="-1" class="btn" @click="rosterFilterMenu.clear()">Clear</button>
+                      <button tabindex="-1" class="btn" @click="rosterFilterMenu.close()">Close</button>
                     </div>
                   </div>
                 </div>
 
                 <!-- Filter text search -->
-                <input v-model.trim="rostersTextFilter.querySearch" class="input" placeholder="Search roster child name..." />
+                <input v-model.trim="rosterTextFilter.querySearch" class="input" placeholder="Search roster child name..." />
 
                 <button
                   tabindex="-1"
                   class="btn small"
                   type="button"
-                  @click="rostersFilterMenu.clear() && rostersTextFilter.clear()"
+                  @click="rosterFilterMenu.clear() && rosterTextFilter.clear()"
                   title="Clear Rosters filters">
                   Clear
                 </button>
@@ -1598,7 +1520,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="r in rostersPager.items" :key="r.registrationId + '-' + r.childId">
+                  <tr v-for="r in rosterPager.items" :key="r.registrationId + '-' + r.childId">
                     <td>{{ r.programId }}</td>
                     <td>{{ codeToLabel(r.year, YEAR_OPTIONS) }}</td>
                     <td>{{ codeToLabel(r.eventType, EVENT_TYPES) }}</td>

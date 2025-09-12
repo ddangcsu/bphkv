@@ -8,6 +8,7 @@
   const Ctx = {
     onContactPhoneInput: () => {},
     needsNameException: () => {},
+    parentLastNameSet: () => {},
   };
 
   const familyFields = {
@@ -21,6 +22,7 @@
           default: () => Util.Format.makeId('F'),
           disabled: true,
           show: true,
+          required: true,
         },
         {
           col: 'parishMember',
@@ -28,6 +30,7 @@
           type: 'select',
           selOpt: () => Options.YES_NO_OPTIONS,
           default: true,
+          required: true,
           api: { fromApi: (v) => Boolean(v), toApi: (v) => Boolean(v) },
         },
         {
@@ -35,19 +38,26 @@
           label: 'Parish Number',
           type: 'text',
           default: '',
+          required: true,
           show: ({ form }) => form.parishMember === true,
         },
       ],
       address: [
-        { col: 'street', label: 'Number and Street', type: 'text', default: '' },
-        { col: 'city', label: 'City', type: 'text', default: '' },
+        { col: 'street', label: 'Number and Street', type: 'text', default: '', required: true },
+        { col: 'city', label: 'City', type: 'text', default: '', required: true },
         { col: 'state', label: 'State', type: 'text', default: 'CA', disabled: true },
-        { col: 'zip', label: 'Zip Code', type: 'text', default: '' },
+        {
+          col: 'zip',
+          label: 'Zip Code',
+          type: 'text',
+          default: '',
+          validate: (value) => (!/^\d{5}(-\d{4})?$/.test(value || '') ? 'must be 5 digits' : ''),
+        },
       ],
     },
     contacts: [
-      { col: 'lastName', label: 'Last Name', type: 'text', default: '' },
-      { col: 'firstName', label: 'First Name', type: 'text', default: '' },
+      { col: 'lastName', label: 'Last Name', type: 'text', default: '', required: true },
+      { col: 'firstName', label: 'First Name', type: 'text', default: '', required: true },
       { col: 'middle', label: 'Middle', type: 'text', default: '' },
       {
         col: 'relationship',
@@ -55,6 +65,7 @@
         type: 'select',
         selOpt: () => Options.RELATIONSHIP_OPTIONS,
         default: '',
+        required: true,
       },
       {
         col: 'phone',
@@ -65,23 +76,42 @@
         },
         placeholder: '(714) 123-4567',
         default: '',
+        validate: (value) => (!value.trim() || Util.Format.normPhone(value).length !== 10 ? 'must be 10 digit' : ''),
       },
-      { col: 'email', label: 'Email Address', type: 'text', default: '' },
+      {
+        col: 'email',
+        label: 'Email Address',
+        type: 'text',
+        default: '',
+        validate: (value) =>
+          (value || '').trim() && !/^\S+@\S+\.\S+$/.test(value) ? 'leave blank or enter valid email' : '',
+      },
       {
         col: 'isEmergency',
         label: 'Primary Contact',
         type: 'checkbox',
         default: false,
+        required: true,
         api: { fromApi: (v) => Boolean(v), toApi: (v) => Boolean(v) },
       },
     ],
     children: [
       { col: 'childId', label: 'Child ID', type: 'text', show: false, default: () => Util.Format.makeId('S') },
-      { col: 'lastName', label: 'Last Name', type: 'text', default: '' },
-      { col: 'firstName', label: 'First Name', type: 'text', default: '' },
+      {
+        col: 'lastName',
+        label: 'Last Name',
+        type: 'text',
+        default: '',
+        required: true,
+        validate: (value, { row }) => {
+          const matchesParent = Ctx.parentLastNameSet.value.has((value.trim() || '').toLowerCase());
+          return !matchesParent && !(row.isNameException && row.exceptionNotes?.trim()) ? 'mismatch w/ parents' : '';
+        },
+      },
+      { col: 'firstName', label: 'First Name', type: 'text', default: '', required: true },
       { col: 'middle', label: 'Middle', type: 'text', default: '' },
-      { col: 'saintName', label: 'Saint Name', type: 'text', default: '' },
-      { col: 'dob', label: 'Date of Birth', type: 'date', default: '' },
+      { col: 'saintName', label: 'Saint Name', type: 'text', default: '', required: true },
+      { col: 'dob', label: 'Date of Birth', type: 'date', default: '', required: true },
       {
         col: 'allergies',
         label: 'Allergies (comma)',
@@ -97,6 +127,7 @@
         label: 'Name Exception',
         type: 'checkbox',
         default: false,
+        required: true,
         api: { fromApi: (v) => Boolean(v), toApi: (v) => Boolean(v) },
         show: (ctx) => Ctx.needsNameException(ctx),
       },
@@ -105,6 +136,7 @@
         label: 'Exception Notes',
         type: 'text',
         default: '',
+        required: true,
         show: (ctx) => Ctx.needsNameException(ctx),
       },
     ],
@@ -117,8 +149,23 @@
         disabled: true,
         show: true,
       },
-      { col: 'note', label: 'Family Note', type: 'text', default: '', show: true, classes: 'col-span-2' },
-      { col: 'updatedBy', label: 'Updated By', type: 'select', default: '', selOpt: () => Options.VOLUNTEERS_OPTIONS },
+      {
+        col: 'note',
+        label: 'Family Note',
+        type: 'text',
+        default: '',
+        show: true,
+        classes: 'col-span-2',
+        required: true,
+      },
+      {
+        col: 'updatedBy',
+        label: 'Updated By',
+        type: 'select',
+        default: '',
+        required: true,
+        selOpt: () => Options.VOLUNTEERS_OPTIONS,
+      },
     ],
   };
 

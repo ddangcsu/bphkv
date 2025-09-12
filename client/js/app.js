@@ -235,8 +235,6 @@ const app = createApp({
       if (ms) setTimeout(() => (status.visible = false), ms);
     }
 
-    const PARENT_RELATIONSHIPS = new Set(); // first 3 relationships
-
     function syncEnum(target, options = []) {
       // reset and refill
       for (const k of Object.keys(target)) delete target[k];
@@ -247,11 +245,6 @@ const app = createApp({
     watch(
       setup,
       () => {
-        // first 3 entries in relationships are parents
-        PARENT_RELATIONSHIPS.clear();
-        for (const r of (RELATIONSHIP_OPTIONS.value || []).slice(0, 3)) {
-          if (r?.value) PARENT_RELATIONSHIPS.add(String(r.value).trim());
-        }
         syncEnum(PROGRAM, PROGRAM_OPTIONS.value || []);
         syncEnum(EVENT, EVENT_TYPES.value || []);
         syncEnum(LEVEL, LEVEL_OPTIONS.value || []);
@@ -350,14 +343,8 @@ const app = createApp({
     const familiesTextFilter = Util.Helpers.createTextFilter((row, raw, terms, utils) => {
       const parts = [row.id, row.parishNumber, row.address?.city];
       (row.contacts || []).forEach((c) => {
-        //const fn1 = [c.lastName, [c.firstName, c.middle].join(' ')].join(', '); // last, first middle
-        //const fn2 = [c.lastName, c.middle, c.firstName].join(' '); // last middle first
-        //const fn3 = [c.firstName, c.lastName].join(' '); // first last
         parts.push(c.lastName, c.firstName, c.middle, c.email, Util.Format.normPhone(c.phone));
       });
-      /* We skip search by child name for now
-      (row.children || []).forEach((kid) => parts.push(kid.firstName, kid.lastName, kid.middle, kid.saintName));
-      */
       return utils.includesAllTerms(utils.normalize(parts.filter(Boolean).join(' ')), terms);
     });
 
@@ -371,8 +358,8 @@ const app = createApp({
       if (!contacts.length) return '—';
 
       // Prioritize the first 2 among Father / Mother / Guardian
-      const prioritized = contacts.filter((c) => PARENT_RELATIONSHIPS.has((c.relationship || '').trim()));
-      const others = contacts.filter((c) => !PARENT_RELATIONSHIPS.has((c.relationship || '').trim()));
+      const prioritized = contacts.filter((c) => Schema.Options.PARENTS.has((c.relationship || '').trim()));
+      const others = contacts.filter((c) => !Schema.Options.PARENTS.has((c.relationship || '').trim()));
       const pick = [...prioritized, ...others].slice(0, 2);
       const result = pick.map((c) => {
         if ('lastName' in c) {
@@ -403,10 +390,25 @@ const app = createApp({
       return !!last && !parentLastNameSet.value.has(last);
     }
 
+    const parentLastNameSet = computed(() => {
+      const s = new Set();
+      for (const c of familyForm.contacts ?? []) {
+        const rel = String(c?.relationship ?? '').trim();
+        if (!Schema.Options.PARENTS.has(rel)) continue;
+
+        const ln = String(c?.lastName ?? '')
+          .trim()
+          .toLowerCase();
+        if (ln) s.add(ln);
+      }
+      return s; // Set<string> of lowercase names
+    });
+
     // FAMILIES_META
     const familyCtx = {
       onContactPhoneInput,
       needsNameException,
+      parentLastNameSet,
     };
     const familyFields = Schema.Forms.Families(familyCtx);
 
@@ -418,123 +420,42 @@ const app = createApp({
     const familyForm = reactive(newFamilyForm());
     const familyErrors = reactive({ household: {}, contacts: [{}], children: [{}], notes: [{}] });
 
-    function hydrateFamilyErrors() {
-      familyErrors.household = {};
-      familyErrors.contacts = familyForm.contacts.map(() => ({}));
-      familyErrors.children = familyForm.children.map(() => ({}));
-      familyErrors.notes = familyForm.notes.map(() => ({}));
-    }
+    const validateFamily = () => {
+      const errors = {};
 
-    function validateFamily() {
-      const s = familyForm;
-      let e = { household: {}, contacts: [], children: [], notes: [], contactErrors: '' };
-
-      if (!s.id?.trim()) e.household.id = 'required';
-      if (!s.parishNumber?.trim() && s.parishMember) e.household.parishNumber = 'required';
-      if (!s.address.street?.trim()) e.household.street = 'required';
-      if (!s.address.city?.trim()) e.household.city = 'required';
-      if (!/^\d{5}(-\d{4})?$/.test(s.address.zip || '')) e.household.zip = 'must be 5 digits.';
-
-      e.contacts = s.contacts.map((c) => {
-        const ce = {};
-        if (!c.lastName?.trim()) ce.lastName = 'required';
-        if (!c.firstName?.trim()) ce.firstName = 'required';
-        if (!c.relationship?.trim()) ce.relationship = 'required';
-        if (!c.phone?.trim() || normPhone(c.phone).length !== 10) ce.phone = 'required and must be 10 digit';
-        if ((c.email || '').trim() && !/^\S+@\S+\.\S+$/.test(c.email)) ce.email = 'blank or valid email';
-        return ce;
+      // household
+      errors.main = Util.Helpers.validateFields(familyFields.household.main, familyForm, { form: familyForm });
+      errors.address = Util.Helpers.validateFields(familyFields.household.address, familyForm.address || {}, {
+        form: familyForm,
       });
+      // arrays
+      errors.contacts = Util.Helpers.validateRowArray(familyFields.contacts, familyForm.contacts, { form: familyForm });
+      errors.children = Util.Helpers.validateRowArray(familyFields.children, familyForm.children, { form: familyForm });
+      errors.notes = Util.Helpers.validateRowArray(familyFields.notes, familyForm.notes, { form: familyForm });
+      // Custom item
+      if (!familyForm.contacts.some((c) => Schema.Options.PARENTS.has(c.relationship)))
+        errors.contactErrors = 'Contacts must have at least one with Father/Mother/Guardian relationship';
 
-      if (!s.contacts.some((c) => PARENT_RELATIONSHIPS.has(c.relationship)))
-        e.contactErrors = 'Contacts must have at least one with Father/Mother/Guardian relationship';
+      familyErrors.household = { ...errors.main, ...errors.address };
+      familyErrors.contacts = errors.contacts;
+      familyErrors.children = errors.children;
+      familyErrors.notes = errors.notes;
+      familyErrors.contactErrors = errors.contactErrors;
 
-      e.children = s.children.map((c) => {
-        const ce = {};
-        if (!c.lastName?.trim()) ce.lastName = 'required';
-        if (!c.firstName?.trim()) ce.firstName = 'required';
-        if (!c.dob?.trim()) ce.dob = 'required.';
-        const matchesParent = parentLastNameSet.value.has((c.lastName || '').toLowerCase());
-        if (!matchesParent) {
-          if (!c.isNameException) ce.isNameException = 'Check here if name exception';
-          if (!c.exceptionNotes?.trim()) ce.exceptionNotes = 'required';
-          if (!(c.isNameException && c.exceptionNotes?.trim())) ce.lastName = ce.lastName || 'mismatch w/ parents';
-        }
-        return ce;
-      });
-
-      e.notes =
-        s.notes?.length > 0
-          ? s.notes.map((n) => {
-              const ce = {};
-              if (!n.note?.trim()) ce.note = 'required';
-              if (!n.updatedBy?.trim()) ce.updatedBy = 'required';
-              return ce;
-            })
-          : [];
-
-      familyErrors.household = e.household;
-      familyErrors.contacts = e.contacts;
-      familyErrors.children = e.children;
-      familyErrors.notes = e.notes;
-      familyErrors.contactErrors = e.contactErrors;
-
-      // final result (pure booleans)
-      const noHouseHoldErrors = Object.keys(e.household).length === 0;
+      const noHouseHoldErrors = Object.keys(errors.main).length === 0 && Object.keys(errors.address).length === 0;
       const noContactsErrors =
-        (e.contacts || []).every((obj) => !obj || Object.keys(obj).length === 0) || e.contactErrors.length === 0;
-      const noChildrenErrors = (e.children || []).every((obj) => !obj || Object.keys(obj).length === 0);
-      const noNotesErrors = (e.notes || []).every((obj) => !obj || Object.keys(obj).length === 0);
+        (errors.contacts || []).every((obj) => !obj || Object.keys(obj).length === 0) && !errors.contactErrors;
+      const noChildrenErrors = (errors.children || []).every((obj) => !obj || Object.keys(obj).length === 0);
+      const noNotesErrors = (errors.notes || []).every((obj) => !obj || Object.keys(obj).length === 0);
 
       return noHouseHoldErrors && noContactsErrors && noChildrenErrors && noNotesErrors;
+    };
+
+    function hydrateFamilyErrors() {
+      validateFamily();
     }
 
-    // paging
-    const familyContactsMode = ref('all');
-    const familyChildrenMode = ref('all');
-    const familyContactsIndex = ref(0);
-    const familyChildrenIndex = ref(0);
-
-    const visibleFamilyContacts = computed(() => {
-      if (!familyForm.contacts.length) return [];
-      if (familyContactsMode.value === 'all') return familyForm.contacts.map((c, i) => ({ c, i }));
-      const i = Math.min(familyContactsIndex.value, familyForm.contacts.length - 1);
-      return [{ c: familyForm.contacts[i], i }];
-    });
-    const visibleFamilyChildren = computed(() => {
-      if (!familyForm.children.length) return [];
-      if (familyChildrenMode.value === 'all') return familyForm.children.map((c, i) => ({ c, i }));
-      const i = Math.min(familyChildrenIndex.value, familyForm.children.length - 1);
-      return [{ c: familyForm.children[i], i }];
-    });
-
-    function nextFamilyContact() {
-      if (familyContactsIndex.value < familyForm.contacts.length - 1) familyContactsIndex.value++;
-    }
-    function prevFamilyContact() {
-      if (familyContactsIndex.value > 0) familyContactsIndex.value--;
-    }
-    function nextFamilyChild() {
-      if (familyChildrenIndex.value < familyForm.children.length - 1) familyChildrenIndex.value++;
-    }
-    function prevFamilyChild() {
-      if (familyChildrenIndex.value > 0) familyChildrenIndex.value--;
-    }
-
-    watch(
-      () => familyForm.contacts.length,
-      (n) => {
-        if (familyContactsIndex.value > n - 1) familyContactsIndex.value = Math.max(0, n - 1);
-        hydrateFamilyErrors();
-      },
-    );
-    watch(
-      () => familyForm.children.length,
-      (n) => {
-        if (familyChildrenIndex.value > n - 1) familyChildrenIndex.value = Math.max(0, n - 1);
-        hydrateFamilyErrors();
-      },
-    );
-
+    // Monitor to clear isNameException and exceptionNotes
     watch(
       () => familyForm.children,
       () => {
@@ -547,6 +468,14 @@ const app = createApp({
       },
       { deep: true, immediate: true },
     );
+
+    // Interactive error on the form as user input
+    Vue.watch(() => familyForm.parishMember, hydrateFamilyErrors);
+    Vue.watch(() => familyForm.parishNumber, hydrateFamilyErrors);
+    Vue.watch(() => familyForm.address, hydrateFamilyErrors, { deep: true });
+    Vue.watch(() => familyForm.contacts, hydrateFamilyErrors, { deep: true });
+    Vue.watch(() => familyForm.children, hydrateFamilyErrors, { deep: true });
+    Vue.watch(() => familyForm.notes, hydrateFamilyErrors, { deep: true });
 
     // dirty tracking
     const eventOriginalSnapshot = ref('');
@@ -591,20 +520,6 @@ const app = createApp({
       setStatus(`Editing ${apiFamily.id}`, 'info', 1200);
     }
 
-    const parentLastNameSet = computed(() => {
-      const s = new Set();
-      for (const c of familyForm.contacts ?? []) {
-        const rel = String(c?.relationship ?? '').trim();
-        if (!PARENT_RELATIONSHIPS.has(rel)) continue;
-
-        const ln = String(c?.lastName ?? '')
-          .trim()
-          .toLowerCase();
-        if (ln) s.add(ln);
-      }
-      return s; // Set<string> of lowercase names
-    });
-
     // Display-friendly string
     const parentLastNamesDisplay = computed(() =>
       [...parentLastNameSet.value].map((e) => Util.Format.capitalize(e)).join(' / '),
@@ -614,7 +529,6 @@ const app = createApp({
       if (isReadOnly.value) return;
       familyForm.contacts.push(newFamilyContact());
       familyErrors.contacts.push({});
-      if (familyContactsMode.value === 'single') familyContactsIndex.value = familyForm.contacts.length - 1;
       await nextTick();
     }
     function removeFamilyContact(i) {
@@ -626,7 +540,6 @@ const app = createApp({
       if (isReadOnly.value) return;
       familyForm.children.push(newFamilyChild());
       familyErrors.children.push({});
-      if (familyChildrenMode.value === 'single') familyChildrenIndex.value = familyForm.children.length - 1;
       await nextTick();
     }
     function removeFamilyChild(i) {
@@ -663,11 +576,6 @@ const app = createApp({
 
       if (!validateFamily()) {
         setStatus('Error found. Please fix errors before trying to save', 'error', 3500);
-        return;
-      }
-
-      if (!familyForm.id?.trim()) {
-        setStatus('Family ID is missing from form.', 'error', 2000);
         return;
       }
 
@@ -1417,8 +1325,8 @@ const app = createApp({
       const contacts = Array.isArray(fam.contacts) ? fam.contacts : [];
 
       // Prioritize the first 2 among Father / Mother / Guardian
-      const prioritized = contacts.filter((c) => PARENT_RELATIONSHIPS.has((c.relationship || '').trim()));
-      const others = contacts.filter((c) => !PARENT_RELATIONSHIPS.has((c.relationship || '').trim()));
+      const prioritized = contacts.filter((c) => Schema.Options.PARENTS.has((c.relationship || '').trim()));
+      const others = contacts.filter((c) => !Schema.Options.PARENTS.has((c.relationship || '').trim()));
       const pick = [...prioritized, ...others].slice(0, 2);
 
       form.contacts = pick.map((c) => ({
@@ -1688,21 +1596,6 @@ const app = createApp({
     // Roster TNTT
     // =========================================================
 
-    const eventOptionsForRoster = computed(() => {
-      // Create base from eventRows
-      return eventRows.value
-        .filter((f) => {
-          const byYear = !rosterFilter.year || Number(f.year) === Number(rosterFilter.year);
-          const byType = !rosterFilter.eventType || f.eventType === rosterFilter.eventType;
-          const childEvent = f.level === LEVEL.PER_CHILD;
-          return byYear && byType && childEvent;
-        })
-        .map((ev) => ({
-          value: ev.id,
-          label: ev.title,
-        }));
-    });
-
     const programOptionsForRoster = computed(() => {
       return PROGRAM_OPTIONS.value?.filter((p) => p.value !== PROGRAM.BPH);
     });
@@ -1711,7 +1604,7 @@ const app = createApp({
       return EVENT_TYPES.value?.filter((t) => t.value !== EVENT.ADMIN);
     });
 
-    const ageOptions = computed(() => {
+    const ageOptions = function (program = '') {
       const arr = [];
       for (let i = 7; i < 18; i++) {
         arr.push(i);
@@ -1720,7 +1613,7 @@ const app = createApp({
         value: i,
         label: i,
       }));
-    });
+    };
 
     const rosterRows = computed(() =>
       registrationRows.value
@@ -1774,13 +1667,29 @@ const app = createApp({
         key: 'eventId',
         label: 'Event',
         type: 'select',
-        options: () => eventOptionsForRoster.value,
+        options: (fMeta, ctx) => {
+          const { programId, year, eventType } = ctx?.state || {};
+          const childLevel = Schema.Options.ENUMS.LEVEL.PER_CHILD;
+
+          return eventRows.value
+            .filter(
+              (ev) =>
+                (!programId || ev.programId === programId) &&
+                (!year || Number(ev.year) === Number(year)) &&
+                (!eventType || ev.eventType === eventType) &&
+                ev.level === childLevel,
+            )
+            .map((ev) => ({ value: ev.id, label: ev.title }));
+        },
       },
       {
         key: 'age',
         label: 'Age',
         type: 'select',
-        options: () => ageOptions.value,
+        options: (fMeta, ctx) => {
+          const { programId } = ctx?.state || {};
+          return ageOptions(programId);
+        },
       },
       {
         key: 'allergies',
@@ -1801,19 +1710,34 @@ const app = createApp({
       },
     ];
 
-    const rostersFilterMenu = Util.Helpers.createFilterMenu(rosterFilterDef);
+    const rosterFilterMenu = Util.Helpers.createFilterMenu(rosterFilterDef);
 
-    const rostersTextFilter = Util.Helpers.createTextFilter((row, raw, terms, utils) => {
+    const rosterTextFilter = Util.Helpers.createTextFilter((row, raw, terms, utils) => {
       const parts = [row.fullName];
       return utils.includesAllTerms(utils.normalize(parts.filter(Boolean).join(' ')), terms);
     });
 
     const filteredRosterRows = computed(() => {
-      const byMenu = rostersFilterMenu.applyTo(rosterRows.value);
-      return rostersTextFilter.applyTo(byMenu);
+      const byMenu = rosterFilterMenu.applyTo(rosterRows.value);
+      return rosterTextFilter.applyTo(byMenu);
     });
 
-    const rostersPager = Util.Helpers.createPager({ source: filteredRosterRows });
+    const eventOptionsForRoster = computed(() => {
+      // Create base from eventRows
+      return eventRows.value
+        .filter((f) => {
+          const byYear = !rosterFilter.year || Number(f.year) === Number(rosterFilter.year);
+          const byType = !rosterFilter.eventType || f.eventType === rosterFilter.eventType;
+          const childEvent = f.level === LEVEL.PER_CHILD;
+          return byYear && byType && childEvent;
+        })
+        .map((ev) => ({
+          value: ev.id,
+          label: ev.title,
+        }));
+    });
+
+    const rosterPager = Util.Helpers.createPager({ source: filteredRosterRows });
 
     // ======================= RECEIPT (view/print/email) =======================
     const showReceiptModal = ref(false);
@@ -1926,8 +1850,8 @@ const app = createApp({
 
     function getPrimaryContactsForFamily(f) {
       const contacts = Array.isArray(f?.contacts) ? f.contacts : [];
-      const prioritized = contacts.filter((c) => PARENT_RELATIONSHIPS.has((c.relationship || '').trim()));
-      const others = contacts.filter((c) => !PARENT_RELATIONSHIPS.has((c.relationship || '').trim()));
+      const prioritized = contacts.filter((c) => Schema.Options.PARENTS.has((c.relationship || '').trim()));
+      const others = contacts.filter((c) => !Schema.Options.PARENTS.has((c.relationship || '').trim()));
       const pick = [...prioritized, ...others].slice(0, 3); // show up to 3
       return pick.map((c) => ({
         name: `${c.lastName}, ${c.firstName}${c.middle ? ' ' + c.middle : ''}`,
@@ -2007,19 +1931,9 @@ const app = createApp({
       filteredFamilyRows,
       familyForm,
       familyErrors,
-      familyContactsMode,
-      familyContactsIndex,
-      visibleFamilyContacts,
-      nextFamilyContact,
-      prevFamilyContact,
       displayChildNameAndAge,
       parentLastNamesDisplay,
-      familyChildrenMode,
-      familyChildrenIndex,
-      visibleFamilyChildren,
       isFamilyDirty,
-      nextFamilyChild,
-      prevFamilyChild,
       beginCreateFamily,
       beginEditFamily,
       submitFamilyForm,
@@ -2096,9 +2010,9 @@ const app = createApp({
       openChildContactsModal,
       closeChildContactsModal,
       // List pager and filters
-      rostersPager,
-      rostersFilterMenu,
-      rostersTextFilter,
+      rosterPager,
+      rosterFilterMenu,
+      rosterTextFilter,
 
       // settings
       setup,

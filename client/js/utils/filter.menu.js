@@ -88,6 +88,13 @@
       });
     }
 
+    // NEW: dynamic options resolver; templates call menu.opt(def, rows)
+    const opt = (def, ctx = {}) => {
+      const Ctx = ctx;
+      Ctx.state = state;
+      return Helpers.getOptions(def, Ctx);
+    };
+
     return {
       get isOpen() {
         return isOpen.value;
@@ -102,6 +109,7 @@
       definitions,
       state,
       applyTo,
+      opt,
     };
   };
 
