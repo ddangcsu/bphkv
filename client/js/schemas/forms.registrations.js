@@ -124,6 +124,15 @@
         required: true,
         selOpt: (fieldMeta, ctx) => Ctx.childRegistrationOptions(fieldMeta, ctx),
         onChange: (fieldMeta, ctx, event) => Ctx.hydrateChildSnapshot(fieldMeta, ctx),
+        validate: (value, scope) => {
+          if (!value.trim()) return 'required';
+          if (scope?.ctx?.form?.event?.programId === Schema.Options.ENUMS.PROGRAM.TNTT) {
+            if (Number(Util.Helpers.computeAgeByYear(scope?.row?.dob)) < 7) {
+              return 'Child is Under Age';
+            }
+          }
+          return '';
+        },
       },
       { col: 'fullName', label: 'Full Name', type: 'text', disabled: true, show: false },
       { col: 'saintName', label: 'Saint Name', type: 'text', default: '', disabled: true },
