@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link href="./css/light.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="./css/modal.css" />
   </head>
 
   <body>
@@ -1258,22 +1259,25 @@
           </section>
 
           <!-- Registration Receipt Modal -->
-          <section v-if="showReceiptModal" class="modal-overlay" @click.self="closeReceipt">
+          <ui-modal
+            v-model:open="showReceiptModal"
+            class="ui-modal--printable"
+            title="View and Print Receipt"
+            placement="top"
+            :top-offset="0"
+            size="xl"
+            :closeOnBackdrop="true"
+            :closeOnEsc="true"
+            :aria-description="'Registration receipt details and totals.'">
+            <template #header-actions>
+              <button type="button" class="btn primary" @click="printReceipt('#receipt-sheet')"><i class="fa-solid fa-print"></i></button>
+            </template>
             <div
               id="receipt-sheet"
-              class="card modal print-page"
+              class="print-page"
               :data-watermark="receiptView.status === 'paid' ? `PAID ${receiptView.programId} ${receiptView.year}` : ''">
               <div class="subpanel">
-                <div class="item-header compact bordered">
-                  <h4 class="title">Registration Receipt</h4>
-                  <div class="spacer"></div>
-                  <button class="btn small" type="button" @click="printReceipt('#receipt-sheet')">
-                    <i class="fa-solid fa-print"></i>
-                  </button>
-                  <button class="btn small" type="button" @click="closeReceipt">
-                    <i class="fa-solid fa-xmark"></i>
-                  </button>
-                </div>
+                <h4 class="title" style="text-align: center">Registration Receipt</h4>
 
                 <!-- Main Info -->
                 <table class="table">
@@ -1428,7 +1432,14 @@
                 </table>
               </div>
             </div>
-          </section>
+            <!-- Not using footer
+            <template #footer>
+              <div class="footer-actions">
+                <button type="button" class="btn primary" @click="printReceipt('#receipt-sheet')"><i class="fa-solid fa-print"></i></button>
+              </div>
+            </template>
+            -->
+          </ui-modal>
         </main>
 
         <!-- ==================== ROSTERS ========================= -->
@@ -1529,7 +1540,7 @@
                     <td>{{ r.eventTitle }}</td>
                     <td>{{ r.saintName }}</td>
                     <td>
-                      <a href="#" class="link" title="Child's Contacts" @click.prevent="openChildContactsModal(r)"> {{ r.fullName }} </a>
+                      <a href="#" class="link" title="View Child's Contacts" @click.prevent="openChildContactsModal(r)"> {{ r.fullName }} </a>
                     </td>
                     <td>{{ r.grade }}</td>
                     <td class="actions">
@@ -1541,54 +1552,52 @@
             </div>
           </section>
 
-          <!-- Roster Contacts Modal -->
-          <section v-if="showContactsModal" class="modal-overlay" @click.self="closeChildContactsModal">
-            <div class="card modal subpanel">
-              <div class="item-header compact bordered">
-                <h4 class="title">Family Contacts - ID: <span v-text="contactsModal.familyId"></span></h4>
-                <div class="spacer"></div>
-                <button class="btn small" type="button" @click="closeChildContactsModal">
-                  <i class="fa-solid fa-xmark"></i>
-                </button>
-              </div>
-
-              <div class="grid">
-                <label>
-                  Child Name
-                  <input class="input" :value="contactsModal.childName" disabled />
-                </label>
-                <label>
-                  Age
-                  <input class="input" :value="contactsModal.age" disabled />
-                </label>
-                <label v-if="contactsModal.allergies">
-                  Allergies
-                  <input class="input col-span-2" :value="contactsModal.allergies" disabled />
-                </label>
-              </div>
-
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th>Contact Name</th>
-                    <th>Relationship</th>
-                    <th>Phone</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="(c,i) in contactsModal.contacts" :key="i">
-                    <td>{{ c.name }}</td>
-                    <td>{{ c.relationship }}</td>
-                    <td>{{ c.phone }}</td>
-                  </tr>
-                  <tr v-if="contactsModal.contacts.length===0">
-                    <td colspan="3" class="muted">No contacts found.</td>
-                  </tr>
-                </tbody>
-              </table>
-              <div class="footer"></div>
+          <!-- Contacts Modal — read-only preview using <ui-modal> -->
+          <ui-modal
+            v-model:open="showContactsModal"
+            :title="`Family Contacts - ID: ${contactsModal.familyId}`"
+            size="md"
+            placement="top"
+            :top-offset="140"
+            :aria-description="'Parents/Guardians for selected child from roster.'">
+            <!-- BODY: keep your existing content 100% unchanged -->
+            <!-- BEGIN existing roster child-contacts markup -->
+            <div class="grid col3">
+              <label>
+                Child Name
+                <input class="input" :value="contactsModal.childName" disabled />
+              </label>
+              <label>
+                Age
+                <input class="input" :value="contactsModal.age" disabled />
+              </label>
+              <label v-if="contactsModal.allergies">
+                Allergies
+                <input class="input" :value="contactsModal.allergies" disabled />
+              </label>
             </div>
-          </section>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Contact Name</th>
+                  <th>Relationship</th>
+                  <th>Phone</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(c,i) in contactsModal.contacts" :key="i">
+                  <td>{{ c.name }}</td>
+                  <td>{{ c.relationship }}</td>
+                  <td>{{ c.phone }}</td>
+                </tr>
+                <tr v-if="contactsModal.contacts.length===0">
+                  <td colspan="3" class="muted">No contacts found.</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- END existing roster child-contacts markup -->
+          </ui-modal>
         </main>
 
         <!-- ==================== SETTINGS (no list; table layout) ==================== -->
@@ -1959,6 +1968,9 @@
     <script src="./js/mappers/events.js" defer></script>
     <script src="./js/mappers/families.js" defer></script>
     <script src="./js/mappers/registrations.js" defer></script>
+
+    <!-- Components -->
+    <script src="./js/components/modal.js" defer></script>
 
     <!-- App API -->
     <script src="./js/api/setup.js" defer></script>

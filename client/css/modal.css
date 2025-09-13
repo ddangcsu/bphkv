@@ -1,0 +1,203 @@
+/* Base overlay + dialog (no Tailwind required) */
+
+/* --- Modal density + radius overrides (tune to taste) --- */
+:root {
+  /* match these to your old dialog */
+  --ui-radius: 8px; /* was 16px */
+  --ui-padding-header: 6px 8px; /* was 12px 16px */
+  --ui-padding-body: 8px; /* was 16px */
+  --ui-padding-footer: 6px 8px; /* was 12px 16px */
+}
+
+body.ui-modal-open {
+  overflow: hidden;
+}
+
+.ui-modal-overlay {
+  position: fixed;
+  inset: 0; /* top:0,right:0,bottom:0,left:0 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+  z-index: 10000; /* above headers/menus */
+}
+
+.ui-modal-dialog {
+  position: relative;
+  background: #ffffff;
+  border-radius: var(--ui-radius);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+  outline: none;
+  width: min(44rem, calc(100vw - 2rem));
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Sections */
+.ui-modal-header {
+  padding: var(--ui-padding-header);
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.ui-modal-title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #111827;
+}
+.ui-modal-close {
+  border: none;
+  background: transparent;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 20px;
+  line-height: 1;
+  color: #6b7280;
+  cursor: pointer;
+}
+.ui-modal-close:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+.ui-modal-body {
+  padding: var(--ui-padding-body);
+  overflow: auto;
+}
+
+.ui-modal-footer {
+  padding: var(--ui-padding-footer);
+  border-bottom-left-radius: var(--ui-radius);
+  border-bottom-right-radius: var(--ui-radius);
+  border-top: 1px solid #e5e7eb;
+  background: #f9fafb;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* Sizes */
+.ui-modal--sm .ui-modal-dialog {
+  width: min(28rem, calc(100vw - 2rem));
+}
+.ui-modal--md .ui-modal-dialog {
+  width: min(36rem, calc(100vw - 2rem));
+}
+.ui-modal--lg .ui-modal-dialog {
+  width: min(48rem, calc(100vw - 2rem));
+}
+.ui-modal--xl .ui-modal-dialog {
+  width: min(64rem, calc(100vw - 2rem));
+}
+.ui-modal--full .ui-modal-dialog {
+  width: 100vw;
+  height: 100vh;
+  max-height: 100vh;
+  border-radius: 0;
+}
+
+/* Minimal fade/scale */
+@media (prefers-reduced-motion: no-preference) {
+  .ui-modal-overlay {
+    animation: uiModalFade 120ms ease-out;
+  }
+  .ui-modal-dialog {
+    animation: uiModalPop 120ms ease-out;
+    transform-origin: center;
+  }
+}
+@keyframes uiModalFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes uiModalPop {
+  from {
+    transform: scale(0.98);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+/* --- Top placement variant --- */
+.ui-modal--top {
+  align-items: flex-start; /* stick to top of viewport */
+}
+
+.ui-modal--top .ui-modal-dialog {
+  margin-top: var(--ui-top-offset, 48px); /* space from top */
+}
+
+/* If dialog is full-screen, ignore top offset */
+.ui-modal--top.ui-modal--full .ui-modal-dialog {
+  margin-top: 0;
+}
+
+/* Header layout: title on left, actions + close on right */
+.ui-modal-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.ui-modal-title {
+  margin: 0;
+  font-size: var(--ui-title-size, 16px);
+  font-weight: 600;
+  color: #111827;
+}
+.ui-modal-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ui-modal-close {
+  border: none;
+  background: transparent;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 20px;
+  line-height: 1;
+  color: #6b7280;
+  cursor: pointer;
+}
+.ui-modal-close i {
+  font-size: 18px;
+}
+
+/* Thinner header when no title */
+.ui-modal-header--compact {
+  padding: 6px 10px;
+}
+
+/* Full-height dialog shell (header/footer fixed; body scrolls) */
+.ui-modal-dialog {
+  /* width rules already in your file; keep them */
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - var(--ui-vertical-gap, 64px)); /* fills viewport before scrolling */
+}
+
+.ui-modal-body {
+  padding: 16px;
+  overflow: auto; /* only body scrolls */
+  flex: 1 1 auto; /* take remaining height */
+}
+
+/* Top placement (already present; adding vars for height calc) */
+.ui-modal--top {
+  align-items: flex-start;
+}
+.ui-modal--top .ui-modal-dialog {
+  margin-top: var(--ui-top-offset, 48px);
+}

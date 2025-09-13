@@ -33,6 +33,7 @@ const app = createApp({
     });
 
     Schema.Options.setLiveSetupRef(setup);
+    Schema.Options.initializeEnums();
 
     async function loadSetup({ showStatusIfActive = false } = {}) {
       try {
@@ -78,7 +79,6 @@ const app = createApp({
     const PROGRAM = Schema.Options.ENUMS.PROGRAM;
     const EVENT = Schema.Options.ENUMS.EVENT;
     const LEVEL = Schema.Options.ENUMS.LEVEL;
-    const METHOD = Schema.Options.ENUMS.METHOD;
     const FEE = Schema.Options.ENUMS.FEE;
 
     /**
@@ -235,25 +235,6 @@ const app = createApp({
       if (ms) setTimeout(() => (status.visible = false), ms);
     }
 
-    function syncEnum(target, options = []) {
-      // reset and refill
-      for (const k of Object.keys(target)) delete target[k];
-      for (const o of options) if (o && o.key != null) target[o.key] = o.value;
-    }
-
-    // One watcher to rebuild everything whenever setup changes
-    watch(
-      setup,
-      () => {
-        syncEnum(PROGRAM, PROGRAM_OPTIONS.value || []);
-        syncEnum(EVENT, EVENT_TYPES.value || []);
-        syncEnum(LEVEL, LEVEL_OPTIONS.value || []);
-        syncEnum(METHOD, PAYMENT_METHOD_OPTIONS.value || []);
-        syncEnum(FEE, FEE_CODES.value || []);
-      },
-      { deep: true, immediate: true },
-    );
-
     // Build program-aware options from VOLUNTEERS_OPTIONS
     function volunteersFor(programId = '') {
       const all = VOLUNTEERS_OPTIONS.value || [];
@@ -308,13 +289,11 @@ const app = createApp({
     const onFormFieldInput = Util.Helpers.onFormFieldInput;
     const getOptions = Util.Helpers.getOptions;
     const formatOptionLabel = Util.Helpers.formatOptionLabel;
-    const buildFromFields = Util.Helpers.buildFromFields;
 
     // === Unified meta switches ===
     const isVisible = Util.Helpers.isVisible;
     const fieldClass = Util.Helpers.fieldClass;
     const getFieldDisabled = Util.Helpers.getFieldDisabled;
-    const isNonNegativeNumber = Util.Helpers.isNonNegativeNumber;
     const maskLast4 = Util.Format.maskLast4;
     const computeAgeByYear = Util.Helpers.computeAgeByYear;
     const displayChildNameAndAge = Util.Format.displayChildNameAndAge;
@@ -1818,7 +1797,6 @@ const app = createApp({
       // Optional: strip any screen-only controls in the clone
       dest.querySelectorAll('[data-no-print]').forEach((el) => el.remove());
 
-      // Fire print
       window.print();
 
       // Cleanup after a moment so the DOM stays light
@@ -2011,4 +1989,5 @@ const app = createApp({
   },
 });
 
+app.component('ui-modal', window.UiModal);
 app.mount('#app');

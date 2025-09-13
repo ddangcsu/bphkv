@@ -1111,13 +1111,8 @@ textarea.input[readonly] {
 @media screen {
   .print-page {
     width: auto;
-    /*
-    width: 8.5in;
-    min-height: 7in;
-    */
-    padding: 0.5in; /* 1/2" content margin */
-    margin: 2rem auto;
-    background: white;
+    transform: scale(1);
+    /*background: white;*/
     box-sizing: border-box;
     box-shadow: 0 0 0.5in rgba(0, 0, 0, 0.15);
     border-radius: 4px;
@@ -1129,7 +1124,7 @@ textarea.input[readonly] {
   /* Exact Letter sheet; margins handled by .print-page padding */
   @page {
     size: 8.5in 11in;
-    margin: 0;
+    margin: 0.25;
   }
 
   /* Show ONLY the print-root */
@@ -1158,7 +1153,7 @@ textarea.input[readonly] {
   #print-root .print-page {
     width: 8.5in;
     min-height: 11in;
-    padding: 0.5in; /* ~ 1/2" margins */
+    /* padding: 0.5in; /* ~ 1/2" margins */
     margin: 0 auto;
     background: #fff !important; /* re-assert after global background wipe */
     border-radius: 0;
