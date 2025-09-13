@@ -34,6 +34,7 @@ body.ui-modal-open {
   max-height: 80vh;
   display: flex;
   flex-direction: column;
+  max-height: calc(100vh - var(--ui-vertical-gap, 64px)); /* fills viewport before scrolling */
 }
 
 /* Sections */
@@ -46,7 +47,7 @@ body.ui-modal-open {
 }
 .ui-modal-title {
   margin: 0;
-  font-size: 1.125rem;
+  font-size: var(--ui-title-size, 16px);
   font-weight: 600;
   color: #111827;
 }
@@ -68,6 +69,7 @@ body.ui-modal-open {
 .ui-modal-body {
   padding: var(--ui-padding-body);
   overflow: auto;
+  flex: 1 1 auto; /* take remaining height */
 }
 
 .ui-modal-footer {
@@ -142,62 +144,165 @@ body.ui-modal-open {
   margin-top: 0;
 }
 
-/* Header layout: title on left, actions + close on right */
-.ui-modal-header {
-  padding: 12px 16px;
-  border-bottom: 1px solid #e5e7eb;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.ui-modal-title {
-  margin: 0;
-  font-size: var(--ui-title-size, 16px);
-  font-weight: 600;
-  color: #111827;
-}
 .ui-modal-header-actions {
   display: flex;
   align-items: center;
   gap: 8px;
 }
-.ui-modal-close {
-  border: none;
-  background: transparent;
-  border-radius: 999px;
-  padding: 6px 10px;
-  font-size: 20px;
-  line-height: 1;
-  color: #6b7280;
-  cursor: pointer;
-}
+
 .ui-modal-close i {
   font-size: 18px;
 }
 
 /* Thinner header when no title */
 .ui-modal-header--compact {
-  padding: 6px 10px;
+  padding: 4px 6px;
 }
 
-/* Full-height dialog shell (header/footer fixed; body scrolls) */
-.ui-modal-dialog {
-  /* width rules already in your file; keep them */
-  display: flex;
-  flex-direction: column;
-  max-height: calc(100vh - var(--ui-vertical-gap, 64px)); /* fills viewport before scrolling */
+/* ---------- Screen preview: show it as a Letter sheet ---------- */
+@media screen {
+  .print-page {
+    width: auto;
+    transform: scale(1);
+    /*background: white;*/
+    box-sizing: border-box;
+    box-shadow: 0 0 0.5in rgba(0, 0, 0, 0.15);
+    border-radius: 4px;
+  }
 }
+@media print {
+  /* Page size & margins */
+  @page {
+    size: 8.5in 11in;
+    margin: 0.25in; /* <-- unit matters */
+  }
+  /* Show ONLY the printable modal; hide other top-level nodes */
+  body > *:not(.ui-modal--printable) {
+    display: none !important;
+  }
 
-.ui-modal-body {
-  padding: 16px;
-  overflow: auto; /* only body scrolls */
-  flex: 1 1 auto; /* take remaining height */
-}
+  /* Make the overlay/dialog behave like a normal page container */
+  .ui-modal--printable {
+    display: block !important;
+    position: static !important;
+    inset: auto !important;
+    background: transparent !important;
+  }
+  .ui-modal--printable .ui-modal-dialog {
+    width: auto !important;
+    height: auto !important;
+    max-height: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+  }
 
-/* Top placement (already present; adding vars for height calc) */
-.ui-modal--top {
-  align-items: flex-start;
-}
-.ui-modal--top .ui-modal-dialog {
-  margin-top: var(--ui-top-offset, 48px);
+  /* Only the BODY of the modal should remain, and it must not scroll */
+  .ui-modal--printable .ui-modal-body {
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+    padding: 0 !important; /* optional: remove inner padding for exact 8.5x11 layout */
+  }
+
+  /* Hide modal chrome */
+  .ui-modal--printable .ui-modal-header,
+  .ui-modal--printable .ui-modal-footer,
+  .ui-modal--printable .ui-modal-close,
+  .ui-modal--printable .ui-modal-header-actions {
+    display: none !important;
+  }
+
+  /* Inside the body: hide everything... */
+  .ui-modal--printable .ui-modal-body > * {
+    display: none !important;
+  }
+  /* ...except your printable content */
+  .ui-modal--printable .ui-modal-body > .printable-content {
+    display: block !important;
+  }
+
+  /* Ink-friendly defaults (optional) */
+  html,
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  * {
+    background: transparent !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  /* Sheet sizing */
+  .printable-content {
+    margin: 0 auto !important;
+  }
+  .printable-content .print-page {
+    width: 8.5in;
+    min-height: 11in;
+    padding: 0.25in; /* ~1/2" margins inside the sheet */
+    box-sizing: border-box;
+    page-break-after: always;
+    background: #fff !important;
+  }
+  .printable-content .print-page:last-child {
+    page-break-after: auto;
+  }
+
+  .printable-content .subpanel {
+    width: 100% !important;
+    border: 0px solid #000 !important;
+  }
+
+  /* Tables tidy */
+  .printable-content .table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+
+  .printable-content .table th,
+  .printable-content .table td {
+    padding: 4px 6px;
+    border: 0 solid #bbb !important;
+  }
+  .printable-content .table thead th {
+    border-bottom: 0.5px solid #4b4b4b !important;
+    font-weight: 500;
+  }
+
+  .printable-content .table tr:last-child {
+    border-bottom: 0px solid #000 !important;
+  }
+
+  /* Keep headers per page & avoid row splits */
+  .printable-content thead {
+    display: table-header-group !important;
+  }
+  .printable-content tr,
+  .printable-content .row {
+    page-break-inside: avoid !important;
+  }
+
+  .printable-content h4 {
+    font-weight: 500;
+    font-size: large;
+  }
+  /* Watermark if you use data-watermark on .print-page */
+  .printable-content .print-page[data-watermark]:not([data-watermark=''])::before {
+    content: attr(data-watermark);
+    position: fixed;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-60deg);
+    font-size: 88px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: rgba(85, 84, 84, 0.06);
+    mix-blend-mode: multiply;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 0;
+  }
 }

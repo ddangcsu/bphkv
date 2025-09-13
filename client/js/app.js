@@ -1701,22 +1701,7 @@ const app = createApp({
 
     // ======================= RECEIPT (view/print/email) =======================
     const showReceiptModal = ref(false);
-    const receiptView = reactive({
-      id: '',
-      eventTitle: '',
-      eventTypeLabel: '',
-      programId: '',
-      year: '',
-      familyId: '',
-      parishMember: null,
-      parishNumber: '',
-      contacts: [], // [{ name, relationship, phone, email }]
-      children: [], // [{ fullName, saintName, dob }]
-      payments: [], // [{ code, codeLabel, unitAmount, qty, amount, method, receiptNo, receivedBy }]
-      total: 0,
-      acceptedBy: '',
-      updatedAt: '',
-    });
+    const receiptView = ref({});
 
     function buildReceiptView(r) {
       const fam = familyById(r.familyId);
@@ -1737,7 +1722,8 @@ const app = createApp({
         receivedBy: p.receivedBy || '',
       }));
 
-      Object.assign(receiptView, {
+      receiptView.value = {
+        receiptName: `Receipt ${r.event.title}`,
         id: r.id,
         eventTitle: r.event?.title || '',
         eventTypeLabel: typeLabel,
@@ -1758,7 +1744,7 @@ const app = createApp({
         total: pays.reduce((sum, p) => sum + Number(p.amount || 0), 0),
         acceptedBy: r.acceptedBy || '',
         updatedAt: (r.updatedAt || r.createdAt || '').slice(0, 10),
-      });
+      };
     }
 
     function openReceipt(r) {
@@ -1780,40 +1766,13 @@ const app = createApp({
       });
     }
 
-    function closeReceipt() {
-      showReceiptModal.value = false;
-    }
-
-    function printReceipt(selector = '#receipt-sheet') {
-      const src = document.querySelector(selector);
-      const dest = document.getElementById('print-root');
-      if (!src || !dest) {
-        setStatus('Receipt not ready to print.', 'warn', 1500);
-        return;
-      }
-      // Clone the current rendered HTML into the print root
-      dest.innerHTML = src.outerHTML;
-
-      // Optional: strip any screen-only controls in the clone
-      dest.querySelectorAll('[data-no-print]').forEach((el) => el.remove());
-
-      window.print();
-
-      // Cleanup after a moment so the DOM stays light
-      setTimeout(() => {
-        dest.innerHTML = '';
-      }, 500);
+    async function printReceipt() {
+      await nextTick(() => window.print());
     }
 
     // ---- Roster "Contacts" modal ----
     const showContactsModal = ref(false);
-    const contactsModal = reactive({
-      familyId: '',
-      childName: '',
-      age: '',
-      allergies: '',
-      contacts: [], // [{ name, relationship, phone }]
-    });
+    const contactsView = ref({});
 
     function getPrimaryContactsForFamily(f) {
       const contacts = Array.isArray(f?.contacts) ? f.contacts : [];
@@ -1829,11 +1788,13 @@ const app = createApp({
 
     function openChildContactsModal(row) {
       const fam = familyById(row.familyId);
-      contactsModal.familyId = row.familyId || '';
-      contactsModal.childName = row.fullName || '';
-      contactsModal.allergies = row.allergies || '';
-      contactsModal.age = row.age || '';
-      contactsModal.contacts = fam ? getPrimaryContactsForFamily(fam) : [];
+      contactsView.value = {
+        familyId: row.familyId,
+        childName: row.fullName,
+        allergies: row.allergies || 'None',
+        age: row.age,
+        contacts: fam ? getPrimaryContactsForFamily(fam) : [],
+      };
       showContactsModal.value = true;
     }
 
@@ -1964,14 +1925,12 @@ const app = createApp({
       showReceiptModal,
       receiptView,
       openReceipt,
-      openReceiptById,
-      closeReceipt,
       printReceipt,
       formatMoney,
 
       // rosters
       showContactsModal,
-      contactsModal,
+      contactsView,
       openChildContactsModal,
       closeChildContactsModal,
       // List pager and filters
