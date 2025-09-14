@@ -56,6 +56,7 @@
       closeOnEsc: { type: Boolean, default: true },
       ariaDescription: { type: String, default: '' },
       teleportTarget: { type: String, default: 'body' },
+      backgroundInertSelector: { type: String, default: '#app' },
     },
     emits: ['update:open', 'after-open', 'after-close'],
     setup(props, { emit, slots, attrs }) {
@@ -128,12 +129,21 @@
         else body.classList.remove('ui-modal-open');
       }
 
+      // inside setup, reuse your open watcher:
+      function toggleInert(enable) {
+        const host = document.querySelector(props.backgroundInertSelector);
+        if (!host) return;
+        if (enable) host.setAttribute('inert', '');
+        else host.removeAttribute('inert');
+      }
+
       watch(
         () => props.open,
         (isOpen) => {
           if (isOpen) {
             document.addEventListener('keydown', onKeydown, true);
             applyBodyLock(true);
+            toggleInert(true);
             requestAnimationFrame(() => {
               focusFirst();
               emit('after-open');
@@ -141,6 +151,7 @@
           } else {
             document.removeEventListener('keydown', onKeydown, true);
             applyBodyLock(false);
+            toggleInert(false);
             emit('after-close');
           }
         },
@@ -158,6 +169,7 @@
       onBeforeUnmount(() => {
         document.removeEventListener('keydown', onKeydown, true);
         applyBodyLock(false);
+        toggleInert(false);
       });
 
       // Build overlay classes and inline vars for full-height calculation

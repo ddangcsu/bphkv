@@ -45,7 +45,7 @@
 
   const normPhone = (s = '') => String(s || '').replace(/\D+/g, '');
 
-  function phone(raw = '') {
+  function formatPhone(raw = '') {
     const d = normPhone(raw).slice(0, 10);
     if (!d) return '';
     if (d.length < 4) return `(${d}`;
@@ -328,7 +328,7 @@
   // Public surface (non-breaking shape)
   root.Format = {
     normPhone,
-    phone,
+    formatPhone,
     formatMoney,
     capitalize,
     codeToLabel,

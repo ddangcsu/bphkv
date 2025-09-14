@@ -337,7 +337,7 @@
                       :disabled="isReadOnly"
                       @click="removeFamilyContact(i)"
                       v-if="familyForm.contacts.length>1">
-                      <i class="fa-solid fa-minus"></i>
+                      <i class="fa-solid fa-trash"></i>
                     </button>
                   </div>
 
@@ -413,7 +413,7 @@
                         :disabled="isReadOnly"
                         @click="removeFamilyChild(i)"
                         v-if="familyForm.children.length>1">
-                        <i class="fa-solid fa-minus"></i>
+                        <i class="fa-solid fa-trash"></i>
                       </button>
                     </div>
                   </div>
@@ -455,6 +455,8 @@
                           :disabled="getFieldDisabled(f, {mode: currentMode, form: familyForm, row, index: i, isReadOnly })"
                           v-model.trim="row[f.col]"
                           :placeholder="f.placeholder"
+                          :min="f.min"
+                          :max="f.max"
                           @input="onFormFieldInput(f, {mode: currentMode, form: familyForm, row, index: i }, $event)"
                           @change="onFormFieldChange(f, {mode: currentMode, form: familyForm, row, index: i }, $event)" />
                       </template>
@@ -479,7 +481,7 @@
                 <div class="row" v-for="(n,i) in familyForm.notes" :key="'note'+i">
                   <div class="row-actions">
                     <button tabindex="-1" type="button" class="btn small danger" :disabled="isReadOnly" @click="removeFamilyNote(i)">
-                      <i class="fa-solid fa-minus"></i>
+                      <i class="fa-solid fa-trash"></i>
                     </button>
                   </div>
 
@@ -724,7 +726,7 @@
                 <div class="row" v-for="(row,i) in eventForm.fees" :key="'fee'+i">
                   <div tabindex="-1" class="row-actions" style="align-self: end">
                     <button class="btn small danger" type="button" :disabled="isReadOnly" @click="removeEventFee(i)" v-if="eventForm.fees.length>1">
-                      <i class="fa-solid fa-minus"></i>
+                      <i class="fa-solid fa-trash"></i>
                     </button>
                   </div>
 
@@ -796,7 +798,7 @@
                       :disabled="isReadOnly"
                       @click="removeEventPrerequisiteRow(i)"
                       v-if="eventForm.prerequisites.length>1">
-                      <i class="fa-solid fa-minus"></i>
+                      <i class="fa-solid fa-trash"></i>
                     </button>
                   </div>
 
@@ -1126,7 +1128,7 @@
                       :disabled="isReadOnly"
                       @click="removeRegChildRow(i)"
                       v-if="registrationForm.children.length>1">
-                      <i class="fa-solid fa-minus"></i>
+                      <i class="fa-solid fa-trash"></i>
                     </button>
                   </div>
                   <div class="grid">
@@ -1210,6 +1212,72 @@
                         </template>
                       </label>
                     </template>
+                  </div>
+                </div>
+              </section>
+
+              <!-- Notes -->
+              <section id="panel-notes" role="tabpanel" class="subpanel">
+                <!-- Notes Header and Actions-->
+                <div class="item-header compact bordered">
+                  <h4 class="title">Notes/Logs</h4>
+                  <div class="spacer"></div>
+                  <div class="actions">
+                    <button tabindex="-1" type="button" class="btn small accent" :disabled="isReadOnly" @click="addRegistrationNote">
+                      <i class="fa-solid fa-plus"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="row" v-for="(n,i) in registrationForm.notes" :key="'note'+i">
+                  <div class="row-actions">
+                    <button tabindex="-1" type="button" class="btn small danger" :disabled="isReadOnly" @click="removeRegistrationNote(i)">
+                      <i class="fa-solid fa-trash"></i>
+                    </button>
+                  </div>
+
+                  <div class="grid">
+                    <label
+                      v-for="f in registrationFields.notes"
+                      :key="f.col"
+                      :for="`note-${i}-${f.col}`"
+                      :class="fieldClass(f, { form: n, index: i })"
+                      v-show="isVisible(f, {mode: currentMode, form: registrationForm, row: n, index: i })">
+                      {{ f.label }}
+                      <small class="error" v-if="registrationErrors?.notes?.[i]?.[f.col]">{{ registrationErrors.notes[i][f.col] }}</small>
+                      <!-- select type field -->
+                      <template v-if="f.type === 'select'">
+                        <select
+                          class="input"
+                          :id="`note-${i}-${f.col}`"
+                          :name="`registration.note[${i}].${f.col}`"
+                          :disabled="getFieldDisabled(f, {mode: currentMode, form: registrationForm, row: n, index: i, isReadOnly })"
+                          v-model="n[f.col]"
+                          @input="onFormFieldInput(f, {mode: currentMode, form: registrationForm, row: n, index: i }, $event)"
+                          @change="onFormFieldChange(f, {mode: currentMode, form: registrationForm, row: n, index: i }, $event)">
+                          <option disabled value="">-- choose --</option>
+                          <option
+                            v-for="opt in getOptions(f, {mode: currentMode, form: registrationForm, row: n, index: i })"
+                            :key="String(opt.value)"
+                            :value="opt.value">
+                            {{ formatOptionLabel(opt) }}
+                          </option>
+                        </select>
+                      </template>
+
+                      <template v-else>
+                        <input
+                          :class="f.type === 'checkbox' ? 'check-lg':'input'"
+                          :type="f.type || 'text'"
+                          :id="`note-${i}-${f.col}`"
+                          :name="`registration.note[${i}].${f.col}`"
+                          :disabled="getFieldDisabled(f, {mode: currentMode, form: registrationForm, row: n, index: i, isReadOnly })"
+                          v-model.trim="n[f.col]"
+                          :placeholder="f.placeholder"
+                          @input="onFormFieldInput(f, {mode: currentMode, form: registrationForm, row: n, index: i }, $event)"
+                          @change="onFormFieldChange(f, {mode: currentMode, form: registrationForm, row: n, index: i }, $event)" />
+                      </template>
+                    </label>
                   </div>
                 </div>
               </section>
@@ -1658,7 +1726,7 @@
                             :disabled="isReadOnly"
                             @click="setup.volunteers.splice(i,1)"
                             v-if="setup.volunteers.length>1">
-                            <i class="fa-solid fa-minus"></i>
+                            <i class="fa-solid fa-trash"></i>
                           </button>
                         </td>
                       </tr>
@@ -1702,7 +1770,7 @@
                             :disabled="isReadOnly"
                             @click="setup.relationships.splice(i,1)"
                             v-if="setup.relationships.length>1">
-                            <i class="fa-solid fa-minus"></i>
+                            <i class="fa-solid fa-trash"></i>
                           </button>
                         </td>
                       </tr>
@@ -1748,7 +1816,7 @@
                             :disabled="isReadOnly"
                             @click="setup.programs.splice(i,1)"
                             v-if="setup.programs.length>1">
-                            <i class="fa-solid fa-minus"></i>
+                            <i class="fa-solid fa-trash"></i>
                           </button>
                         </td>
                       </tr>
@@ -1794,7 +1862,7 @@
                             :disabled="isReadOnly"
                             @click="setup.eventTypes.splice(i,1)"
                             v-if="setup.eventTypes.length>1">
-                            <i class="fa-solid fa-minus"></i>
+                            <i class="fa-solid fa-trash"></i>
                           </button>
                         </td>
                       </tr>
@@ -1831,7 +1899,7 @@
                         <td class="center"><input type="checkbox" class="check-lg" v-model="lv.locked" :disabled="isReadOnly" /></td>
                         <td class="actions">
                           <button class="btn small danger" type="button" :disabled="isReadOnly" @click="setup.levels.splice(i,1)" v-if="setup.levels.length>1">
-                            <i class="fa-solid fa-minus"></i>
+                            <i class="fa-solid fa-trash"></i>
                           </button>
                         </td>
                       </tr>
@@ -1877,7 +1945,7 @@
                             :disabled="isReadOnly"
                             @click="setup.feeCodes.splice(i,1)"
                             v-if="setup.feeCodes.length>1">
-                            <i class="fa-solid fa-minus"></i>
+                            <i class="fa-solid fa-trash"></i>
                           </button>
                         </td>
                       </tr>
@@ -1924,7 +1992,7 @@
                             :disabled="isReadOnly"
                             @click="setup.paymentMethods.splice(i,1)"
                             v-if="setup.paymentMethods.length>1">
-                            <i class="fa-solid fa-minus"></i>
+                            <i class="fa-solid fa-trash"></i>
                           </button>
                         </td>
                       </tr>

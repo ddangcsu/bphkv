@@ -70,10 +70,11 @@
         col: 'openDate',
         label: 'Open Date',
         type: 'date',
+        min: '2020-01-01',
         default: '',
         required: true,
       },
-      { col: 'endDate', label: 'End Date', type: 'date', default: '', required: true },
+      { col: 'endDate', label: 'End Date', type: 'date', min: '2020-01-01', default: '', required: true },
     ],
     feeRow: [
       { col: 'code', label: 'Fee Type', type: 'select', selOpt: () => Options.FEE_CODES, default: '', required: true },

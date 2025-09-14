@@ -306,3 +306,7 @@ body.ui-modal-open {
     z-index: 0;
   }
 }
+
+.ui-modal-header-actions .btn + .btn {
+  margin-left: 8px;
+}

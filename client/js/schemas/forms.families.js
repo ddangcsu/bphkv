@@ -70,7 +70,7 @@
       {
         col: 'phone',
         label: 'Contact Phone',
-        type: 'tel',
+        type: 'text',
         onInput: (f, ctx, e) => {
           Ctx.onContactPhoneInput && Ctx.onContactPhoneInput(f, ctx, e);
         },
@@ -117,6 +117,8 @@
         type: 'date',
         default: '',
         required: true,
+        min: '2005-01-01',
+        max: '2030-01-01',
         api: {
           fromApi: (v) => (v || '').slice(0, 10),
         },

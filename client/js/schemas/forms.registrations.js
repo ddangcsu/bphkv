@@ -210,6 +210,33 @@
         selOpt: (fieldMeta, ctx) => Ctx.receivedByOptions(ctx),
       },
     ],
+    notes: [
+      {
+        col: 'timeStamp',
+        label: 'Time Stamp',
+        type: 'text',
+        default: () => new Date().toLocaleString(),
+        disabled: true,
+        show: true,
+      },
+      {
+        col: 'note',
+        label: 'Registration Note',
+        type: 'text',
+        default: '',
+        show: true,
+        classes: 'col-span-2',
+        required: true,
+      },
+      {
+        col: 'updatedBy',
+        label: 'Updated By',
+        type: 'select',
+        default: '',
+        required: true,
+        selOpt: (fieldMeta, ctx) => Ctx.receivedByOptions(ctx),
+      },
+    ],
   };
 
   function Registrations(regCtx = {}) {
@@ -233,6 +260,10 @@
     return Util.Helpers.buildFromFields(registrationFields.paymentsRow, { ctx, overrides });
   };
 
+  Registrations.newNote = function ({ ctx = {}, overrides = {} } = {}) {
+    return Util.Helpers.buildFromFields(registrationFields.notes, { ctx, overrides });
+  };
+
   Registrations.new = function ({ ctx = {}, overrides = {} } = {}) {
     const main = Util.Helpers.buildFromFields(registrationFields.main, { ctx, overrides });
     const meta = Util.Helpers.buildFromFields(registrationFields.meta, { ctx, overrides });
@@ -245,6 +276,7 @@
       contacts: [],
       children: [],
       payments: [],
+      notes: [],
       createdAt: null,
       updatedAt: null,
     };

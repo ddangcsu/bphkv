@@ -91,6 +91,58 @@
     return [apiKey, apiValue];
   }
 
+  /* ===========================
+   Field/Row mappers (UI <-> API)
+   =========================== */
+
+  /**
+   * API -> UI (single object)
+   * mapFieldsToUi(apiSourceObject, fieldMetas) -> { [col]: value }
+   */
+  function mapFieldsToUi(apiSourceObject, fieldMetas) {
+    const uiObject = {};
+    if (!apiSourceObject || !Array.isArray(fieldMetas)) return uiObject;
+
+    for (const fieldMeta of fieldMetas) {
+      const valueFromApi = readFieldValueFromApi(apiSourceObject, fieldMeta);
+      uiObject[fieldMeta.col] = getWithDefault(valueFromApi, fieldMeta.default);
+    }
+    return uiObject;
+  }
+
+  /**
+   * API -> UI (array of objects)
+   * mapRowsToUi(apiArraySource, fieldMetas) -> Array<{ [col]: value }>
+   */
+  function mapRowsToUi(apiArraySource, fieldMetas) {
+    if (!Array.isArray(apiArraySource)) return [];
+    return apiArraySource.map((rowObject) => mapFieldsToUi(rowObject, fieldMetas));
+  }
+
+  /**
+   * UI -> API (single object)
+   * mapFieldsToApi(uiSourceObject, fieldMetas) -> { ...api shaped... }
+   */
+  function mapFieldsToApi(uiSourceObject, fieldMetas) {
+    const apiObject = {};
+    if (!uiSourceObject || !Array.isArray(fieldMetas)) return apiObject;
+
+    for (const fieldMeta of fieldMetas) {
+      const [apiKey, apiValue] = writeFieldValueToApi(uiSourceObject, fieldMeta);
+      if (apiValue !== undefined) apiObject[apiKey] = apiValue;
+    }
+    return apiObject;
+  }
+
+  /**
+   * UI -> API (array of objects)
+   * mapRowsToApi(uiArraySource, fieldMetas) -> Array<{...api shaped...}>
+   */
+  function mapRowsToApi(uiArraySource, fieldMetas) {
+    if (!Array.isArray(uiArraySource)) return [];
+    return uiArraySource.map((rowObject) => mapFieldsToApi(rowObject, fieldMetas));
+  }
+
   Helpers.makeFamilyMappersFromSchema = function makeFamilyMappersFromSchema(familySchema) {
     const mainFields = familySchema.household?.main || [];
     const addressFields = familySchema.household?.address || [];
@@ -99,103 +151,25 @@
     const noteFields = familySchema.notes || [];
 
     function toUi(apiFamily = {}) {
-      const uiFamily = {};
-
-      mainFields.forEach((fieldMeta) => {
-        uiFamily[fieldMeta.col] = getWithDefault(readFieldValueFromApi(apiFamily, fieldMeta), fieldMeta.default);
-      });
-
-      const apiAddress = apiFamily.address || {};
-      uiFamily.address = {};
-      addressFields.forEach((fieldMeta) => {
-        uiFamily.address[fieldMeta.col] = getWithDefault(
-          readFieldValueFromApi(apiAddress, fieldMeta),
-          fieldMeta.default,
-        );
-      });
-
-      uiFamily.contacts = Array.isArray(apiFamily.contacts)
-        ? apiFamily.contacts.map((apiRow) => {
-            const uiRow = {};
-            contactFields.forEach((fieldMeta) => {
-              uiRow[fieldMeta.col] = getWithDefault(readFieldValueFromApi(apiRow, fieldMeta), fieldMeta.default);
-            });
-            return uiRow;
-          })
-        : [];
-
-      uiFamily.children = Array.isArray(apiFamily.children)
-        ? apiFamily.children.map((apiRow) => {
-            const uiRow = {};
-            childFields.forEach((fieldMeta) => {
-              uiRow[fieldMeta.col] = getWithDefault(readFieldValueFromApi(apiRow, fieldMeta), fieldMeta.default);
-            });
-            return uiRow;
-          })
-        : [];
-
-      uiFamily.notes = Array.isArray(apiFamily.notes)
-        ? apiFamily.notes.map((apiRow) => {
-            const uiRow = {};
-            noteFields.forEach((fieldMeta) => {
-              uiRow[fieldMeta.col] = getWithDefault(readFieldValueFromApi(apiRow, fieldMeta), fieldMeta.default);
-            });
-            return uiRow;
-          })
-        : [];
-
-      return uiFamily;
+      const ui = {
+        ...mapFieldsToUi(apiFamily, mainFields),
+        address: mapFieldsToUi(apiFamily?.address, addressFields),
+        contacts: mapRowsToUi(apiFamily?.contacts, contactFields),
+        children: mapRowsToUi(apiFamily?.children, childFields),
+        notes: mapRowsToUi(apiFamily?.notes, noteFields),
+      };
+      return ui;
     }
 
     function toApi(uiFamily = {}) {
-      const apiFamily = {};
-
-      mainFields.forEach((fieldMeta) => {
-        const [apiKey, apiValue] = writeFieldValueToApi(uiFamily, fieldMeta);
-        if (apiValue !== undefined) apiFamily[apiKey] = apiValue;
-      });
-
-      apiFamily.address = {};
-      const uiAddress = uiFamily.address || {};
-      addressFields.forEach((fieldMeta) => {
-        const [apiKey, apiValue] = writeFieldValueToApi(uiAddress, fieldMeta);
-        if (apiValue !== undefined) apiFamily.address[apiKey] = apiValue;
-      });
-
-      apiFamily.contacts = Array.isArray(uiFamily.contacts)
-        ? uiFamily.contacts.map((uiRow) => {
-            const apiRow = {};
-            contactFields.forEach((fieldMeta) => {
-              const [apiKey, apiValue] = writeFieldValueToApi(uiRow, fieldMeta);
-              if (apiValue !== undefined) apiRow[apiKey] = apiValue;
-            });
-            return apiRow;
-          })
-        : [];
-
-      apiFamily.children = Array.isArray(uiFamily.children)
-        ? uiFamily.children.map((uiRow) => {
-            const apiRow = {};
-            childFields.forEach((fieldMeta) => {
-              const [apiKey, apiValue] = writeFieldValueToApi(uiRow, fieldMeta);
-              if (apiValue !== undefined) apiRow[apiKey] = apiValue;
-            });
-            return apiRow;
-          })
-        : [];
-
-      apiFamily.notes = Array.isArray(uiFamily.notes)
-        ? uiFamily.notes.map((uiRow) => {
-            const apiRow = {};
-            noteFields.forEach((fieldMeta) => {
-              const [apiKey, apiValue] = writeFieldValueToApi(uiRow, fieldMeta);
-              if (apiValue !== undefined) apiRow[apiKey] = apiValue;
-            });
-            return apiRow;
-          })
-        : [];
-
-      return apiFamily;
+      const api = {
+        ...mapFieldsToApi(uiFamily, mainFields),
+        address: mapFieldsToApi(uiFamily?.address, addressFields),
+        contacts: mapRowsToApi(uiFamily?.contacts, contactFields),
+        children: mapRowsToApi(uiFamily?.children, childFields),
+        notes: mapRowsToApi(uiFamily?.notes, noteFields),
+      };
+      return api;
     }
 
     return { toUi, toApi };
@@ -207,65 +181,21 @@
     const prereqFields = Array.isArray(eventSchema.prerequisiteRow) ? eventSchema.prerequisiteRow : [];
 
     function toUi(apiEvent = {}) {
-      const uiEvent = {};
-
-      mainFields.forEach((fieldMeta) => {
-        uiEvent[fieldMeta.col] = getWithDefault(readFieldValueFromApi(apiEvent, fieldMeta), fieldMeta.default);
-      });
-
-      uiEvent.fees = Array.isArray(apiEvent.fees)
-        ? apiEvent.fees.map((apiRow) => {
-            const uiRow = {};
-            feeFields.forEach((fieldMeta) => {
-              uiRow[fieldMeta.col] = getWithDefault(readFieldValueFromApi(apiRow, fieldMeta), fieldMeta.default);
-            });
-            return uiRow;
-          })
-        : [];
-
-      uiEvent.prerequisites = Array.isArray(apiEvent.prerequisites)
-        ? apiEvent.prerequisites.map((apiRow) => {
-            const uiRow = {};
-            prereqFields.forEach((fieldMeta) => {
-              uiRow[fieldMeta.col] = getWithDefault(readFieldValueFromApi(apiRow, fieldMeta), fieldMeta.default);
-            });
-            return uiRow;
-          })
-        : [];
-
-      return uiEvent;
+      const ui = {
+        ...mapFieldsToUi(apiEvent, mainFields),
+        fees: mapRowsToUi(apiEvent?.fees, feeFields),
+        prerequisites: mapRowsToUi(apiEvent?.prerequisites, prereqFields),
+      };
+      return ui;
     }
 
     function toApi(uiEvent = {}) {
-      const apiEvent = {};
-
-      mainFields.forEach((fieldMeta) => {
-        const [apiKey, apiValue] = writeFieldValueToApi(uiEvent, fieldMeta);
-        if (apiValue !== undefined) apiEvent[apiKey] = apiValue;
-      });
-
-      apiEvent.fees = Array.isArray(uiEvent.fees)
-        ? uiEvent.fees.map((uiRow) => {
-            const apiRow = {};
-            feeFields.forEach((fieldMeta) => {
-              const [apiKey, apiValue] = writeFieldValueToApi(uiRow, fieldMeta);
-              if (apiValue !== undefined) apiRow[apiKey] = apiValue;
-            });
-            return apiRow;
-          })
-        : [];
-
-      apiEvent.prerequisites = Array.isArray(uiEvent.prerequisites)
-        ? uiEvent.prerequisites.map((uiRow) => {
-            const apiRow = {};
-            prereqFields.forEach((fieldMeta) => {
-              const [apiKey, apiValue] = writeFieldValueToApi(uiRow, fieldMeta);
-              if (apiValue !== undefined) apiRow[apiKey] = apiValue;
-            });
-            return apiRow;
-          })
-        : [];
-      return apiEvent;
+      const api = {
+        ...mapFieldsToApi(uiEvent, mainFields),
+        fees: mapRowsToApi(uiEvent?.fees, feeFields),
+        prerequisites: mapRowsToApi(uiEvent?.prerequisites, prereqFields),
+      };
+      return api;
     }
 
     return { toUi, toApi };
@@ -278,113 +208,36 @@
     const contactSnapFields = Array.isArray(regSchema.contactSnapshot) ? regSchema.contactSnapshot : [];
     const childFields = Array.isArray(regSchema.childrenRow) ? regSchema.childrenRow : [];
     const paymentFields = Array.isArray(regSchema.paymentsRow) ? regSchema.paymentsRow : [];
+    const noteFields = Array.isArray(regSchema.notes) ? regSchema.notes : [];
 
     function toUi(apiReg = {}) {
-      const ui = {};
-
-      mainFields.forEach((f) => {
-        ui[f.col] = getWithDefault(readFieldValueFromApi(apiReg, f), f.default);
-      });
-      metaFields.forEach((f) => {
-        ui[f.col] = getWithDefault(readFieldValueFromApi(apiReg, f), f.default);
-      });
-
-      const apiEvent = apiReg.event || {};
-      ui.event = {};
-      eventSnapFields.forEach((f) => {
-        ui.event[f.col] = getWithDefault(readFieldValueFromApi(apiEvent, f), f.default);
-      });
-
-      ui.contacts = Array.isArray(apiReg.contacts)
-        ? apiReg.contacts.map((row) => {
-            const out = {};
-            contactSnapFields.forEach((f) => {
-              out[f.col] = getWithDefault(readFieldValueFromApi(row, f), f.default);
-            });
-            return out;
-          })
-        : [];
-
-      ui.children = Array.isArray(apiReg.children)
-        ? apiReg.children.map((row) => {
-            const out = {};
-            childFields.forEach((f) => {
-              out[f.col] = getWithDefault(readFieldValueFromApi(row, f), f.default);
-            });
-            return out;
-          })
-        : [];
-
-      ui.payments = Array.isArray(apiReg.payments)
-        ? apiReg.payments.map((row) => {
-            const out = {};
-            paymentFields.forEach((f) => {
-              out[f.col] = getWithDefault(readFieldValueFromApi(row, f), f.default);
-            });
-            return out;
-          })
-        : [];
-
-      ui.createdAt = apiReg.createdAt !== undefined ? apiReg.createdAt : null;
-      ui.updatedAt = apiReg.updatedAt !== undefined ? apiReg.updatedAt : null;
+      const ui = {
+        ...mapFieldsToUi(apiReg, mainFields),
+        ...mapFieldsToUi(apiReg, metaFields),
+        event: mapFieldsToUi(apiReg?.event, eventSnapFields),
+        contacts: mapRowsToUi(apiReg?.contacts, contactSnapFields),
+        children: mapRowsToUi(apiReg?.children, childFields),
+        payments: mapRowsToUi(apiReg?.payments, paymentFields),
+        notes: mapRowsToUi(apiReg?.notes, noteFields),
+        createdAt: apiReg.createdAt !== undefined ? apiReg.createdAt : null,
+        updatedAt: apiReg.updatedAt !== undefined ? apiReg.updatedAt : null,
+      };
 
       return ui;
     }
 
     function toApi(uiReg = {}) {
-      const api = {};
-
-      mainFields.forEach((f) => {
-        const [k, v] = writeFieldValueToApi(uiReg, f);
-        if (v !== undefined) api[k] = v;
-      });
-      metaFields.forEach((f) => {
-        const [k, v] = writeFieldValueToApi(uiReg, f);
-        if (v !== undefined) api[k] = v;
-      });
-
-      api.event = {};
-      const uiEvent = uiReg.event || {};
-      eventSnapFields.forEach((f) => {
-        const [k, v] = writeFieldValueToApi(uiEvent, f);
-        if (v !== undefined) api.event[k] = v;
-      });
-
-      api.contacts = Array.isArray(uiReg.contacts)
-        ? uiReg.contacts.map((row) => {
-            const out = {};
-            contactSnapFields.forEach((f) => {
-              const [k, v] = writeFieldValueToApi(row, f);
-              if (v !== undefined) out[k] = v;
-            });
-            return out;
-          })
-        : [];
-
-      api.children = Array.isArray(uiReg.children)
-        ? uiReg.children.map((row) => {
-            const out = {};
-            childFields.forEach((f) => {
-              const [k, v] = writeFieldValueToApi(row, f);
-              if (v !== undefined) out[k] = v;
-            });
-            return out;
-          })
-        : [];
-
-      api.payments = Array.isArray(uiReg.payments)
-        ? uiReg.payments.map((row) => {
-            const out = {};
-            paymentFields.forEach((f) => {
-              const [k, v] = writeFieldValueToApi(row, f);
-              if (v !== undefined) out[k] = v;
-            });
-            return out;
-          })
-        : [];
-
-      api.createdAt = uiReg.createdAt ? uiReg.createdAt : Util.Helpers.isoNowLocal();
-      api.updatedAt = Util.Helpers.isoNowLocal();
+      const api = {
+        ...mapFieldsToApi(uiReg, mainFields),
+        ...mapFieldsToApi(uiReg, metaFields),
+        event: mapFieldsToApi(uiReg?.event, eventSnapFields),
+        contacts: mapRowsToApi(uiReg?.contacts, contactSnapFields),
+        children: mapRowsToApi(uiReg?.children, childFields),
+        payments: mapRowsToApi(uiReg?.payments, paymentFields),
+        notes: mapRowsToApi(uiReg?.notes, noteFields),
+        createdAt: uiReg.createdAt ? uiReg.createdAt : Util.Helpers.isoNowLocal(),
+        updatedAt: Util.Helpers.isoNowLocal(),
+      };
 
       return api;
     }

@@ -424,7 +424,7 @@ const app = createApp({
 
     function onContactPhoneInput(fieldMeta, ctx, event) {
       const raw = event?.target?.value ?? '';
-      const formatted = Util.Format.phone(raw);
+      const formatted = Util.Format.formatPhone(raw);
       const target = ctx?.row || ctx?.form;
       // write-back here (meta function owns mutation)
       if (target && fieldMeta?.col) {
@@ -463,12 +463,7 @@ const app = createApp({
     };
     const familyFields = Schema.Forms.Families(familyCtx);
 
-    const newFamilyContact = Schema.Forms.Families.newContact;
-    const newFamilyChild = Schema.Forms.Families.newChild;
-    const newFamilyNote = Schema.Forms.Families.newNote;
-    const newFamilyForm = Schema.Forms.Families.new;
-
-    const familyForm = reactive(newFamilyForm());
+    const familyForm = reactive(Schema.Forms.Families.new());
     const familyErrors = ref({});
 
     const validateFamily = () => {
@@ -490,9 +485,9 @@ const app = createApp({
       familyErrors.value = {
         ...errors.main,
         address: errors.address,
-        contacts: errors.contacts,
-        children: errors.children,
-        notes: errors.notes,
+        contacts: errors.contacts || [],
+        children: errors.children || [],
+        notes: errors.notes || [],
         contactErrors: errors.contactErrors,
       };
 
@@ -550,7 +545,7 @@ const app = createApp({
     // nav
 
     function beginCreateFamily() {
-      Object.assign(familyForm, newFamilyForm());
+      Object.assign(familyForm, Schema.Forms.Families.new());
       hydrateFamilyErrors();
       snapshotFamilyForm();
       switchSection(SECTION_NAMES.FAMILIES, MODE_NAMES.CREATE);
@@ -564,7 +559,7 @@ const app = createApp({
       }
       editingFamilyId.value = apiFamily.id;
       const ui = Mappers.Families.toUi(apiFamily || {});
-      Object.assign(familyForm, newFamilyForm(), ui);
+      Object.assign(familyForm, Schema.Forms.Families.new(), ui);
       hydrateFamilyErrors();
       snapshotFamilyForm();
       switchSection(SECTION_NAMES.FAMILIES, MODE_NAMES.EDIT);
@@ -578,42 +573,42 @@ const app = createApp({
 
     async function addFamilyContact() {
       if (isReadOnly.value) return;
-      familyForm.contacts.push(newFamilyContact());
-      familyErrors.contacts.push({});
+      familyForm.contacts.push(Schema.Forms.Families.newContact());
+      familyErrors.value.contacts.push({});
       await nextTick();
     }
     function removeFamilyContact(i) {
       if (isReadOnly.value) return;
       familyForm.contacts.splice(i, 1);
-      familyErrors.contacts.splice(i, 1);
+      familyErrors.value.contacts.splice(i, 1);
     }
     async function addFamilyChild() {
       if (isReadOnly.value) return;
-      familyForm.children.push(newFamilyChild());
-      familyErrors.children.push({});
+      familyForm.children.push(Schema.Forms.Families.newChild());
+      familyErrors.value.children.push({});
       await nextTick();
     }
     function removeFamilyChild(i) {
       if (isReadOnly.value) return;
       familyForm.children.splice(i, 1);
-      familyErrors.children.splice(i, 1);
+      familyErrors.value.children.splice(i, 1);
     }
 
     async function addFamilyNote() {
       if (isReadOnly.value) return;
-      familyForm.notes.push(newFamilyNote());
-      familyErrors.notes.push({});
+      familyForm.notes.push(Schema.Forms.Families.newNote());
+      familyErrors.value.notes.push({});
       await nextTick();
     }
 
     function removeFamilyNote(i) {
       if (isReadOnly.value) return;
       familyForm.notes.splice(i, 1);
-      familyErrors.notes.splice(i, 1);
+      familyErrors.value.notes.splice(i, 1);
     }
 
     function resetFamilyForm() {
-      Object.assign(familyForm, newFamilyForm());
+      Object.assign(familyForm, Schema.Forms.Families.new());
       hydrateFamilyErrors();
       snapshotFamilyForm();
       setStatus('Form reset.', 'info', 1200);
@@ -701,9 +696,7 @@ const app = createApp({
       );
     }
 
-    const newEventForm = Schema.Forms.Events.new;
-
-    const eventForm = reactive(newEventForm());
+    const eventForm = reactive(Schema.Forms.Events.new());
 
     const showPrerequisites = computed(() => eventForm.eventType !== EVENT.ADMIN);
 
@@ -738,19 +731,23 @@ const app = createApp({
     function addEventFee() {
       if (isReadOnly.value) return;
       eventForm.fees.push(Schema.Forms.Events.newFee());
+      eventErrors.value.fees.push({});
     }
     function removeEventFee(i) {
       if (isReadOnly.value) return;
       eventForm.fees.splice(i, 1);
+      eventErrors.value.fees.splice(i, 1);
     }
 
     function addEventPrerequisiteRow() {
       if (isReadOnly.value) return;
       eventForm.prerequisites.push(Schema.Forms.Events.newPreq({ ctx: { index: 0, form: eventForm } }));
+      eventErrors.value.prerequisites.push({});
     }
     function removeEventPrerequisiteRow(i) {
       if (isReadOnly.value) return;
       eventForm.prerequisites.splice(i, 1);
+      eventErrors.value.prerequisites.splice(i, 1);
       if (showPrerequisites.value && eventForm.prerequisites.length === 0) addEventPrerequisiteRow();
     }
 
@@ -800,7 +797,7 @@ const app = createApp({
     const eventPager = Util.Helpers.createPager({ source: filteredEventRows });
 
     function beginCreateEvent() {
-      Object.assign(eventForm, newEventForm());
+      Object.assign(eventForm, Schema.Forms.Events.new());
       editingEventId.value = null;
       hydrateEventErrors();
       snapshotEventForm();
@@ -815,7 +812,7 @@ const app = createApp({
       }
       editingEventId.value = apiEvent.id;
       const ui = Mappers.Events.toUi(apiEvent || {});
-      Object.assign(eventForm, newEventForm(), ui);
+      Object.assign(eventForm, Schema.Forms.Events.new(), ui);
 
       hydrateEventErrors();
       snapshotEventForm();
@@ -855,8 +852,8 @@ const app = createApp({
 
       eventErrors.value = {
         ...errors.main,
-        fees: errors.fees,
-        prerequisites: errors.prerequisites,
+        fees: errors.fees || [],
+        prerequisites: errors.prerequisites || [],
         feeErrors: errors.feeErrors,
         preqErrors: errors.preqErrors,
       };
@@ -975,9 +972,8 @@ const app = createApp({
     };
 
     const registrationFields = Schema.Forms.Registrations(registrationFormCtx);
-    const newRegistrationForm = Schema.Forms.Registrations.new;
 
-    const registrationForm = reactive(newRegistrationForm());
+    const registrationForm = reactive(Schema.Forms.Registrations.new());
     const registrationErrors = ref({});
 
     // --- Helpers --------------------------------------------------------------
@@ -1105,7 +1101,7 @@ const app = createApp({
     const registrationPager = Util.Helpers.createPager({ source: filteredRegistrationRows });
 
     function beginCreateRegistration() {
-      Object.assign(registrationForm, newRegistrationForm());
+      Object.assign(registrationForm, Schema.Forms.Registrations.new());
       editingRegistrationId.value = null;
       hydrateRegistrationErrors();
       snapshotRegistrationForm();
@@ -1160,7 +1156,7 @@ const app = createApp({
 
     function beginEditRegistration(apiReg) {
       editingRegistrationId.value = apiReg.id;
-      Object.assign(registrationForm, newRegistrationForm(), Mappers.Registrations.toUi(apiReg || {}));
+      Object.assign(registrationForm, Schema.Forms.Registrations.new(), Mappers.Registrations.toUi(apiReg || {}));
       hydrateRegistrationErrors();
       snapshotRegistrationForm();
       switchSection(SECTION_NAMES.REGISTRATIONS, MODE_NAMES.EDIT);
@@ -1254,13 +1250,26 @@ const app = createApp({
     function addRegChildRow() {
       if (isReadOnly.value) return;
       registrationForm.children.push(Schema.Forms.Registrations.newChild());
-      registrationErrors.children.push({});
+      registrationErrors.value.children.push({});
     }
     function removeRegChildRow(i) {
       if (isReadOnly.value) return;
       registrationForm.children.splice(i, 1);
-      registrationErrors.children.splice(i, 1);
+      registrationErrors.value.children.splice(i, 1);
       recomputePayments({ form: registrationForm });
+    }
+
+    async function addRegistrationNote() {
+      if (isReadOnly.value) return;
+      registrationForm.notes.push(Schema.Forms.Registrations.newNote());
+      registrationErrors.value.notes.push({});
+      await nextTick();
+    }
+
+    function removeRegistrationNote(i) {
+      if (isReadOnly.value) return;
+      registrationForm.notes.splice(i, 1);
+      registrationErrors.value.notes.splice(i, 1);
     }
 
     // Prerequisites per same year
@@ -1325,7 +1334,7 @@ const app = createApp({
           overrides: {
             name: `${c.lastName}, ${c.firstName}${c.middle ? ' ' + c.middle : ''}`,
             relationship: c.relationship || '',
-            phone: Util.Format.phone(c.phone || ''),
+            phone: Util.Format.formatPhone(c.phone || ''),
           },
         }),
       );
@@ -1407,7 +1416,7 @@ const app = createApp({
       // Remove any already-chosen children that don't belong to this family
       const fam = familyById(form.familyId);
       form.children = (form.children || []).filter((row) => fam.children?.some((c) => c.childId === row.childId));
-      registrationErrors.children = form.children.map(() => ({}));
+      registrationErrors.value.children = form.children.map(() => ({}));
 
       // Recompute total amounts in case quantity depends on children
       hydrateRegistrationPayments(ctx);
@@ -1487,19 +1496,23 @@ const app = createApp({
       errors.payments = Util.Helpers.validateRowArray(registrationFields.paymentsRow, registrationForm.payments, {
         form: registrationForm,
       });
+      errors.notes = Util.Helpers.validateRowArray(registrationFields.notes, registrationForm.notes, {
+        form: registrationForm,
+      });
 
       registrationErrors.value = {
         ...errors.main,
         ...errors.meta,
-        children: errors.children,
-        payments: errors.payments,
+        children: errors.children || [],
+        payments: errors.payments || [],
+        notes: errors.notes || [],
       };
 
       const mainErrors = Object.keys(errors.main).length === 0 && Object.keys(errors.meta).length === 0;
       const childrenErrors = (errors.children || []).every((obj) => !obj || Object.keys(obj).length === 0);
       const paymentsErrors = (errors.payments || []).every((obj) => !obj || Object.keys(obj).length === 0);
-
-      return mainErrors && childrenErrors && paymentsErrors;
+      const notesErrors = (errors.notes || []).every((obj) => !obj || Object.keys(obj).length === 0);
+      return mainErrors && childrenErrors && paymentsErrors && notesErrors;
     };
 
     function hydrateRegistrationErrors() {
@@ -1782,7 +1795,7 @@ const app = createApp({
       return pick.map((c) => ({
         name: `${c.lastName}, ${c.firstName}${c.middle ? ' ' + c.middle : ''}`,
         relationship: c.relationship || '',
-        phone: Util.Format.phone(c.phone || ''),
+        phone: Util.Format.formatPhone(c.phone || ''),
       }));
     }
 
@@ -1916,6 +1929,8 @@ const app = createApp({
       availableChildOptions,
       addRegChildRow,
       removeRegChildRow,
+      addRegistrationNote,
+      removeRegistrationNote,
       // Registrations List
       registrationPager,
       registrationsFilterMenu,
