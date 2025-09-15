@@ -490,18 +490,6 @@ const app = createApp({
     );
 
     // dirty tracking
-    const eventOriginalSnapshot = ref('');
-    const isEventDirty = computed(() => JSON.stringify(eventForm) !== eventOriginalSnapshot.value);
-    function snapshotEventForm() {
-      eventOriginalSnapshot.value = JSON.stringify(eventForm);
-    }
-
-    const registrationOriginalSnapshot = ref('');
-    const isRegistrationDirty = computed(() => JSON.stringify(registrationForm) !== registrationOriginalSnapshot.value);
-    function snapshotRegistrationForm() {
-      registrationOriginalSnapshot.value = JSON.stringify(registrationForm);
-    }
-
     const familyOriginalSnapshot = ref('');
     const isFamilyDirty = computed(() => JSON.stringify(familyForm) !== familyOriginalSnapshot.value);
     function snapshotFamilyForm() {
@@ -624,214 +612,46 @@ const app = createApp({
     // =========================================================
     // EVENTS
     // =========================================================
-    const eventRows = ref([]);
-
-    async function loadEvents({ showStatusIfActive = false } = {}) {
-      try {
-        const list = await API.Events.list();
-        eventRows.value = list;
-        if (showStatusIfActive && SECTION.EVENTS) setStatus('Events loaded.', 'info', 1200);
-      } catch (e) {
-        console.error('loadEvents failed:', e);
-        eventRows.value = [];
-      }
-    }
-
-    const eventErrors = ref({});
-    const editingEventId = ref(null);
-
-    // EVENTS_META
-    const eventCtx = { availablePrerequisiteOptions };
-    const eventFields = Schema.Forms.Events(eventCtx);
-
-    function availablePrerequisiteOptions(ctx) {
-      const index = Number.isInteger(ctx?.index) ? ctx.index : -1;
-      const form = ctx?.form || {};
-
-      const reqType = requiredPrereqType();
-      if (!reqType) return [];
-      const selectedElsewhere = new Set(
-        (form?.prerequisites || []).map((p, i) => (i === index ? null : p.eventId)).filter(Boolean),
-      );
-      return eventRows.value.filter(
-        (ev) =>
-          Number(ev.year) === Number(form?.year) &&
-          ev.id !== eventForm.id &&
-          (ev.eventType || '') === reqType &&
-          !selectedElsewhere.has(ev.id),
-      );
-    }
-
-    const eventForm = reactive(Schema.Forms.Events.new());
-
-    const showPrerequisites = computed(() => eventForm.eventType !== EVENT.ADMIN);
-
-    function requiredPrereqType() {
-      if (eventForm.eventType === EVENT.REGISTRATION) return EVENT.ADMIN;
-      if (eventForm.eventType === EVENT.EVENT) return EVENT.REGISTRATION;
-      return null; // ADM => none
-    }
-
-    // Watch the year/id/eventType to determine if we need prerequisite or not
-    watch(
-      () => [eventForm.year, eventForm.id, eventForm.eventType],
-      () => {
-        const reqType = requiredPrereqType();
-        if (!reqType) {
-          eventForm.prerequisites = [];
-        } else {
-          eventForm.prerequisites = (eventForm.prerequisites || []).filter((p) => {
-            const id = (p?.eventId || '').trim();
-            if (!id) return true;
-            const ev = eventRows.value.find((e) => e.id === id);
-            if (!ev) return false;
-            if (Number(ev.year) !== Number(eventForm.year)) return false;
-            if (ev.id === eventForm.id) return false;
-            return (ev.eventType || '') === reqType;
-          });
-          if (eventForm.prerequisites.length === 0) addEventPrerequisiteRow();
-        }
-      },
-    );
-
-    function addEventFee() {
-      if (isReadOnly.value) return;
-      eventForm.fees.push(Schema.Forms.Events.newFee());
-      eventErrors.value.fees.push({});
-    }
-    function removeEventFee(i) {
-      if (isReadOnly.value) return;
-      eventForm.fees.splice(i, 1);
-      eventErrors.value.fees.splice(i, 1);
-    }
-
-    function addEventPrerequisiteRow() {
-      if (isReadOnly.value) return;
-      eventForm.prerequisites.push(Schema.Forms.Events.newPreq({ ctx: { index: 0, form: eventForm } }));
-      eventErrors.value.prerequisites.push({});
-    }
-    function removeEventPrerequisiteRow(i) {
-      if (isReadOnly.value) return;
-      eventForm.prerequisites.splice(i, 1);
-      eventErrors.value.prerequisites.splice(i, 1);
-      if (showPrerequisites.value && eventForm.prerequisites.length === 0) addEventPrerequisiteRow();
-    }
-
-    /**
-     * Define eventFilters options to build the filter menu
-     */
-
-    const eventFilterDefs = [
-      {
-        key: 'programId',
-        label: 'Program',
-        type: 'select',
-        options: () => Schema.Options.PROGRAM_OPTIONS,
-        emptyValue: '',
-      },
-      { key: 'year', label: 'School Year', type: 'select', options: () => Schema.Options.YEAR_OPTIONS, emptyValue: '' },
-      {
-        key: 'level',
-        label: 'Level Scope',
-        type: 'select',
-        options: () => Schema.Options.LEVEL_OPTIONS,
-        emptyValue: '',
-      },
-      {
-        key: 'eventType',
-        label: 'Event Type',
-        type: 'select',
-        options: () => Schema.Options.EVENT_TYPES,
-        emptyValue: '',
-      },
-    ];
-
-    const eventsFilterMenu = Util.Helpers.createFilterMenu(eventFilterDefs);
-
-    // Create the text filter with an event-specific matcher on id and title
-    const eventsTextFilter = Util.Helpers.createTextFilter((row, raw, terms, utils) => {
-      const haystack = utils.normalize(`${row.id} ${row.title}`);
-      return utils.includesAllTerms(haystack, terms);
+    // =========================================================
+    // EVENTS (delegated to Controllers.Events)
+    // =========================================================
+    const Events = Controllers.Events.create({
+      setStatus, // (msg, level?, ms?)
+      switchSection, // (sectionName, modeName)
+      goBackSection, // ()
+      MODE, // reactive flags or enum-like
+      MODE_NAMES, // { CREATE:'create', EDIT:'edit' }
+      SECTION, // current section enum
+      SECTION_NAMES, // { EVENTS:'events', ... }
+      isReadOnly, // ref/computed<boolean>
     });
 
-    const filteredEventRows = computed(() => {
-      const byMenu = eventsFilterMenu.applyTo(eventRows.value);
-      return eventsTextFilter.applyTo(byMenu);
-    });
+    // --- Re-expose fields with the same names your template expects ---
+    const eventRows = Events.eventRows;
+    const filteredEventRows = Events.filteredEventRows;
+    const eventPager = Events.eventPager;
 
-    // Event List Pagination instance
-    const eventPager = Util.Helpers.createPager({ source: filteredEventRows });
+    const eventForm = Events.eventForm;
+    const eventErrors = Events.eventErrors;
+    const eventFields = Events.eventFields;
+    const showPrerequisites = Events.showPrerequisites;
 
-    function beginCreateEvent() {
-      Object.assign(eventForm, Schema.Forms.Events.new());
-      editingEventId.value = null;
-      hydrateEventErrors();
-      snapshotEventForm();
-      switchSection(SECTION_NAMES.EVENTS, MODE_NAMES.CREATE);
-      setStatus('Creating new event…', 'info', 1200);
-    }
+    const eventsFilterMenu = Events.eventsFilterMenu;
+    const eventsTextFilter = Events.eventsTextFilter;
 
-    function beginEditEvent(apiEvent) {
-      if (!apiEvent || !apiEvent.id) {
-        setStatus('Nothing to edit', 'warn', 1500);
-        return;
-      }
-      editingEventId.value = apiEvent.id;
-      const ui = Mappers.Events.toUi(apiEvent || {});
-      Object.assign(eventForm, Schema.Forms.Events.new(), ui);
+    // Keep action names identical
+    const loadEvents = Events.loadEvents;
+    const beginCreateEvent = Events.beginCreateEvent;
+    const beginEditEvent = Events.beginEditEvent;
+    const submitEventForm = Events.submitEventForm;
 
-      hydrateEventErrors();
-      snapshotEventForm();
-      switchSection(SECTION_NAMES.EVENTS, MODE_NAMES.EDIT);
-      setStatus(`Editing ${e.id}`, 'info', 1200);
-    }
+    const addEventFee = Events.addEventFee;
+    const removeEventFee = Events.removeEventFee;
+    const addEventPrerequisiteRow = Events.addEventPrerequisiteRow;
+    const removeEventPrerequisiteRow = Events.removeEventPrerequisiteRow;
 
-    function hydrateEventErrors() {
-      Schema.Forms.Events.validate(eventForm, eventErrors);
-    }
-
-    // Interactive error on the form as user input
-    Vue.watch(() => eventForm, hydrateEventErrors, { deep: true, immediate: true });
-
-    async function submitEventForm() {
-      if (isReadOnly.value) {
-        setStatus('Read-only mode: cannot save.', 'warn', 1800);
-        return;
-      }
-
-      if (!isEventDirty.value) {
-        setStatus('No changes to save.', 'warn', 1800);
-        return;
-      }
-
-      if (!Schema.Forms.Events.validate(eventForm, eventErrors)) {
-        setStatus('Please fix errors before saving.', 'error', 2500);
-        return;
-      }
-
-      await saveEvent();
-    }
-
-    async function saveEvent() {
-      setStatus('Saving Event...');
-      const payload = Mappers.Events.toApi(eventForm);
-      try {
-        if (MODE.CREATE) {
-          await API.Events.create(payload);
-          setStatus('Event created.', 'success', 1500);
-        } else {
-          const patch = { ...payload };
-          delete patch.id;
-          await API.Events.update(editingEventId.value, patch);
-          setStatus('Event updated.', 'success', 1500);
-        }
-        await loadEvents();
-        goBackSection();
-      } catch (err) {
-        console.error(err);
-        setStatus('Failed to save Event.', 'error', 3000);
-      }
-    }
+    // Useful meta/derived
+    const isEventDirty = Events.isEventDirty;
 
     // =========================================================
     // REGISTRATION — fields-metadata renderer
@@ -850,6 +670,12 @@ const app = createApp({
     }
 
     const editingRegistrationId = ref(null);
+
+    const registrationOriginalSnapshot = ref('');
+    const isRegistrationDirty = computed(() => JSON.stringify(registrationForm) !== registrationOriginalSnapshot.value);
+    function snapshotRegistrationForm() {
+      registrationOriginalSnapshot.value = JSON.stringify(registrationForm);
+    }
 
     // --- Select options for eventId on Registration Form ----------------------
     const eventOptionsForRegistration = computed(() => {
@@ -1795,6 +1621,7 @@ const app = createApp({
       removeEventPrerequisiteRow,
       showPrerequisites,
       submitEventForm,
+      loadEvents,
       beginCreateEvent,
       beginEditEvent,
       // Event List
@@ -1855,4 +1682,8 @@ const app = createApp({
 });
 
 app.component('ui-modal', window.UiModal);
+app.component('events-toolbar', window.Components && window.Components.EventsToolbar);
+app.component('events-table', window.Components && window.Components.EventsTable);
+app.component('events-form', window.Components && window.Components.EventsForm);
+
 app.mount('#app');

@@ -187,6 +187,14 @@
     enumsWatcherInstalled = true;
   };
 
+  // Alias the ENUMS to the global root
+  Object.defineProperty(global, 'ENUMS', {
+    get() {
+      return Options.ENUMS;
+    },
+    enumerable: true,
+  });
+
   // Expose
   SchemaRoot.Options = Options;
 })(typeof window !== 'undefined' ? window : globalThis);
