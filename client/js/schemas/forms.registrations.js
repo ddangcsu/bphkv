@@ -191,16 +191,37 @@
         default: '',
         required: true,
         selOpt: () => Options.PAYMENT_METHOD_OPTIONS,
+        onChange: (fieldMeta, ctx, event) => {
+          const row = ctx?.row;
+          if (row[fieldMeta.col] === Options.ENUMS.METHOD?.WAIVED) {
+            row.amount = 0;
+          } else {
+            row.amount = Math.round(Number(row.unitAmount) * Number(row.quantity) * 100) / 100;
+          }
+        },
+        validate: (value, scope) => {
+          const form = scope.form;
+          if (value.trim() === Options.ENUMS.METHOD?.WAIVED) {
+            return !form?.notes.length > 0 ? 'Required note' : '';
+          }
+        },
       },
       {
         col: 'txnRef',
-        label: 'Ref/Check #',
+        label: 'Ref#/Reason',
         type: 'text',
         default: '',
         required: true,
         show: ({ row }) => (row?.method || '') !== Options.ENUMS.METHOD?.CASH,
       },
-      { col: 'receiptNo', label: 'Receipt #', type: 'text', default: '', required: true },
+      {
+        col: 'receiptNo',
+        label: 'Receipt #',
+        type: 'text',
+        default: '',
+        required: true,
+        show: ({ row }) => (row?.method || '') !== Options.ENUMS.METHOD?.WAIVED,
+      },
       {
         col: 'receivedBy',
         label: 'Received By',
@@ -280,6 +301,40 @@
       createdAt: null,
       updatedAt: null,
     };
+  };
+
+  Registrations.validate = function (registrationDataRef, registrationErrorRef) {
+    const registrationForm = registrationDataRef || {};
+    const registrationErrors = registrationErrorRef || {};
+
+    const errors = {};
+    // main
+    errors.main = Util.Helpers.validateFields(registrationFields.main, registrationForm, { form: registrationForm });
+    errors.meta = Util.Helpers.validateFields(registrationFields.meta, registrationForm, { form: registrationForm });
+    // arrays
+    errors.children = Util.Helpers.validateRowArray(registrationFields.childrenRow, registrationForm.children, {
+      form: registrationForm,
+    });
+    errors.payments = Util.Helpers.validateRowArray(registrationFields.paymentsRow, registrationForm.payments, {
+      form: registrationForm,
+    });
+    errors.notes = Util.Helpers.validateRowArray(registrationFields.notes, registrationForm.notes, {
+      form: registrationForm,
+    });
+
+    registrationErrors.value = {
+      ...errors.main,
+      ...errors.meta,
+      children: errors.children || [],
+      payments: errors.payments || [],
+      notes: errors.notes || [],
+    };
+
+    const mainErrors = Object.keys(errors.main).length === 0 && Object.keys(errors.meta).length === 0;
+    const childrenErrors = (errors.children || []).every((obj) => !obj || Object.keys(obj).length === 0);
+    const paymentsErrors = (errors.payments || []).every((obj) => !obj || Object.keys(obj).length === 0);
+    const notesErrors = (errors.notes || []).every((obj) => !obj || Object.keys(obj).length === 0);
+    return mainErrors && childrenErrors && paymentsErrors && notesErrors;
   };
 
   forms.Registrations = Registrations;

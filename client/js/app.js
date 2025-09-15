@@ -466,42 +466,8 @@ const app = createApp({
     const familyForm = reactive(Schema.Forms.Families.new());
     const familyErrors = ref({});
 
-    const validateFamily = () => {
-      const errors = {};
-
-      // household
-      errors.main = Util.Helpers.validateFields(familyFields.household.main, familyForm, { form: familyForm });
-      errors.address = Util.Helpers.validateFields(familyFields.household.address, familyForm.address || {}, {
-        form: familyForm,
-      });
-      // arrays
-      errors.contacts = Util.Helpers.validateRowArray(familyFields.contacts, familyForm.contacts, { form: familyForm });
-      errors.children = Util.Helpers.validateRowArray(familyFields.children, familyForm.children, { form: familyForm });
-      errors.notes = Util.Helpers.validateRowArray(familyFields.notes, familyForm.notes, { form: familyForm });
-      // Custom item
-      if (!familyForm.contacts.some((c) => Schema.Options.PARENTS.has(c.relationship)))
-        errors.contactErrors = 'Contacts must have at least one with Father/Mother/Guardian relationship';
-
-      familyErrors.value = {
-        ...errors.main,
-        address: errors.address,
-        contacts: errors.contacts || [],
-        children: errors.children || [],
-        notes: errors.notes || [],
-        contactErrors: errors.contactErrors,
-      };
-
-      const noHouseHoldErrors = Object.keys(errors.main).length === 0 && Object.keys(errors.address).length === 0;
-      const noContactsErrors =
-        (errors.contacts || []).every((obj) => !obj || Object.keys(obj).length === 0) && !errors.contactErrors;
-      const noChildrenErrors = (errors.children || []).every((obj) => !obj || Object.keys(obj).length === 0);
-      const noNotesErrors = (errors.notes || []).every((obj) => !obj || Object.keys(obj).length === 0);
-
-      return noHouseHoldErrors && noContactsErrors && noChildrenErrors && noNotesErrors;
-    };
-
     function hydrateFamilyErrors() {
-      validateFamily();
+      Schema.Forms.Families.validate(familyForm, familyErrors);
     }
 
     function normalizeNameExceptions() {
@@ -620,7 +586,7 @@ const app = createApp({
         return;
       }
 
-      if (!validateFamily()) {
+      if (!Schema.Forms.Families.validate(familyForm, familyErrors)) {
         setStatus('Error found. Please fix errors before trying to save', 'error', 3500);
         return;
       }
@@ -820,53 +786,8 @@ const app = createApp({
       setStatus(`Editing ${e.id}`, 'info', 1200);
     }
 
-    const validateEvent = () => {
-      const errors = {};
-      // main
-      errors.main = Util.Helpers.validateFields(eventFields.main, eventForm, { form: eventForm });
-      // arrays
-      errors.fees = Util.Helpers.validateRowArray(eventFields.feeRow, eventForm.fees, { form: eventForm });
-      errors.prerequisites = Util.Helpers.validateRowArray(eventFields.prerequisiteRow, eventForm.prerequisites, {
-        form: eventForm,
-      });
-      // Custom item
-      if (!Array.isArray(eventForm.fees) || eventForm.fees.length === 0) {
-        errors.feeErrors = 'Event must have at least one fee entry';
-      }
-      if (requiredPrereqType() && (!Array.isArray(eventForm.prerequisites) || eventForm.prerequisites.length === 0))
-        errors.preqErrors = 'Event required at least one prerequisite';
-
-      if (
-        YEAR_OPTIONS.value.some((o) => Number(o.value) === Number(eventForm.year)) &&
-        eventForm.openDate &&
-        eventForm.endDate
-      ) {
-        const boundStart = new Date(Number(eventForm.year), 6, 1); // July = month 6 (0-based)
-        const boundEnd = new Date(Number(eventForm.year) + 1, 6, 0, 23, 59, 59, 999); // June 30 end-of-day
-        const start = new Date(eventForm.openDate);
-        const end = new Date(eventForm.endDate);
-        if (start > end) errors.main.openDate = 'Must <= End Date';
-        if (start < boundStart) errors.main.openDate = 'Not in School Year';
-        if (end > boundEnd) errors.main.endDate = 'Not in School Year';
-      }
-
-      eventErrors.value = {
-        ...errors.main,
-        fees: errors.fees || [],
-        prerequisites: errors.prerequisites || [],
-        feeErrors: errors.feeErrors,
-        preqErrors: errors.preqErrors,
-      };
-
-      const mainErrors = Object.keys(errors.main).length === 0 && !errors.feeErrors && !errors.preqErrors;
-      const feeErrors = (errors.fees || []).every((obj) => !obj || Object.keys(obj).length === 0);
-      const prereqErrors = (errors.prerequisites || []).every((obj) => !obj || Object.keys(obj).length === 0);
-
-      return mainErrors && feeErrors && prereqErrors;
-    };
-
     function hydrateEventErrors() {
-      validateEvent();
+      Schema.Forms.Events.validate(eventForm, eventErrors);
     }
 
     // Interactive error on the form as user input
@@ -883,7 +804,7 @@ const app = createApp({
         return;
       }
 
-      if (!validateEvent()) {
+      if (!Schema.Forms.Events.validate(eventForm, eventErrors)) {
         setStatus('Please fix errors before saving.', 'error', 2500);
         return;
       }
@@ -1389,7 +1310,7 @@ const app = createApp({
       (form.payments || []).forEach((p) => {
         p.quantity = qty;
         const unit = Number(p.unitAmount || 0);
-        p.amount = Math.round(unit * qty * 100) / 100;
+        p.amount = p.method === Schema.Options.ENUMS.METHOD.WAIVED ? 0 : Math.round(unit * qty * 100) / 100;
       });
     }
 
@@ -1484,39 +1405,8 @@ const app = createApp({
       return volunteersFor(selectedEvent.value?.programId || form?.event?.programId || '');
     }
 
-    const validateRegistration = () => {
-      const errors = {};
-      // main
-      errors.main = Util.Helpers.validateFields(registrationFields.main, registrationForm, { form: registrationForm });
-      errors.meta = Util.Helpers.validateFields(registrationFields.meta, registrationForm, { form: registrationForm });
-      // arrays
-      errors.children = Util.Helpers.validateRowArray(registrationFields.childrenRow, registrationForm.children, {
-        form: registrationForm,
-      });
-      errors.payments = Util.Helpers.validateRowArray(registrationFields.paymentsRow, registrationForm.payments, {
-        form: registrationForm,
-      });
-      errors.notes = Util.Helpers.validateRowArray(registrationFields.notes, registrationForm.notes, {
-        form: registrationForm,
-      });
-
-      registrationErrors.value = {
-        ...errors.main,
-        ...errors.meta,
-        children: errors.children || [],
-        payments: errors.payments || [],
-        notes: errors.notes || [],
-      };
-
-      const mainErrors = Object.keys(errors.main).length === 0 && Object.keys(errors.meta).length === 0;
-      const childrenErrors = (errors.children || []).every((obj) => !obj || Object.keys(obj).length === 0);
-      const paymentsErrors = (errors.payments || []).every((obj) => !obj || Object.keys(obj).length === 0);
-      const notesErrors = (errors.notes || []).every((obj) => !obj || Object.keys(obj).length === 0);
-      return mainErrors && childrenErrors && paymentsErrors && notesErrors;
-    };
-
     function hydrateRegistrationErrors() {
-      validateRegistration();
+      Schema.Forms.Registrations.validate(registrationForm, registrationErrors);
     }
 
     // Interactive error on the form as user input
@@ -1533,7 +1423,7 @@ const app = createApp({
         return;
       }
 
-      if (!validateRegistration()) {
+      if (!Schema.Forms.Registrations.validate(registrationForm, registrationErrors)) {
         setStatus('Please fix errors before saving.', 'error', 2500);
         return;
       }
@@ -1754,6 +1644,7 @@ const app = createApp({
           grade: r.event?.programId === PROGRAM.TNTT ? ageGroupLabelTNTT(computeAgeByYear(c.dob)) : ' - ',
         })),
         payments: pays,
+        notes: r.notes,
         total: pays.reduce((sum, p) => sum + Number(p.amount || 0), 0),
         acceptedBy: r.acceptedBy || '',
         updatedAt: (r.updatedAt || r.createdAt || '').slice(0, 10),

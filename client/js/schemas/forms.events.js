@@ -128,5 +128,59 @@
     return { ...base, fees: [Events.newFee()], prerequisites: [] };
   };
 
+  Events.validate = function (eventDataRef, eventErrorRef) {
+    const eventForm = eventDataRef || {};
+    const eventErrors = eventErrorRef || {};
+
+    function requiredPrereqType() {
+      if (eventForm.eventType === Options.ENUMS.EVENT.REGISTRATION) return Options.ENUMS.EVENT.ADMIN;
+      if (eventForm.eventType === Options.ENUMS.EVENT.EVENT) return Options.ENUMS.EVENT.REGISTRATION;
+      return null; // ADM => none
+    }
+
+    const errors = {};
+    // main
+    errors.main = Util.Helpers.validateFields(eventFields.main, eventForm, { form: eventForm });
+    // arrays
+    errors.fees = Util.Helpers.validateRowArray(eventFields.feeRow, eventForm.fees, { form: eventForm });
+    errors.prerequisites = Util.Helpers.validateRowArray(eventFields.prerequisiteRow, eventForm.prerequisites, {
+      form: eventForm,
+    });
+    // Custom item
+    if (!Array.isArray(eventForm.fees) || eventForm.fees.length === 0) {
+      errors.feeErrors = 'Event must have at least one fee entry';
+    }
+    if (requiredPrereqType() && (!Array.isArray(eventForm.prerequisites) || eventForm.prerequisites.length === 0))
+      errors.preqErrors = 'Event required at least one prerequisite';
+
+    if (
+      Options.YEAR_OPTIONS.some((o) => Number(o.value) === Number(eventForm.year)) &&
+      eventForm.openDate &&
+      eventForm.endDate
+    ) {
+      const boundStart = new Date(Number(eventForm.year), 6, 1); // July = month 6 (0-based)
+      const boundEnd = new Date(Number(eventForm.year) + 1, 6, 0, 23, 59, 59, 999); // June 30 end-of-day
+      const start = new Date(eventForm.openDate);
+      const end = new Date(eventForm.endDate);
+      if (start > end) errors.main.openDate = 'Must <= End Date';
+      if (start < boundStart) errors.main.openDate = 'Not in School Year';
+      if (end > boundEnd) errors.main.endDate = 'Not in School Year';
+    }
+
+    eventErrors.value = {
+      ...errors.main,
+      fees: errors.fees || [],
+      prerequisites: errors.prerequisites || [],
+      feeErrors: errors.feeErrors,
+      preqErrors: errors.preqErrors,
+    };
+
+    const mainErrors = Object.keys(errors.main).length === 0 && !errors.feeErrors && !errors.preqErrors;
+    const feeErrors = (errors.fees || []).every((obj) => !obj || Object.keys(obj).length === 0);
+    const prereqErrors = (errors.prerequisites || []).every((obj) => !obj || Object.keys(obj).length === 0);
+
+    return mainErrors && feeErrors && prereqErrors;
+  };
+
   forms.Events = Events;
 })(typeof window !== 'undefined' ? window : globalThis);

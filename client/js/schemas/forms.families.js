@@ -209,5 +209,41 @@
     };
   };
 
+  Families.validate = function (formDataRef, formErrorRef) {
+    const familyForm = formDataRef || {};
+    const familyErrors = formErrorRef || {};
+    const errors = {};
+
+    // household
+    errors.main = Util.Helpers.validateFields(familyFields.household.main, familyForm, { form: familyForm });
+    errors.address = Util.Helpers.validateFields(familyFields.household.address, familyForm.address || {}, {
+      form: familyForm,
+    });
+    // arrays
+    errors.contacts = Util.Helpers.validateRowArray(familyFields.contacts, familyForm.contacts, { form: familyForm });
+    errors.children = Util.Helpers.validateRowArray(familyFields.children, familyForm.children, { form: familyForm });
+    errors.notes = Util.Helpers.validateRowArray(familyFields.notes, familyForm.notes, { form: familyForm });
+    // Custom item
+    if (!familyForm.contacts.some((c) => Options.PARENTS.has(c.relationship)))
+      errors.contactErrors = 'Contacts must have at least one with Father/Mother/Guardian relationship';
+
+    familyErrors.value = {
+      ...errors.main,
+      address: errors.address,
+      contacts: errors.contacts || [],
+      children: errors.children || [],
+      notes: errors.notes || [],
+      contactErrors: errors.contactErrors,
+    };
+
+    const noHouseHoldErrors = Object.keys(errors.main).length === 0 && Object.keys(errors.address).length === 0;
+    const noContactsErrors =
+      (errors.contacts || []).every((obj) => !obj || Object.keys(obj).length === 0) && !errors.contactErrors;
+    const noChildrenErrors = (errors.children || []).every((obj) => !obj || Object.keys(obj).length === 0);
+    const noNotesErrors = (errors.notes || []).every((obj) => !obj || Object.keys(obj).length === 0);
+
+    return noHouseHoldErrors && noContactsErrors && noChildrenErrors && noNotesErrors;
+  };
+
   forms.Families = Families;
 })(typeof window !== 'undefined' ? window : globalThis);

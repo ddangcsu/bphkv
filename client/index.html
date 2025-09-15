@@ -1417,7 +1417,7 @@
                   </div>
 
                   <!-- Children Enrolled -->
-                  <div class="subpanel" v-if="receiptView.children && receiptView.children.length">
+                  <div class="subpanel" v-if="receiptView.children && receiptView.children.length > 0">
                     <div class="item-header compact bordered">
                       <h4 class="title">Children Enrolled</h4>
                     </div>
@@ -1474,6 +1474,18 @@
                           <td colspan="3"></td>
                         </tr>
                       </tbody>
+                    </table>
+                  </div>
+
+                  <!-- Registration Notes -->
+                  <div class="subpanel" v-if="receiptView.notes && receiptView.notes.length > 0">
+                    <div class="item-header compact bordered">
+                      <h4 class="title">Registration Notes</h4>
+                    </div>
+                    <table class="table">
+                      <tr v-for="(n,i) in receiptView.notes" :key="'rn'+i">
+                        <td>{{ n.note }}</td>
+                      </tr>
                     </table>
                   </div>
 
