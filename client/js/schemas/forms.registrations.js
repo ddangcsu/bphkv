@@ -130,6 +130,9 @@
             if (Number(Util.Helpers.computeAgeByYear(scope?.row?.dob)) < 7) {
               return 'Child is Under Age';
             }
+            if (Number(Util.Helpers.computeAgeByYear(scope?.row?.dob)) > 17) {
+              return 'Child is Over Age';
+            }
           }
           return '';
         },

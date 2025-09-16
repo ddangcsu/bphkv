@@ -305,309 +305,45 @@ const app = createApp({
     // =========================================================
     // FAMILIES
     // =========================================================
-    const editingFamilyId = ref(null);
-    const familyRows = ref([]);
 
-    async function loadFamilies({ showStatusIfActive = false } = {}) {
-      try {
-        const list = await API.Families.list();
-        familyRows.value = list;
-        if (showStatusIfActive && SECTION.FAMILIES) setStatus('Families loaded.', 'info', 1200);
-      } catch {
-        setStatus('Error encountered loading Families list', 'error', 3000);
-        familyRows.value = [];
-      }
-    }
-
-    // --- Family filter helpers ---
-    function familyHasRegistrationForState(familyId, state) {
-      // Fallback: scan registrationRows with optional program/type/year constraints
-      const list = registrationRows.value || [];
-      for (const reg of list) {
-        if (reg.familyId !== familyId) continue;
-        const ev = reg.event || {};
-        if (state.programId && ev.programId !== state.programId) continue;
-        if (state.eventType && ev.eventType !== state.eventType) continue;
-        if (state.year && Number(ev.year) !== Number(state.year)) continue;
-        return true;
-      }
-      return false;
-    }
-
-    // --- Families — filter menu defs (now with programId, eventType, year, and regMode) ---
-    const familyFilterDefs = [
-      {
-        key: 'parishMember',
-        label: 'Parish Member',
-        type: 'select',
-        options: () => Schema.Options.YES_NO_OPTIONS,
-        emptyValue: '',
-      },
-      {
-        key: 'programId',
-        label: 'Program',
-        type: 'select',
-        options: () => Schema.Options.PROGRAM_OPTIONS,
-        emptyValue: '',
-        bypass: true,
-      },
-      {
-        key: 'eventType',
-        label: 'Event Type',
-        type: 'select',
-        options: () => Schema.Options.EVENT_TYPES,
-        emptyValue: '',
-        bypass: true,
-      },
-      {
-        key: 'year',
-        label: 'School Year',
-        type: 'select',
-        options: () => Schema.Options.YEAR_OPTIONS,
-        emptyValue: '',
-        bypass: true,
-      },
-      {
-        key: 'regMode',
-        label: 'Registration',
-        type: 'select',
-        options: () => [
-          { value: 'registered', label: 'Registered (matches filters)' },
-          { value: 'not-registered', label: 'Not registered (matches filters)' },
-        ],
-        emptyValue: '',
-        // Use programId/eventType/year from the current menu state to scope the check
-        matches: (familyRow, selectedMode, state) => {
-          if (!selectedMode) return true; // no special reg filter
-          const has = familyHasRegistrationForState(familyRow.id, state);
-          return selectedMode === 'registered' ? has : !has;
-        },
-      },
-    ];
-
-    const familiesFilterMenu = Util.Helpers.createFilterMenu(familyFilterDefs);
-
-    // Define text filter for family
-    const familiesTextFilter = Util.Helpers.createTextFilter((row, raw, terms, utils) => {
-      const parts = [row.id, row.parishNumber, row.address?.city];
-      (row.contacts || []).forEach((c) => {
-        parts.push(c.lastName, c.firstName, c.middle, c.email, Util.Format.normPhone(c.phone));
-      });
-      return utils.includesAllTerms(utils.normalize(parts.filter(Boolean).join(' ')), terms);
+    // =========================================================
+    // FAMILIES — all owned by controller
+    // =========================================================
+    const Families = Controllers.Families.create({
+      setStatus,
+      switchSection,
+      goBackSection,
+      MODE,
+      MODE_NAMES,
+      SECTION,
+      SECTION_NAMES,
+      isReadOnly,
+      getRegistrationRows: () => registrationRows.value, // used for regMode filter
     });
 
-    const filteredFamilyRows = Vue.computed(() => {
-      const byMenu = familiesFilterMenu.applyTo(familyRows.value);
-      return familiesTextFilter.applyTo(byMenu);
-    });
+    // LIST (same names as your template)
+    const familyRows = Families.familyRows;
+    const familiesFilterMenu = Families.familiesFilterMenu;
+    const familiesTextFilter = Families.familiesTextFilter;
+    const filteredFamilyRows = Families.filteredFamilyRows;
+    const familiesPager = Families.familiesPager;
+    const contactDisplay = Families.contactDisplay;
+    const loadFamilies = Families.loadFamilies;
 
-    // Create a family list pagination instance
-    const familiesPager = Util.Helpers.createPager({ source: filteredFamilyRows });
-
-    const contactDisplay = (f, one = false) => {
-      const contacts = Array.isArray(f.contacts) ? f.contacts : [];
-      if (!contacts.length) return '—';
-
-      // Prioritize the first 2 among Father / Mother / Guardian
-      const prioritized = contacts.filter((c) => Schema.Options.PARENTS.has((c.relationship || '').trim()));
-      const others = contacts.filter((c) => !Schema.Options.PARENTS.has((c.relationship || '').trim()));
-      const pick = [...prioritized, ...others].slice(0, 2);
-      const result = pick.map((c) => {
-        if ('lastName' in c) {
-          return `${c.lastName}, ${c.firstName}${c.middle ? ' ' + c.middle : ''} ${maskLast4(c.phone)}`;
-        } else {
-          return `${c.name} ${maskLast4(c.phone)}`;
-        }
-      });
-      return one ? result[0] : result.join(' / ');
-    };
-
-    function onContactPhoneInput(fieldMeta, ctx, event) {
-      const raw = event?.target?.value ?? '';
-      const formatted = Util.Format.formatPhone(raw);
-      const target = ctx?.row || ctx?.form;
-      // write-back here (meta function owns mutation)
-      if (target && fieldMeta?.col) {
-        // setDefault supports deep paths if you ever use nested cols
-        Util.Helpers.setDefault(target, fieldMeta.col, formatted);
-      }
-    }
-
-    function needsNameException(ctx) {
-      const target = ctx?.row || ctx?.form;
-      const last = String(target?.lastName ?? '')
-        .trim()
-        .toLowerCase();
-      return !!last && !parentLastNameSet.value.has(last);
-    }
-
-    const parentLastNameSet = computed(() => {
-      const s = new Set();
-      for (const c of familyForm.contacts ?? []) {
-        const rel = String(c?.relationship ?? '').trim();
-        if (!Schema.Options.PARENTS.has(rel)) continue;
-
-        const ln = String(c?.lastName ?? '')
-          .trim()
-          .toLowerCase();
-        if (ln) s.add(ln);
-      }
-      return s; // Set<string> of lowercase names
-    });
-
-    // FAMILIES_META
-    const familyCtx = {
-      onContactPhoneInput,
-      needsNameException,
-      parentLastNameSet,
-    };
-    const familyFields = Schema.Forms.Families(familyCtx);
-
-    const familyForm = reactive(Schema.Forms.Families.new());
-    const familyErrors = ref({});
-
-    function hydrateFamilyErrors() {
-      Schema.Forms.Families.validate(familyForm, familyErrors);
-    }
-
-    function normalizeNameExceptions() {
-      for (const child of familyForm.children || []) {
-        // Only write if we actually need to change something to avoid extra re-renders
-        if (!needsNameException({ form: familyForm, row: child })) {
-          if (child.isNameException) child.isNameException = false;
-          if (child.exceptionNotes) child.exceptionNotes = '';
-        }
-      }
-    }
-
-    Vue.watch(
-      () => familyForm,
-      () => {
-        normalizeNameExceptions(); // keep the form normalized
-        hydrateFamilyErrors(); // then recompute interactive errors
-      },
-      { deep: true, immediate: true },
-    );
-
-    // dirty tracking
-    const familyOriginalSnapshot = ref('');
-    const isFamilyDirty = computed(() => JSON.stringify(familyForm) !== familyOriginalSnapshot.value);
-    function snapshotFamilyForm() {
-      familyOriginalSnapshot.value = JSON.stringify(familyForm);
-    }
-
-    // nav
-
-    function beginCreateFamily() {
-      Object.assign(familyForm, Schema.Forms.Families.new());
-      hydrateFamilyErrors();
-      snapshotFamilyForm();
-      switchSection(SECTION_NAMES.FAMILIES, MODE_NAMES.CREATE);
-      setStatus('Creating new family…', 'info', 1200);
-    }
-
-    function beginEditFamily(apiFamily) {
-      if (!apiFamily || !apiFamily.id) {
-        setStatus('Nothing to edit', 'warn', 1500);
-        return;
-      }
-      editingFamilyId.value = apiFamily.id;
-      const ui = Mappers.Families.toUi(apiFamily || {});
-      Object.assign(familyForm, Schema.Forms.Families.new(), ui);
-      hydrateFamilyErrors();
-      snapshotFamilyForm();
-      switchSection(SECTION_NAMES.FAMILIES, MODE_NAMES.EDIT);
-      setStatus(`Editing ${apiFamily.id}`, 'info', 1200);
-    }
-
-    // Display-friendly string
-    const parentLastNamesDisplay = computed(() =>
-      [...parentLastNameSet.value].map((e) => Util.Format.capitalize(e)).join(' / '),
-    );
-
-    async function addFamilyContact() {
-      if (isReadOnly.value) return;
-      familyForm.contacts.push(Schema.Forms.Families.newContact());
-      familyErrors.value.contacts.push({});
-      await nextTick();
-    }
-    function removeFamilyContact(i) {
-      if (isReadOnly.value) return;
-      familyForm.contacts.splice(i, 1);
-      familyErrors.value.contacts.splice(i, 1);
-    }
-    async function addFamilyChild() {
-      if (isReadOnly.value) return;
-      familyForm.children.push(Schema.Forms.Families.newChild());
-      familyErrors.value.children.push({});
-      await nextTick();
-    }
-    function removeFamilyChild(i) {
-      if (isReadOnly.value) return;
-      familyForm.children.splice(i, 1);
-      familyErrors.value.children.splice(i, 1);
-    }
-
-    async function addFamilyNote() {
-      if (isReadOnly.value) return;
-      familyForm.notes.push(Schema.Forms.Families.newNote());
-      familyErrors.value.notes.push({});
-      await nextTick();
-    }
-
-    function removeFamilyNote(i) {
-      if (isReadOnly.value) return;
-      familyForm.notes.splice(i, 1);
-      familyErrors.value.notes.splice(i, 1);
-    }
-
-    function resetFamilyForm() {
-      Object.assign(familyForm, Schema.Forms.Families.new());
-      hydrateFamilyErrors();
-      snapshotFamilyForm();
-      setStatus('Form reset.', 'info', 1200);
-    }
-
-    async function submitFamilyForm() {
-      if (isReadOnly.value) {
-        setStatus('Read-only mode: cannot save.', 'warn', 1800);
-        return;
-      }
-
-      if (!Schema.Forms.Families.validate(familyForm, familyErrors)) {
-        setStatus('Error found. Please fix errors before trying to save', 'error', 3500);
-        return;
-      }
-
-      if (!isFamilyDirty.value) {
-        setStatus('No changes to save.', 'warn', 1500);
-        return;
-      }
-      await saveFamily();
-    }
-
-    async function saveFamily() {
-      setStatus('Saving Family data...');
-      const payload = Mappers.Families.toApi(familyForm);
-
-      try {
-        if (MODE.CREATE) {
-          await API.Families.create(payload);
-          setStatus('Family created.', 'success', 1500);
-        } else {
-          const patch = { ...payload };
-          delete patch.id;
-          await API.Families.update(editingFamilyId.value, patch);
-          setStatus('Family updated.', 'success', 1500);
-        }
-        await loadFamilies();
-        await nextTick();
-        goBackSection();
-      } catch (e) {
-        setStatus('Create failed.', 'error', 3000);
-        console.error(e);
-      }
-    }
+    // FORM (same names as your template)
+    const familyForm = Families.familyForm;
+    const familyErrors = Families.familyErrors;
+    const familyFields = Families.familyFields;
+    const isFamilyDirty = Families.isFamilyDirty;
+    const beginCreateFamily = Families.beginCreateFamily;
+    const beginEditFamily = Families.beginEditFamily;
+    const submitFamilyForm = Families.submitFamilyForm;
+    const addFamilyContact = Families.addFamilyContact;
+    const removeFamilyContact = Families.removeFamilyContact;
+    const addFamilyChild = Families.addFamilyChild;
+    const removeFamilyChild = Families.removeFamilyChild;
+    const addFamilyNote = Families.addFamilyNote;
+    const removeFamilyNote = Families.removeFamilyNote;
 
     // =========================================================
     // EVENTS
@@ -743,14 +479,16 @@ const app = createApp({
       eventType = null,
     }) {
       if (!familyId || !Number.isFinite(Number(year))) return false;
-      return registrationRows.value.some((r) => {
-        if (r.familyId !== familyId) return false;
-        if (Number(r.event?.year) !== Number(year)) return false;
-        if (eventId != null && r.eventId !== eventId) return false;
-        if (programId != null && r.event?.programId !== programId) return false;
-        if (eventType != null && r.event?.eventType !== eventType) return false;
-        return true;
-      });
+      return registrationRows.value
+        .filter((p) => p.status === 'paid')
+        .some((r) => {
+          if (r.familyId !== familyId) return false;
+          if (Number(r.event?.year) !== Number(year)) return false;
+          if (eventId != null && r.eventId !== eventId) return false;
+          if (programId != null && r.event?.programId !== programId) return false;
+          if (eventType != null && r.event?.eventType !== eventType) return false;
+          return true;
+        });
     }
 
     // Does this family meet all prerequisites for the event (same year)?
@@ -1590,12 +1328,10 @@ const app = createApp({
       familyForm,
       familyErrors,
       displayChildNameAndAge,
-      parentLastNamesDisplay,
       isFamilyDirty,
       beginCreateFamily,
       beginEditFamily,
       submitFamilyForm,
-      resetFamilyForm,
       addFamilyContact,
       removeFamilyContact,
       addFamilyChild,
@@ -1682,8 +1418,12 @@ const app = createApp({
 });
 
 app.component('ui-modal', window.UiModal);
+
 app.component('events-toolbar', window.Components && window.Components.EventsToolbar);
 app.component('events-table', window.Components && window.Components.EventsTable);
 app.component('events-form', window.Components && window.Components.EventsForm);
+
+app.component('families-toolbar', window.Components && window.Components.FamiliesToolbar);
+app.component('families-table', window.Components && window.Components.FamiliesTable);
 
 app.mount('#app');

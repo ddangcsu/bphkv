@@ -69,129 +69,19 @@
           <!-- List -->
           <section v-if="MODE.LIST" class="page">
             <div class="card">
-              <div class="toolbar">
-                <!-- Page size selector -->
-                <div class="pager">
-                  <label class="nowrap">
-                    Rows:
-                    <select class="pager-size" v-model.number="familiesPager.pageSize">
-                      <option v-for="n in familiesPager.options" :key="n" :value="n">{{ n === familiesPager.allSentinel ? "All": n }}</option>
-                    </select>
-                  </label>
+              <families-toolbar :pager="familiesPager" :menu="familiesFilterMenu" :text-filter="familiesTextFilter"></families-toolbar>
 
-                  <span>
-                    {{ familiesPager.totalRows ? (familiesPager.isAll ? 1 : familiesPager.pageStart + 1) : 0 }}–{{ familiesPager.isAll ? familiesPager.totalRows
-                    : Math.min(familiesPager.pageEnd, familiesPager.totalRows) }} of {{ familiesPager.totalRows }}
-                  </span>
-
-                  <div class="pager-buttons">
-                    <button @click="familiesPager.goFirst" :disabled="familiesPager.page <= 1 || familiesPager.isAll">
-                      <i class="fa fa-angle-double-left"></i>
-                    </button>
-                    <button @click="familiesPager.goPrev" :disabled="familiesPager.page <= 1 || familiesPager.isAll">
-                      <i class="fa fa-angle-left"></i>
-                    </button>
-                  </div>
-                  <span>Page {{ familiesPager.page }} / {{ familiesPager.totalPages }}</span>
-                  <div class="pager-buttons">
-                    <button @click="familiesPager.goNext" :disabled="familiesPager.page >= familiesPager.totalPages || familiesPager.isAll">
-                      <i class="fa fa-angle-right"></i>
-                    </button>
-                    <button @click="familiesPager.goLast" :disabled="familiesPager.page >= familiesPager.totalPages || familiesPager.isAll">
-                      <i class="fa fa-angle-double-right"></i>
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Filter menu button + popover -->
-                <div class="filter-trigger">
-                  <button tabindex="-1" class="btn" @click="familiesFilterMenu.toggle()">
-                    <i class="fa-solid fa-filter"></i>
-                    <span v-if="familiesFilterMenu.activeCount">({{ familiesFilterMenu.activeCount }})</span>
-                  </button>
-                  <div v-if="familiesFilterMenu.isOpen" class="clickout-overlay" @click="familiesFilterMenu.close()"></div>
-                  <div v-if="familiesFilterMenu.isOpen" class="filter-popover" @click.stop>
-                    <div class="item-header compact bordered">
-                      <h4 class="title">Family Filter</h4>
-                    </div>
-                    <div class="filter-row" v-for="def in familiesFilterMenu.definitions" :key="def.key">
-                      <label class="text-sm">{{ def.label }}</label>
-                      <select class="input" v-if="def.type==='select'" v-model="familiesFilterMenu.state[def.key]">
-                        <option :value="def.emptyValue ?? ''">All</option>
-                        <option v-for="opt in familiesFilterMenu.opt(def)" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
-                      </select>
-                    </div>
-                    <div class="filter-actions">
-                      <button tabindex="-1" class="btn" @click="familiesFilterMenu.clear()">Clear</button>
-                      <button tabindex="-1" class="btn" @click="familiesFilterMenu.close()">Close</button>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Filter text search -->
-                <input
-                  v-model.trim="familiesTextFilter.querySearch"
-                  class="input"
-                  placeholder="Search family by id, parishNumber, city, Contact name/phone/email ..." />
-                <button tabindex="-1" class="btn small" type="button" @click="familiesTextFilter.clear() && familiesFilterMenu.clear()" title="Clear filters">
-                  Clear
-                </button>
-              </div>
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th>Family ID</th>
-                    <th>Member</th>
-                    <th>Parish#</th>
-                    <th>Contact Info</th>
-                    <th>City</th>
-                    <th># Children</th>
-                    <th>Actions</th>
-                    <th>BPH</th>
-                    <th>TNTT</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <template v-for="f in familiesPager.items" :key="f.id">
-                    <tr>
-                      <td>{{ f.id }}</td>
-                      <td class="badge" :data-variant="codeToLabel(f.parishMember, YES_NO_OPTIONS)">{{ codeToLabel(f.parishMember, YES_NO_OPTIONS) }}</td>
-                      <td>{{ f.parishNumber || '-' }}</td>
-                      <td v-html="contactDisplay(f)"></td>
-                      <td>{{ f.address.city }}</td>
-                      <td>{{ f.children.length }}</td>
-                      <td>
-                        <button tabindex="-1" class="btn" type="button" @click="beginEditFamily(f)">
-                          <i class="fa-solid fa-pen-to-square"></i><span> Edit</span>
-                        </button>
-                      </td>
-                      <td>
-                        <button tabindex="-1" class="btn" type="button" @click="registerAdminForFamily(f)">
-                          <template v-if="alreadyRegistered({familyId: f.id, programId: PROGRAM.BPH})">
-                            <i class="fa-solid fa-dollar-sign"></i> <span> Paid </span>
-                          </template>
-                          <template v-else> <i class="fa-solid fa-clipboard-list"></i><span> Enroll</span> </template>
-                        </button>
-                      </td>
-                      <td>
-                        <button
-                          tabindex="-1"
-                          v-if="alreadyRegistered({familyId: f.id, programId: PROGRAM.BPH })"
-                          class="btn"
-                          type="button"
-                          @click="registerTNTTForFamily(f)">
-                          <template
-                            v-if="alreadyRegistered({familyId: f.id, programId: PROGRAM.TNTT, eventType: EVENT.REGISTRATION
-                          })">
-                            <i class="fa-solid fa-dollar-sign"></i> <span> Paid </span>
-                          </template>
-                          <template v-else> <i class="fa-solid fa-clipboard-list"></i><span> Enroll</span> </template>
-                        </button>
-                      </td>
-                    </tr>
-                  </template>
-                </tbody>
-              </table>
+              <families-table
+                :rows="familiesPager.items"
+                :code-to-label="codeToLabel"
+                :yes-no-options="YES_NO_OPTIONS"
+                :contact-display="contactDisplay"
+                :already-registered="alreadyRegistered"
+                :register-admin-for-family="registerAdminForFamily"
+                :register-tntt-for-family="registerTNTTForFamily"
+                :program="PROGRAM"
+                :event="EVENT"
+                @edit="beginEditFamily"></families-table>
             </div>
           </section>
 
@@ -217,7 +107,7 @@
               <!-- Household -->
               <section id="panel-household" role="tabpanel" class="subpanel">
                 <div class="item-header compact bordered">
-                  <h4 class="title">{{`Household Information of ${parentLastNamesDisplay} Family`}}</h4>
+                  <h4 class="title">Household Information</h4>
                 </div>
 
                 <div>
@@ -1076,7 +966,7 @@
             class="ui-modal--printable"
             title="View and Print Receipt"
             placement="top"
-            :top-offset="0"
+            :top-offset="5"
             size="xl"
             :closeOnBackdrop="true"
             :closeOnEsc="true"
@@ -1806,9 +1696,13 @@
     <script src="./js/components/events.toolbar.js" defer></script>
     <script src="./js/components/events.table.js" defer></script>
     <script src="./js/components/events.form.js" defer></script>
+    <script src="./js/components/families.toolbar.js" defer></script>
+    <script src="./js/components/families.table.js" defer></script>
 
     <!-- App Controllers -->
     <script src="./js/controllers/events.controller.js" defer></script>
+    <script src="./js/controllers/families.controller.js" defer></script>
+    <script src="./js/controllers/registrations.controller.js" defer></script>
 
     <script src="./js/app.js" defer></script>
   </body>
