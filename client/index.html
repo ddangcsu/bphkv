@@ -746,7 +746,7 @@
                       tabindex="-1"
                       class="btn small accent"
                       type="button"
-                      @click="addRegChildRow"
+                      @click="addRegChild"
                       :disabled="isReadOnly || availableChildOptions.length===0">
                       <i class="fa-solid fa-plus"></i>
                     </button>
@@ -760,7 +760,7 @@
                       class="btn small danger"
                       type="button"
                       :disabled="isReadOnly"
-                      @click="removeRegChildRow(i)"
+                      @click="removeRegChild(i)"
                       v-if="registrationForm.children.length>1">
                       <i class="fa-solid fa-trash"></i>
                     </button>
@@ -857,7 +857,7 @@
                   <h4 class="title">Notes/Logs</h4>
                   <div class="spacer"></div>
                   <div class="actions">
-                    <button tabindex="-1" type="button" class="btn small accent" :disabled="isReadOnly" @click="addRegistrationNote">
+                    <button tabindex="-1" type="button" class="btn small accent" :disabled="isReadOnly" @click="addRegNote">
                       <i class="fa-solid fa-plus"></i>
                     </button>
                   </div>
@@ -865,7 +865,7 @@
 
                 <div class="row" v-for="(n,i) in registrationForm.notes" :key="'note'+i">
                   <div class="row-actions">
-                    <button tabindex="-1" type="button" class="btn small danger" :disabled="isReadOnly" @click="removeRegistrationNote(i)">
+                    <button tabindex="-1" type="button" class="btn small danger" :disabled="isReadOnly" @click="removeRegNote(i)">
                       <i class="fa-solid fa-trash"></i>
                     </button>
                   </div>
@@ -968,8 +968,8 @@
             placement="top"
             :top-offset="5"
             size="xl"
-            :closeOnBackdrop="true"
-            :closeOnEsc="true"
+            :close-on-backdrop="true"
+            :close-on-esc="true"
             :aria-description="'Registration receipt details and totals.'">
             <template #header-actions>
               <button type="button" class="btn primary" @click="printReceipt"><i class="fa-solid fa-print"></i></button>

@@ -1,7 +1,7 @@
 /* eslint-env browser, es2021 */
 /* global Vue */
 (() => {
-  const { ref, watch, h, onMounted, onBeforeUnmount, Teleport } = Vue;
+  const { ref, watch, h, computed, onMounted, onBeforeUnmount, Teleport } = Vue;
 
   function getFocusable(root) {
     if (!root) return [];
@@ -46,24 +46,41 @@
 
   const UiModal = {
     name: 'UiModal',
+    // Important: we render a Teleport as the root — avoid Vue trying to
+    // auto-apply non-prop attrs to it (which triggers the warning).
+    inheritAttrs: false,
+
     props: {
       open: { type: Boolean, default: false },
-      title: { type: String, default: '' }, // still supported
+      title: { type: String, default: '' },
+      // sizing/placement
       size: { type: String, default: 'md' },
       placement: { type: String, default: 'center' }, // 'center' | 'top'
       topOffset: { type: [Number, String], default: 48 }, // px or CSS value
+      // behavior
       closeOnBackdrop: { type: Boolean, default: true },
       closeOnEsc: { type: Boolean, default: true },
+      // a11y / plumbing
       ariaDescription: { type: String, default: '' },
       teleportTarget: { type: String, default: 'body' },
       backgroundInertSelector: { type: String, default: '#app' },
     },
+
     emits: ['update:open', 'after-open', 'after-close'],
+
     setup(props, { emit, slots, attrs }) {
       const overlayRef = ref(null);
       const dialogRef = ref(null);
-
       const headingId = `ui-modal-title-${Math.random().toString(36).slice(2)}`;
+
+      // Gracefully accept legacy attributes (without dashes) in addition to props.
+      const allowBackdropClose = computed(
+        () => props.closeOnBackdrop || attrs.closeonbackdrop !== undefined || attrs['close-on-backdrop'] !== undefined,
+      );
+      const allowEscClose = computed(
+        () => props.closeOnEsc || attrs.closeonesc !== undefined || attrs['close-on-esc'] !== undefined,
+      );
+
       const hasTitle = computed(() => {
         const slotNode = typeof slots.title === 'function' ? slots.title() : null;
         return Boolean(props.title || (slotNode && slotNode.length));
@@ -77,44 +94,21 @@
       }
 
       function onBackdropClick(event) {
-        if (!props.closeOnBackdrop) return;
+        if (!allowBackdropClose.value) return;
         if (event.target === overlayRef.value) close();
       }
 
-      function getFocusable(root) {
-        if (!root) return [];
-        const selectors = [
-          'a[href]',
-          'button:not([disabled])',
-          'textarea',
-          'input',
-          'select',
-          '[tabindex]:not([tabindex="-1"])',
-        ].join(',');
-        return Array.from(root.querySelectorAll(selectors)).filter(
-          (el) => !el.hasAttribute('disabled') && !el.getAttribute('aria-hidden'),
-        );
-      }
-
-      function trapTab(event, firstEl, lastEl) {
-        if (event.key !== 'Tab') return;
-        if (event.shiftKey && document.activeElement === firstEl) {
-          event.preventDefault();
-          lastEl.focus();
-        } else if (!event.shiftKey && document.activeElement === lastEl) {
-          event.preventDefault();
-          firstEl.focus();
-        }
-      }
-
       function onKeydown(event) {
-        if (props.closeOnEsc && event.key === 'Escape') {
+        if (allowEscClose.value && event.key === 'Escape') {
           event.stopPropagation();
           close();
           return;
         }
+        // focus trap
         const focusables = getFocusable(dialogRef.value);
-        if (focusables.length >= 2) trapTab(event, focusables[0], focusables[focusables.length - 1]);
+        if (focusables.length >= 2) {
+          trapTab(event, focusables[0], focusables[focusables.length - 1]);
+        }
       }
 
       function focusFirst() {
@@ -129,7 +123,6 @@
         else body.classList.remove('ui-modal-open');
       }
 
-      // inside setup, reuse your open watcher:
       function toggleInert(enable) {
         const host = document.querySelector(props.backgroundInertSelector);
         if (!host) return;
@@ -174,7 +167,12 @@
 
       // Build overlay classes and inline vars for full-height calculation
       const overlayClasses = computed(() =>
-        ['ui-modal-overlay', sizeClass(props.size), props.placement === 'top' ? 'ui-modal--top' : '', attrs.class || '']
+        [
+          'ui-modal-overlay',
+          sizeClass(props.size),
+          props.placement === 'top' ? 'ui-modal--top' : '',
+          attrs.class || '', // forward any class passed on <ui-modal ... class="...">
+        ]
           .join(' ')
           .trim(),
       );
@@ -183,6 +181,7 @@
         const topPx = typeof props.topOffset === 'number' ? `${props.topOffset}px` : String(props.topOffset);
         // space below: 24px; vertical gap = top offset + bottom gap (top placement)
         const verticalGap = props.placement === 'top' ? `calc(${topPx} + 24px)` : '64px';
+        // forward inline style (if any) given on <ui-modal ... :style="{...}">
         return {
           ...(attrs.style || null),
           '--ui-top-offset': topPx,
@@ -220,7 +219,7 @@
                     [
                       // header (compact when there is no title)
                       h('div', { class: `ui-modal-header${hasTitle.value ? '' : ' ui-modal-header--compact'}` }, [
-                        // title area (left)
+                        // title (left)
                         h(
                           'h2',
                           { id: headingId, class: 'ui-modal-title' },
@@ -231,19 +230,23 @@
                           'div',
                           { class: 'ui-modal-header-actions' },
                           [
-                            // new header-actions slot
+                            // header-actions slot
                             typeof slots['header-actions'] === 'function' ? slots['header-actions']() : null,
                             // close button
                             h(
                               'button',
-                              { type: 'button', class: 'ui-modal-close', 'aria-label': 'Close dialog', onClick: close },
+                              {
+                                type: 'button',
+                                class: 'ui-modal-close',
+                                'aria-label': 'Close dialog',
+                                onClick: close,
+                              },
                               [h('i', { class: 'fa-solid fa-xmark', 'aria-hidden': 'true' })],
                             ),
                           ].filter(Boolean),
                         ),
                       ]),
-
-                      // body (flex:1; only this area scrolls)
+                      // body (scrolls)
                       h(
                         'div',
                         { class: 'ui-modal-body' },
@@ -252,7 +255,6 @@
                           typeof slots.default === 'function' ? slots.default() : null,
                         ].filter(Boolean),
                       ),
-
                       // footer (optional)
                       typeof slots.footer === 'function'
                         ? h('div', { class: 'ui-modal-footer' }, slots.footer())
