@@ -17,7 +17,7 @@
           <!-- Burger Menu -->
           <div class="menu-wrap" :class="{ open: menuOpen }">
             <button tabindex="-1" class="btn menu-btn" type="button" @click="menuOpen = !menuOpen" aria-haspopup="menu" :aria-expanded="menuOpen">
-              <i class="fa-solid fa-house"></i> <span>Home</span>
+              <i class="fa-solid fa-house"></i>
             </button>
             <div v-if="menuOpen" class="clickout-overlay" @click="menuOpen=false"></div>
             <div v-if="menuOpen" class="menu-panel" role="menu">
@@ -48,19 +48,7 @@
         </div>
 
         <!-- RIGHT: Actions -->
-        <nav class="actionbar">
-          <button tabindex="-1" v-if="SECTION.FAMILIES && MODE.LIST" class="btn primary" type="button" @click="beginCreateFamily">
-            <i class="fa-solid fa-plus"></i> <span>New</span>
-          </button>
-
-          <button tabindex="-1" v-if="SECTION.EVENTS && MODE.LIST" class="btn primary" type="button" @click="beginCreateEvent">
-            <i class="fa-solid fa-plus"></i> <span>New</span>
-          </button>
-
-          <button tabindex="-1" v-if="SECTION.REGISTRATIONS && MODE.LIST" class="btn primary" type="button" @click="beginCreateRegistration">
-            <i class="fa-solid fa-plus"></i> <span>New</span>
-          </button>
-        </nav>
+        <nav class="actionbar"></nav>
       </div>
 
       <transition name="fade" mode="out-in">
@@ -69,7 +57,12 @@
           <!-- List -->
           <section v-if="MODE.LIST" class="page">
             <div class="card">
-              <families-toolbar :pager="familiesPager" :menu="familiesFilterMenu" :text-filter="familiesTextFilter"></families-toolbar>
+              <families-toolbar
+                :pager="familiesPager"
+                :menu="familiesFilterMenu"
+                :text-filter="familiesTextFilter"
+                @create="beginCreateFamily"
+                @refresh="loadFamilies"></families-toolbar>
 
               <families-table
                 :rows="familiesPager.items"
@@ -484,117 +477,24 @@
           <!-- List -->
           <section v-if="MODE.LIST" class="page">
             <div class="card">
-              <div class="toolbar">
-                <!-- Page size selector -->
-                <div class="pager">
-                  <label class="nowrap">
-                    Rows:
-                    <select class="pager-size" v-model.number="registrationPager.pageSize">
-                      <option v-for="n in registrationPager.options" :key="n" :value="n">{{ n === registrationPager.allSentinel ? "All": n }}</option>
-                    </select>
-                  </label>
+              <registrations-toolbar
+                :pager="registrationPager"
+                :menu="registrationsFilterMenu"
+                :text-filter="registrationsTextFilter"
+                title="Registrations"
+                @create="beginCreateRegistration"
+                @refresh="loadRegistrations">
+              </registrations-toolbar>
 
-                  <span>
-                    {{ registrationPager.totalRows ? (registrationPager.isAll ? 1 : registrationPager.pageStart + 1) : 0 }}–{{ registrationPager.isAll ?
-                    registrationPager.totalRows : Math.min(registrationPager.pageEnd, registrationPager.totalRows) }} of {{ registrationPager.totalRows }}
-                  </span>
-
-                  <div class="pager-buttons">
-                    <button @click="registrationPager.goFirst" :disabled="registrationPager.page <= 1 || registrationPager.isAll">
-                      <i class="fa fa-angle-double-left"></i>
-                    </button>
-                    <button @click="registrationPager.goPrev" :disabled="registrationPager.page <= 1 || registrationPager.isAll">
-                      <i class="fa fa-angle-left"></i>
-                    </button>
-                  </div>
-                  <span>Page {{ registrationPager.page }} / {{ registrationPager.totalPages }}</span>
-                  <div class="pager-buttons">
-                    <button @click="registrationPager.goNext" :disabled="registrationPager.page >= registrationPager.totalPages || registrationPager.isAll">
-                      <i class="fa fa-angle-right"></i>
-                    </button>
-                    <button @click="registrationPager.goLast" :disabled="registrationPager.page >= registrationPager.totalPages || registrationPager.isAll">
-                      <i class="fa fa-angle-double-right"></i>
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Filter menu button + popover -->
-                <div class="filter-trigger">
-                  <button class="btn" @click="registrationsFilterMenu.toggle()">
-                    <i class="fa-solid fa-filter"></i>
-                    <span v-if="registrationsFilterMenu.activeCount">({{ registrationsFilterMenu.activeCount }})</span>
-                  </button>
-                  <div v-if="registrationsFilterMenu.isOpen" class="clickout-overlay" @click="registrationsFilterMenu.close()"></div>
-                  <div v-if="registrationsFilterMenu.isOpen" class="filter-popover" @click.stop>
-                    <div class="item-header compact bordered">
-                      <h4 class="title">Registrations Filter</h4>
-                    </div>
-                    <div class="filter-row" v-for="def in registrationsFilterMenu.definitions" :key="def.key">
-                      <label class="text-sm">{{ def.label }}</label>
-                      <select class="input" v-if="def.type==='select'" v-model="registrationsFilterMenu.state[def.key]">
-                        <option :value="def.emptyValue ?? ''">All</option>
-                        <option v-for="opt in registrationsFilterMenu.opt(def)" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
-                      </select>
-                    </div>
-                    <div class="filter-actions">
-                      <button class="btn" @click="registrationsFilterMenu.clear()">Clear</button>
-                      <button class="btn" @click="registrationsFilterMenu.close()">Close</button>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Filter text search -->
-                <input
-                  v-model.trim="registrationsTextFilter.querySearch"
-                  class="input"
-                  placeholder="Search registration by id, familyId, event, contact name/phone, child name, receipt .." />
-                <button
-                  tabindex="-1"
-                  class="btn small"
-                  type="button"
-                  @click="registrationsFilterMenu.clear() && registrationsTextFilter.clear()"
-                  title="Clear filters">
-                  Clear
-                </button>
-              </div>
-
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th>Reg ID</th>
-                    <th>Event</th>
-                    <th>School Year</th>
-                    <th>Program</th>
-                    <th>Family</th>
-                    <th># Children</th>
-                    <th>Status</th>
-                    <th>Payments</th>
-                    <th>Updated</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="r in registrationPager.items" :key="r.id">
-                    <td>{{ r.id }}</td>
-                    <td>{{ r.event?.title }}</td>
-                    <td>{{ codeToLabel(r.event?.year, YEAR_OPTIONS) }}</td>
-                    <td>{{ r.event?.programId }}</td>
-                    <td v-html="contactDisplay(r, true)"></td>
-                    <td>{{ r.children.length > 0 ? r.children.length: '' }}</td>
-                    <td class="badge" :data-variant="r.status">
-                      <a href="#" class="link" v-if="r.status === 'paid'" @click="openReceipt(r)"> <i class="fa-solid fa-receipt"></i> {{ r.status }}</a>
-                      <span v-else>{{ r.status }}</span>
-                    </td>
-                    <td>{{ (r.payments||[]).map(p=>p.code+':$'+p.amount).join(' / ') }}</td>
-                    <td>{{ (r.updatedAt||r.createdAt||'').slice(0,10) }}</td>
-                    <td class="actions">
-                      <button tabindex="-1" class="btn secondary" type="button" @click="beginEditRegistration(r)">
-                        <i class="fa-solid fa-pen-to-square"></i> Edit
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+              <registrations-table
+                :rows="registrationPager.items"
+                :code-to-label="codeToLabel"
+                :year-options="YEAR_OPTIONS"
+                :program-options="PROGRAM_OPTIONS"
+                :contact-display="contactDisplay"
+                :open-receipt="openReceipt"
+                @edit="beginEditRegistration">
+              </registrations-table>
             </div>
           </section>
 
@@ -1269,7 +1169,7 @@
           <ui-modal
             v-model:open="showContactsModal"
             :title="`Family Contacts - ID: ${contactsView.familyId}`"
-            size="md"
+            size="ml"
             placement="top"
             :top-offset="140"
             :aria-description="'Parents/Guardians for selected child from roster.'">
@@ -1698,6 +1598,8 @@
     <script src="./js/components/events.form.js" defer></script>
     <script src="./js/components/families.toolbar.js" defer></script>
     <script src="./js/components/families.table.js" defer></script>
+    <script src="./js/components/registrations.toolbar.js" defer></script>
+    <script src="./js/components/registrations.table.js" defer></script>
 
     <!-- App Controllers -->
     <script src="./js/controllers/events.controller.js" defer></script>

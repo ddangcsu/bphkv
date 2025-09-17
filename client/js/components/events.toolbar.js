@@ -14,7 +14,8 @@
       menu: { type: Object, required: true }, // eventsFilterMenu
       textFilter: { type: Object, required: true }, // eventsTextFilter
     },
-    setup(props) {
+    emits: ['create', 'refresh'],
+    setup(props, { emit }) {
       // formatting helpers identical to your template
       const startRow = computed(() =>
         props.pager.totalRows ? (props.pager.isAll ? 1 : props.pager.pageStart + 1) : 0,
@@ -29,7 +30,7 @@
         if (props.textFilter?.clear) props.textFilter.clear();
       }
 
-      return { startRow, endRow, clearAll };
+      return { startRow, endRow, emit, clearAll };
     },
     template: `
       <div class="toolbar">
@@ -103,11 +104,19 @@
 
         <button
           tabindex="-1"
-          class="btn small"
+          class="btn"
           type="button"
           @click="clearAll"
           title="Clear Program/Level/Year filters">
-          Clear
+          <i class="fa-solid fa-eraser"></i>
+        </button>
+        <div class="spacer"></div>
+
+        <button tabindex="-1" class="btn" type="button" @click="emit('refresh', { showStatusIfActive: true })">
+          <i class="fa-solid fa-rotate"></i>
+        </button>
+        <button tabindex="-1" class="btn primary" type="button" @click="emit('create')">
+          <i class="fa-solid fa-plus"></i>
         </button>
       </div>
     `,

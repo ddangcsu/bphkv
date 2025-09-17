@@ -204,7 +204,8 @@
     if (age >= 7 && age <= 9) return `Ấu Nhi Cấp ${age - 7 + 1}`; // 7→C1, 8→C2, 9→C3
     if (age >= 10 && age <= 12) return `Thiếu Nhi Cấp ${age - 10 + 1}`; // 10→C1, 11→C2, 12→C3
     if (age >= 13 && age <= 15) return `Nghĩa Sĩ Cấp ${age - 13 + 1}`; // 13→C1, 14→C2, 15→C3
-    if (age >= 16) return 'Hiệp Sĩ';
+    if (age >= 16 && age <= 17) return 'Hiệp Sĩ';
+    if (age >= 18) return 'Over Age';
     return null;
   }
 

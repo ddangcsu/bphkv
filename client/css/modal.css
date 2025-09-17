@@ -90,6 +90,9 @@ body.ui-modal-open {
 .ui-modal--md .ui-modal-dialog {
   width: min(36rem, calc(100vw - 2rem));
 }
+.ui-modal--ml .ui-modal-dialog {
+  width: min(42rem, calc(100vw - 2rem));
+}
 .ui-modal--lg .ui-modal-dialog {
   width: min(48rem, calc(100vw - 2rem));
 }

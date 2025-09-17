@@ -77,10 +77,10 @@
               <td>
                 <button tabindex="-1" class="btn" type="button" @click="registerAdminForFamily(f)">
                   <template v-if="isRegisteredBPH(f)">
-                    <i class="fa-solid fa-dollar-sign"></i> <span> Paid </span>
+                    <i class="fa-solid fa-check-to-slot"></i>
                   </template>
                   <template v-else>
-                    <i class="fa-solid fa-clipboard-list"></i><span> Enroll</span>
+                    <i class="fa-regular fa-address-card"></i>
                   </template>
                 </button>
               </td>
@@ -95,10 +95,10 @@
                   @click="registerTnttForFamily(f)"
                 >
                   <template v-if="isRegisteredTnttReg(f)">
-                    <i class="fa-solid fa-dollar-sign"></i> <span> Paid </span>
+                    <i class="fa-solid fa-check-to-slot"></i>
                   </template>
                   <template v-else>
-                    <i class="fa-solid fa-clipboard-list"></i><span> Enroll</span>
+                    <i class="fa-regular fa-address-card"></i>
                   </template>
                 </button>
               </td>

@@ -76,10 +76,9 @@ const app = createApp({
     /**
      * Define ENUMS
      */
-    const PROGRAM = Schema.Options.ENUMS.PROGRAM;
-    const EVENT = Schema.Options.ENUMS.EVENT;
-    const LEVEL = Schema.Options.ENUMS.LEVEL;
-    const FEE = Schema.Options.ENUMS.FEE;
+    const PROGRAM = ENUMS.PROGRAM;
+    const EVENT = ENUMS.EVENT;
+    const LEVEL = ENUMS.LEVEL;
 
     /**
      * De-reference utilities helper
@@ -528,7 +527,7 @@ const app = createApp({
         type: 'select',
         options: (fMeta, ctx) => {
           const { programId, year, eventType } = ctx?.state || {};
-          const childLevel = Schema.Options.ENUMS.LEVEL.PER_CHILD;
+          const childLevel = ENUMS.LEVEL.PER_CHILD;
 
           return eventRows.value
             .filter(
@@ -692,7 +691,7 @@ const app = createApp({
         familyId: row.familyId,
         childName: row.fullName,
         allergies: row.allergies || 'None',
-        age: row.age,
+        age: `${row.grade === '-' ? row.age : [row.age, row.grade].join(' - ')}`,
         contacts: fam ? getPrimaryContactsForFamily(fam) : [],
       };
       showContactsModal.value = true;
@@ -771,6 +770,7 @@ const app = createApp({
       addFamilyNote,
       removeFamilyNote,
       contactDisplay,
+      loadFamilies,
       // pagination list
       familiesPager,
       familiesFilterMenu,
@@ -817,6 +817,7 @@ const app = createApp({
       removeRegChild,
       addRegNote,
       removeRegNote,
+      loadRegistrations,
       // Registrations List
       registrationPager,
       registrationsFilterMenu,
@@ -857,5 +858,8 @@ app.component('events-form', window.Components && window.Components.EventsForm);
 
 app.component('families-toolbar', window.Components && window.Components.FamiliesToolbar);
 app.component('families-table', window.Components && window.Components.FamiliesTable);
+
+app.component('registrations-toolbar', Components.RegistrationsToolbar);
+app.component('registrations-table', Components.RegistrationsTable);
 
 app.mount('#app');

@@ -1,47 +1,57 @@
 /* eslint-env browser, es2021 */
 /* global Vue */
-(function attachFamiliesToolbar(global) {
+(function attachRegistrationsToolbar(global) {
   'use strict';
-
   const Components = global.Components || (global.Components = {});
   const { computed } = Vue;
 
-  // Drop-in toolbar that mirrors your Families list toolbar 1:1
-  Components.FamiliesToolbar = {
-    name: 'families-toolbar',
+  Components.RegistrationsToolbar = {
+    name: 'RegistrationsToolbar',
     props: {
-      pager: { type: Object, required: true }, // familiesPager
-      menu: { type: Object, required: true }, // familiesFilterMenu
-      textFilter: { type: Object, required: true }, // familiesTextFilter (uses .querySearch)
+      pager: { type: Object, required: true },
+      menu: { type: Object, required: true },
+      textFilter: { type: Object, required: true },
+      title: { type: String, default: 'Registrations' },
     },
     emits: ['create', 'refresh'],
     setup(props, { emit }) {
-      const startRow = computed(() =>
-        props.pager.totalRows ? (props.pager.isAll ? 1 : props.pager.pageStart + 1) : 0,
-      );
-      const endRow = computed(() =>
-        props.pager.isAll ? props.pager.totalRows : Math.min(props.pager.pageEnd, props.pager.totalRows),
-      );
+      const rangeText = computed(() => {
+        const p = props.pager;
+        const total = p.totalRows || 0;
+        if (!total) return '0–0';
+        if (p.isAll) return `1–${total}`;
+        const start = (p.pageStart ?? 0) + 1;
+        const end = Math.min(p.pageEnd ?? 0, total);
+        return `${start}–${end}`;
+      });
+      const totalPages = computed(() => props.pager.totalPages || 1);
+
       function clearAll() {
-        if (props.menu?.clear) props.menu.clear();
-        if (props.textFilter?.clear) props.textFilter.clear();
+        props.menu.clear();
+        props.textFilter.clear();
       }
-      return { startRow, endRow, emit, clearAll };
+
+      return {
+        rangeText,
+        totalPages,
+        emit,
+        clearAll,
+      };
     },
     template: `
       <div class="toolbar">
-        <!-- Page size selector -->
+        <!-- Page size + counts + nav -->
         <div class="pager">
           <label class="nowrap">
             Rows:
             <select class="pager-size" v-model.number="pager.pageSize">
               <option v-for="n in pager.options" :key="n" :value="n">
-                {{ n === pager.allSentinel ? "All" : n }}
+                {{ n === pager.allSentinel ? 'All' : n }}
               </option>
             </select>
           </label>
 
-          <span>{{ startRow }}–{{ endRow }} of {{ pager.totalRows }}</span>
+          <span>{{ rangeText }} of {{ pager.totalRows }}</span>
 
           <div class="pager-buttons">
             <button tabindex="-1" @click="pager.goFirst" :disabled="pager.page <= 1 || pager.isAll">
@@ -52,7 +62,7 @@
             </button>
           </div>
 
-          <span>Page {{ pager.page }} / {{ pager.totalPages }}</span>
+          <span>Page {{ pager.page }} / {{ totalPages }}</span>
 
           <div class="pager-buttons">
             <button tabindex="-1" @click="pager.goNext" :disabled="pager.page >= pager.totalPages || pager.isAll">
@@ -64,26 +74,28 @@
           </div>
         </div>
 
-        <!-- Filter menu button + popover -->
+        <!-- Filter menu -->
         <div class="filter-trigger">
           <button tabindex="-1" class="btn" @click="menu.toggle()">
             <i class="fa-solid fa-filter"></i>
             <span v-if="menu.activeCount">({{ menu.activeCount }})</span>
           </button>
-
           <div v-if="menu.isOpen" class="clickout-overlay" @click="menu.close()"></div>
-
           <div v-if="menu.isOpen" class="filter-popover" @click.stop>
             <div class="item-header compact bordered">
-              <h4 class="title">Family Filter</h4>
+              <h4 class="title">{{ title }} Filter</h4>
             </div>
+
             <div class="filter-row" v-for="def in menu.definitions" :key="def.key">
               <label class="text-sm">{{ def.label }}</label>
-              <select class="input" v-if="def.type==='select'" v-model="menu.state[def.key]">
+              <select class="input" v-if="def.type === 'select'" v-model="menu.state[def.key]">
                 <option :value="def.emptyValue ?? ''">All</option>
-                <option v-for="opt in menu.opt(def)" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+                <option v-for="opt in menu.opt(def)" :key="opt.value" :value="opt.value">
+                  {{ opt.label }}
+                </option>
               </select>
             </div>
+
             <div class="filter-actions">
               <button tabindex="-1" class="btn" @click="menu.clear()">Clear</button>
               <button tabindex="-1" class="btn" @click="menu.close()">Close</button>
@@ -91,25 +103,16 @@
           </div>
         </div>
 
-        <!-- Filter text search -->
-        <input
-          v-model.trim="textFilter.querySearch"
-          class="input"
-          placeholder="Search families by name, phone, email…"
-        />
+        <!-- Text search -->
+        <input v-model.trim="textFilter.querySearch" class="input" placeholder="Search by Reg ID, Event, Phone, Receipt…" />
 
-        <button
-          tabindex="-1"
-          class="btn"
-          type="button"
-          @click="clearAll"
-          title="Clear all filters and search">
+        <button tabindex="-1" class="btn" type="button" @click="clearAll" title="Clear filters">
           <i class="fa-solid fa-eraser"></i>
         </button>
 
         <div class="spacer"></div>
 
-        <button tabindex="-1" class="btn" type="button" @click="emit('refresh',{ showStatusIfActive: true })">
+        <button tabindex="-1" class="btn" type="button" @click="emit('refresh', { showStatusIfActive: true })">
           <i class="fa-solid fa-rotate"></i>
         </button>
         <button tabindex="-1" class="btn primary" type="button" @click="emit('create')">

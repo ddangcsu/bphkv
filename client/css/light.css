@@ -192,10 +192,10 @@ body {
 
 /* zebra striping */
 table.table tbody tr:nth-child(odd) {
-  background: #f9f9f9;
+  background: #f9f8f8;
 }
 table.table tbody tr:nth-child(even) {
-  background: #edf2fb;
+  background: #e1ebfb;
 }
 
 /* optional: make inline links look like links inside tables */
