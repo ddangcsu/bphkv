@@ -195,7 +195,6 @@
       editingEventId.value = apiEvent.id;
       const ui = Mappers.Events.toUi(apiEvent || {});
       Object.assign(eventForm, Schema.Forms.Events.new(), ui);
-      originalApiEvent.value = apiEvent; // snapshot the original API object for patch/diff
       hydrateEventErrors();
       snapshotEventForm();
       switchSection(SECTION_NAMES.EVENTS, MODE_NAMES.EDIT);

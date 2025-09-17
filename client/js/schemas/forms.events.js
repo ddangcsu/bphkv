@@ -69,12 +69,59 @@
       {
         col: 'openDate',
         label: 'Open Date',
-        type: 'date',
-        min: '2020-01-01',
+        type: 'text',
         default: '',
         required: true,
+        placeholder: 'MM/DD/YYYY',
+        onInput: (f, ctx, e) => Util.Format.onDateInput(f, ctx, e),
+        api: {
+          toApi: (v) => Util.Date.dateStringToIso(v),
+          fromApi: (v) => Util.Date.isoToDateString(v),
+        },
+        validate: (value, { row }) => {
+          if (!Util.Date.isValidDate(value)) return 'Invalid Date';
+          if (
+            !Util.Helpers.isEmpty(row.year) &&
+            !Util.Helpers.isEmpty(row.endDate) &&
+            Util.Date.isValidDate(row.endDate)
+          ) {
+            const min = new Date(Number(row.year), 6, 1); // July = month 6 (0-based))
+            const max = new Date(row.endDate);
+            const input = new Date(value);
+            if (input < min) return 'Not in School Year';
+            if (input > max) return 'Must <= End Date';
+          }
+          return '';
+        },
       },
-      { col: 'endDate', label: 'End Date', type: 'date', min: '2020-01-01', default: '', required: true },
+      {
+        col: 'endDate',
+        label: 'End Date',
+        type: 'text',
+        default: '',
+        required: true,
+        placeholder: 'MM/DD/YYYY',
+        onInput: (f, ctx, e) => Util.Format.onDateInput(f, ctx, e),
+        api: {
+          toApi: (v) => Util.Date.dateStringToIso(v),
+          fromApi: (v) => Util.Date.isoToDateString(v),
+        },
+        validate: (value, { row }) => {
+          if (!Util.Date.isValidDate(value)) return 'Invalid Date';
+          if (
+            !Util.Helpers.isEmpty(row.year) &&
+            !Util.Helpers.isEmpty(row.openDate) &&
+            Util.Date.isValidDate(row.openDate)
+          ) {
+            const min = new Date(row.openDate);
+            const max = new Date(Number(row.year) + 1, 6, 0, 23, 59, 59, 999); // June 30 end-of-day
+            const input = new Date(value);
+            if (input < min) return 'Must >= Open Date';
+            if (input > max) return 'Not in School Year';
+          }
+          return '';
+        },
+      },
     ],
     feeRow: [
       { col: 'code', label: 'Fee Type', type: 'select', selOpt: () => Options.FEE_CODES, default: '', required: true },
@@ -152,20 +199,6 @@
     }
     if (requiredPrereqType() && (!Array.isArray(eventForm.prerequisites) || eventForm.prerequisites.length === 0))
       errors.preqErrors = 'Event required at least one prerequisite';
-
-    if (
-      Options.YEAR_OPTIONS.some((o) => Number(o.value) === Number(eventForm.year)) &&
-      eventForm.openDate &&
-      eventForm.endDate
-    ) {
-      const boundStart = new Date(Number(eventForm.year), 6, 1); // July = month 6 (0-based)
-      const boundEnd = new Date(Number(eventForm.year) + 1, 6, 0, 23, 59, 59, 999); // June 30 end-of-day
-      const start = new Date(eventForm.openDate);
-      const end = new Date(eventForm.endDate);
-      if (start > end) errors.main.openDate = 'Must <= End Date';
-      if (start < boundStart) errors.main.openDate = 'Not in School Year';
-      if (end > boundEnd) errors.main.endDate = 'Not in School Year';
-    }
 
     eventErrors.value = {
       ...errors.main,

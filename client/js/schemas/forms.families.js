@@ -121,7 +121,12 @@
           fromApi: (v) => Util.Date.isoToDateString(v),
         },
         validate: (value, { row }) => {
-          return !Util.Date.isValidDate(value) ? 'Invalid Date' : '';
+          if (!Util.Date.isValidDate(value)) return 'Invalid Date';
+          const min = new Date('2000-01-01');
+          const max = new Date();
+          const input = new Date(value);
+          if (input >= max || input <= min) return 'Out of Range 01/01/2000 - Today';
+          return '';
         },
       },
       {
