@@ -858,8 +858,9 @@ app.component('events-form', window.Components && window.Components.EventsForm);
 
 app.component('families-toolbar', window.Components && window.Components.FamiliesToolbar);
 app.component('families-table', window.Components && window.Components.FamiliesTable);
+app.component('families-form', window.Components && window.Components.FamiliesForm);
 
-app.component('registrations-toolbar', Components.RegistrationsToolbar);
-app.component('registrations-table', Components.RegistrationsTable);
+app.component('registrations-toolbar', window.Components && window.Components.RegistrationsToolbar);
+app.component('registrations-table', window.Components && window.Components.RegistrationsTable);
 
 app.mount('#app');

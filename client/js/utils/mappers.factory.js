@@ -235,8 +235,8 @@
         children: mapRowsToApi(uiReg?.children, childFields),
         payments: mapRowsToApi(uiReg?.payments, paymentFields),
         notes: mapRowsToApi(uiReg?.notes, noteFields),
-        createdAt: uiReg.createdAt ? uiReg.createdAt : Util.Helpers.isoNowLocal(),
-        updatedAt: Util.Helpers.isoNowLocal(),
+        createdAt: uiReg.createdAt ? uiReg.createdAt : Util.Date.isoNowLocal(),
+        updatedAt: Util.Date.isoNowLocal(),
       };
 
       return api;

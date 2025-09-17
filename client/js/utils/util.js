@@ -43,10 +43,10 @@
     return `${prefix}:${formatted}`;
   }
 
-  const normPhone = (s = '') => String(s || '').replace(/\D+/g, '');
+  const getDigitOnly = (s = '') => String(s || '').replace(/\D+/g, '');
 
   function formatPhone(raw = '') {
-    const d = normPhone(raw).slice(0, 10);
+    const d = getDigitOnly(raw).slice(0, 10);
     if (!d) return '';
     if (d.length < 4) return `(${d}`;
     if (d.length < 7) return `(${d.slice(0, 3)}) ${d.slice(3)}`;
@@ -60,7 +60,7 @@
   }
 
   const maskLast4 = (s = '') => {
-    const d = normPhone(s);
+    const d = getDigitOnly(s);
     return d ? `•${d.slice(-4)}` : '';
   };
 
@@ -326,9 +326,114 @@
     return rows.map((row, i) => validateFields(rowFields, row, { ...ctx, index: i, form: ctx?.form }));
   }
 
+  // ---- Date format helpers ----
+  function formatDate(raw = '') {
+    // keep only digits; cap to 8
+    const digits = getDigitOnly(raw).slice(0, 8);
+    if (!digits) return '';
+    const mm = digits.slice(0, 2);
+    const dd = digits.slice(2, 4);
+    const yyyy = digits.slice(4, 8);
+    if (digits.length <= 2) return mm;
+    if (digits.length <= 4) return `${mm}/${dd}`;
+    return `${mm}/${dd}/${yyyy}`;
+  }
+
+  function dateStringToIso(val) {
+    return isoLocalString(new Date(val)).slice(0, 10);
+  }
+
+  function isoToDateString(val) {
+    const s = String(val || '').slice(0, 10);
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
+    if (!m) return s || '';
+    const [, yyyy, mm, dd] = m;
+    return `${mm}/${dd}/${yyyy}`;
+  }
+
+  function onDateInput(fieldMeta, ctx, e) {
+    const row = ctx?.row || ctx?.form;
+    const raw = e?.target?.value ?? '';
+    const formatted = Util.Format.formatDate(raw);
+    if (row && fieldMeta?.col) {
+      // setDefault supports deep paths if you ever use nested cols
+      setDefault(row, fieldMeta.col, formatted);
+    }
+  }
+
+  function onPhoneInput(fieldMeta, ctx, e) {
+    const row = ctx?.row || ctx?.form;
+    const raw = e?.target?.value ?? '';
+    const formatted = Util.Format.formatPhone(raw);
+    // write-back here (meta function owns mutation)
+    if (row && fieldMeta?.col) {
+      // setDefault supports deep paths if you ever use nested cols
+      setDefault(row, fieldMeta.col, formatted);
+    }
+  }
+
+  function isLeapYear(year) {
+    year = Number(year);
+    return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+  }
+
+  function daysInMonth(month, year) {
+    const m = Number(month);
+    const y = Number(year);
+    if (m === 2) return isLeapYear(y) ? 29 : 28;
+    return [31, 0, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][m - 1] || 0;
+  }
+
+  // Validate "MM/DD/YYYY" (accepts with or without slashes while typing)
+  function isValidMmddyyyy(val, { minYear = 1900, maxYear = 2100 } = {}) {
+    const s = String(val || '').trim();
+    if (!s) return false;
+
+    // Allow "MM/DD/YYYY" or raw digits "MMDDYYYY"
+    let m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(s);
+    if (!m) {
+      const d = s.replace(/\D/g, '');
+      if (d.length !== 8) return false;
+      m = /^(\d{2})(\d{2})(\d{4})$/.exec(d);
+      if (!m) return false;
+    }
+
+    const mm = Number(m[1]);
+    const dd = Number(m[2]);
+    const yyyy = Number(m[3]);
+
+    if (yyyy < minYear || yyyy > maxYear) return false;
+    if (mm < 1 || mm > 12) return false;
+
+    const maxDay = daysInMonth(mm, yyyy);
+    return dd >= 1 && dd <= maxDay;
+  }
+
+  // Validate "YYYY-MM-DD"
+  function isValidIsoDate(val, { minYear = 1900, maxYear = 2100 } = {}) {
+    const s = String(val || '').trim();
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
+    if (!m) return false;
+
+    const yyyy = Number(m[1]);
+    const mm = Number(m[2]);
+    const dd = Number(m[3]);
+
+    if (yyyy < minYear || yyyy > maxYear) return false;
+    if (mm < 1 || mm > 12) return false;
+
+    const maxDay = daysInMonth(mm, yyyy);
+    return dd >= 1 && dd <= maxDay;
+  }
+
+  // Convenience: accepts either format
+  function isValidDate(val, opts) {
+    return isValidMmddyyyy(val, opts) || isValidIsoDate(val, opts);
+  }
+
   // Public surface (non-breaking shape)
   root.Format = {
-    normPhone,
+    getDigitOnly,
     formatPhone,
     formatMoney,
     capitalize,
@@ -336,6 +441,9 @@
     ageGroupLabelTNTT,
     maskLast4,
     displayChildNameAndAge,
+    onDateInput,
+    onPhoneInput,
+    formatDate,
   };
   root.Helpers = {
     makeId,
@@ -355,10 +463,19 @@
     listToString,
     stringToList,
     toNumber,
-    isoNowLocal,
-    isNonNegativeNumber,
     validateFields,
     validateRowArray,
     isEmpty,
+    isNonNegativeNumber,
+  };
+
+  root.Date = {
+    dateStringToIso,
+    isoToDateString,
+    isValidDate,
+    isoNowLocal,
+    isoLocalString,
+    isLeapYear,
+    daysInMonth,
   };
 })(typeof window !== 'undefined' ? (window.Util ? window : (window.Util = {}) && window) : globalThis);

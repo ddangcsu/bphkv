@@ -6,7 +6,6 @@
   const { Options } = root;
 
   const Ctx = {
-    onContactPhoneInput: () => {},
     needsNameException: () => {},
     parentLastNameSet: () => {},
   };
@@ -71,12 +70,10 @@
         col: 'phone',
         label: 'Contact Phone',
         type: 'text',
-        onInput: (f, ctx, e) => {
-          Ctx.onContactPhoneInput && Ctx.onContactPhoneInput(f, ctx, e);
-        },
+        onInput: (f, ctx, e) => Util.Format.onPhoneInput(f, ctx, e),
         placeholder: '(714) 123-4567',
         default: '',
-        validate: (value) => (!value.trim() || Util.Format.normPhone(value).length !== 10 ? 'must be 10 digit' : ''),
+        validate: (value) => (!value.trim() || Util.Format.getDigitOnly(value).length !== 10 ? 'must be 10 digit' : ''),
       },
       {
         col: 'email',
@@ -114,13 +111,17 @@
       {
         col: 'dob',
         label: 'Date of Birth',
-        type: 'date',
+        type: 'text',
         default: '',
         required: true,
-        min: '2005-01-01',
-        max: '2030-01-01',
+        placeholder: 'MM/DD/YYYY',
+        onInput: (f, ctx, e) => Util.Format.onDateInput(f, ctx, e),
         api: {
-          fromApi: (v) => (v || '').slice(0, 10),
+          toApi: (v) => Util.Date.dateStringToIso(v),
+          fromApi: (v) => Util.Date.isoToDateString(v),
+        },
+        validate: (value, { row }) => {
+          return !Util.Date.isValidDate(value) ? 'Invalid Date' : '';
         },
       },
       {

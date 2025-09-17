@@ -88,7 +88,7 @@
     const familiesTextFilter = Util.Helpers.createTextFilter((row, raw, terms, utils) => {
       const parts = [row.id, row.parishNumber, row.address?.city];
       (row.contacts || []).forEach((c) => {
-        parts.push(c.lastName, c.firstName, c.middle, c.email, Util.Format.normPhone(c.phone));
+        parts.push(c.lastName, c.firstName, c.middle, c.email, Util.Format.getDigitOnly(c.phone));
       });
       return utils.includesAllTerms(utils.normalize(parts.filter(Boolean).join(' ')), terms);
     });
@@ -165,17 +165,13 @@
       }
       return s;
     });
-    function onContactPhoneInput(fieldDef, ctx, e) {
-      const raw = e?.target?.value ?? '';
-      e.target.value = Util.Format.formatPhone(raw);
-    }
     function needsNameException({ row }) {
       const value = String(row?.lastName || '')
         .trim()
         .toLowerCase();
       return !parentLastNameSet.value.has(value);
     }
-    const familyFields = Schema.Forms.Families({ onContactPhoneInput, needsNameException, parentLastNameSet });
+    const familyFields = Schema.Forms.Families({ needsNameException, parentLastNameSet });
 
     function hydrateFamilyErrors() {
       return Schema.Forms.Families.validate(familyForm, familyErrors);

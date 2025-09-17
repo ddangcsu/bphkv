@@ -74,7 +74,7 @@
     // Text filter (id, familyId, event.title, contacts, payments.receiptNo, children.fullName)
     const registrationsTextFilter = Util.Helpers.createTextFilter((row, raw, terms, utils) => {
       const parts = [row?.id, row?.familyId, row?.event?.title];
-      (row?.contacts || []).forEach((c) => parts.push(c?.name, Util.Format.normPhone(c?.phone)));
+      (row?.contacts || []).forEach((c) => parts.push(c?.name, Util.Format.getDigitOnly(c?.phone)));
       (row?.payments || []).forEach((p) => parts.push(p?.receiptNo));
       (row?.children || []).forEach((c) => parts.push(c?.fullName));
       return utils.includesAllTerms(utils.normalize(parts.filter(Boolean).join(' ')), terms);
