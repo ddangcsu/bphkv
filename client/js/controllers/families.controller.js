@@ -145,6 +145,15 @@
       }
     }
 
+    const familiesDatalist = Vue.computed(() =>
+      (familyRows.value || []).map((f) => {
+        const label = [f.id, contactDisplay ? contactDisplay(f, true) : '', f.address?.city]
+          .filter(Boolean)
+          .join(' — ');
+        return { value: f.id, label };
+      }),
+    );
+
     // -------------------------
     // FORM STATE (unchanged from earlier F1)
     // -------------------------
@@ -314,6 +323,7 @@
       filteredFamilyRows,
       familiesPager,
       contactDisplay,
+      familiesDatalist,
       loadFamilies,
 
       // form

@@ -293,13 +293,8 @@ const app = createApp({
     const isVisible = Util.Helpers.isVisible;
     const fieldClass = Util.Helpers.fieldClass;
     const getFieldDisabled = Util.Helpers.getFieldDisabled;
-    const maskLast4 = Util.Format.maskLast4;
     const computeAgeByYear = Util.Helpers.computeAgeByYear;
     const displayChildNameAndAge = Util.Format.displayChildNameAndAge;
-
-    function displayEventFees(evt) {
-      return evt.fees?.length > 0 ? evt.fees.map((item) => item.code + '-$' + String(item.amount)).join(' / ') : '—';
-    }
 
     // =========================================================
     // FAMILIES — all owned by controller
@@ -339,6 +334,9 @@ const app = createApp({
     const removeFamilyChild = Families.removeFamilyChild;
     const addFamilyNote = Families.addFamilyNote;
     const removeFamilyNote = Families.removeFamilyNote;
+
+    // Others
+    const familiesDatalist = Families.familiesDatalist;
 
     // =========================================================
     // EVENTS (delegated to Controllers.Events)
@@ -380,6 +378,8 @@ const app = createApp({
 
     // Useful meta/derived
     const isEventDirty = Events.isEventDirty;
+    const displayEventFees = Events.displayEventFees;
+    const eventOpenStatus = Events.eventOpenStatus;
 
     // =========================================================
     // REGISTRATIONS — all owned by controller
@@ -436,18 +436,6 @@ const app = createApp({
 
     // Derived helpers
     const selectedEventLevel = computed(() => selectedEvent.value?.level || '');
-
-    // Full families list for Family ID (kept computed for easy future rules)
-    const familyDatalistOptions = computed(() =>
-      familyRows.value.map((f) => ({
-        value: f.id,
-        label: `${f.parishMember ? 'Member' : 'NonMember'} — ${f.contacts?.[0]?.lastName || ''}, ${
-          f.contacts?.[0]?.firstName || ''
-        }
-        — ${f.contacts?.[0]?.phone} - ${f.address?.city || ''}`,
-      })),
-    );
-
     const ageGroupLabelTNTT = Util.Format.ageGroupLabelTNTT;
 
     // =========================================================
@@ -783,6 +771,7 @@ const app = createApp({
       filteredEventRows,
       isEventDirty,
       displayEventFees,
+      eventOpenStatus,
       addEventFee,
       removeEventFee,
       addEventPrerequisiteRow,
@@ -811,7 +800,7 @@ const app = createApp({
       registrationFields,
       registrationErrors,
       submitRegistrationForm,
-      familyDatalistOptions,
+      familiesDatalist,
       availableChildOptions,
       addRegChild,
       removeRegChild,
@@ -862,5 +851,6 @@ app.component('families-form', window.Components && window.Components.FamiliesFo
 
 app.component('registrations-toolbar', window.Components && window.Components.RegistrationsToolbar);
 app.component('registrations-table', window.Components && window.Components.RegistrationsTable);
+app.component('registrations-form', window.Components && window.Components.RegistrationsForm);
 
 app.mount('#app');

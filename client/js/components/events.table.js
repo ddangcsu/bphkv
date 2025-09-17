@@ -31,6 +31,7 @@
       yearOptions: { type: Array, required: true },
       levelOptions: { type: Array, required: true },
       displayEventFees: { type: Function, required: true },
+      eventOpenStatus: { type: Function, reequired: true },
     },
     emits: ['edit'],
     setup(props, { emit }) {
@@ -49,6 +50,7 @@
               <th scope="col">Description</th>
               <th scope="col">School Year</th>
               <th scope="col">Scope</th>
+              <th scope="col">Status</th>
               <th scope="col">Open Window</th>
               <th scope="col">Schedule Fees</th>
               <th scope="col" class="col-actions">Actions</th>
@@ -62,6 +64,7 @@
               <td>{{ ev.title }}</td>
               <td>{{ codeToLabel(ev.year, yearOptions) }}</td>
               <td>{{ codeToLabel(ev.level, levelOptions) }}</td>
+              <td class="badge" :data-variant="eventOpenStatus(ev)">{{ eventOpenStatus(ev) }}</td>
               <td>{{ ev.openDate }} → {{ ev.endDate }}</td>
               <td>{{ displayEventFees(ev) }}</td>
               <td class="actions">

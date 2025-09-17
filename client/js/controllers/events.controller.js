@@ -165,6 +165,19 @@
       if (showPrerequisites.value && eventForm.prerequisites.length === 0) addEventPrerequisiteRow();
     }
 
+    function displayEventFees(evt) {
+      return evt.fees?.length > 0 ? evt.fees.map((item) => item.code + '-$' + String(item.amount)).join(' / ') : '—';
+    }
+
+    function eventOpenStatus(evt) {
+      const start = new Date(evt.openDate);
+      const end = new Date(evt.endDate);
+      const now = new Date();
+      if (now > end) return 'Closed';
+      if (now < start) return 'Future';
+      return 'Open';
+    }
+
     // Dirty / patch (uses your schema-driven patch factory)
     const eventPatch = computed(
       () => Util.Helpers.makeEventPatchFromSchema(eventFields, originalApiEvent.value || {}, eventForm) || {},
@@ -273,6 +286,10 @@
       LEVEL_OPTIONS,
       isEventDirty,
       //eventPatch,
+
+      // Others
+      displayEventFees,
+      eventOpenStatus,
     };
   }
 
