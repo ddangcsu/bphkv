@@ -111,6 +111,106 @@
     // ---- helpers from your current logic (ported) ----
     const LEVEL = ENUMS.LEVEL;
     const METHOD = ENUMS.METHOD || {}; // for WAIVED/CASH, etc.
+    const FEE = ENUMS.FEE || {};
+
+    // Treat Y/YES/true/1 as "yes"
+    function isYes(v) {
+      if (v === true || v === 1) return true;
+      const s = String(v ?? '')
+        .trim()
+        .toLowerCase();
+      return s === 'y' || s === 'yes' || s === 'true' || s === '1';
+    }
+
+    // (a) Event snapshot (title/year/programId/eventType)
+    function hydrateRegistrationEvent(ctx = { form: registrationForm }) {
+      const form = ctx.form;
+      const ev = (getEventRows() || []).find((e) => e.id === form.eventId);
+      const snap = ev
+        ? { title: ev.title, year: ev.year, programId: ev.programId, eventType: ev.eventType }
+        : { title: '', year: '', programId: '', eventType: '' };
+      Object.assign(form.event, snap);
+    }
+
+    // (b) Contacts snapshot: take two parents (Father → Mother → Guardian)
+    function hydrateRegistrationContacts(ctx = { form: registrationForm }) {
+      const form = ctx.form;
+      const fam = familyById(form.familyId);
+      const parents = pickTwoParents(fam); // you already have this prioritized sorter
+      form.contacts = [];
+      for (const c of parents) {
+        form.contacts.push(
+          Schema.Forms.Registrations.newContact({
+            overrides: {
+              name: [c.lastName, [c.firstName, c.middle].filter(Boolean).join(' ')].filter(Boolean).join(', '),
+              relationship: c.relationship || '',
+              phone: Util.Format.formatPhone(c.phone || ''),
+            },
+          }),
+        );
+      }
+    }
+
+    // (c) Payments: merge from event fees (skip NPM_FEE for parish members), preserve user fields
+    function hydrateRegistrationPayments(ctx = { form: registrationForm }) {
+      const form = ctx.form;
+      const ev = (getEventRows() || []).find((e) => e.id === form.eventId);
+      if (!ev) return;
+
+      const fam = familyById(form.familyId);
+      const parishMember = isYes(fam?.parishMember);
+      const fees = Array.isArray(ev?.fees) ? ev.fees : [];
+
+      // Build a map of current payments by fee code (stringified)
+      const byCode = new Map();
+      (form.payments || (form.payments = [])).forEach((p) => byCode.set(String(p.code ?? ''), p));
+
+      // Quantity rule: PER_CHILD ⇒ number of selected children; else 1
+      const childCount = Array.isArray(form.children) ? form.children.filter((r) => !!r?.childId).length : 0;
+      const qty = ev.level === LEVEL.PER_CHILD ? childCount : 1;
+
+      for (const fee of fees) {
+        const code = String(fee?.code ?? '');
+        // Parish member rule: skip non-parish-member fee for members
+        if (parishMember && FEE?.NPM_FEE && code === String(FEE.NPM_FEE)) continue;
+
+        const unit = Number(fee?.amount) || 0;
+        const existing = byCode.get(code);
+
+        if (existing) {
+          // Update only computed fields; DO NOT reset user-entered fields
+          existing.unitAmount = unit;
+          existing.quantity = qty;
+          existing.amount = Math.round(unit * qty * 100) / 100;
+        } else {
+          // Add a new payment row for this fee
+          const overrides = {
+            code,
+            unitAmount: unit,
+            quantity: qty,
+            amount: Math.round(unit * qty * 100) / 100,
+            method: '',
+            txnRef: '',
+            receiptNo: '',
+            receivedBy: '',
+          };
+          const row = Schema.Forms.Registrations.newPayment({ overrides });
+          form.payments.push(row);
+        }
+      }
+    }
+
+    // tiny helper: ensure at least one blank child row for PER_CHILD
+    function ensureOneChildRow(form) {
+      if (!Array.isArray(form.children)) form.children = [];
+      if (form.children.length === 0) {
+        form.children.push(Schema.Forms.Registrations.newChild({}));
+        if (!Array.isArray(registrationErrors.value.children)) {
+          registrationErrors.value.children = [];
+        }
+        registrationErrors.value.children.push({});
+      }
+    }
 
     const isOpenEventFilter = (ev) => {
       const todayPST = new Date(Date.now() - 8 * 3600 * 1000).toISOString().slice(0, 10);
@@ -177,8 +277,8 @@
         beginCreateRegistration();
         registrationForm.familyId = f.id;
         registrationForm.eventId = adminRegistration.value.id;
-        onRegFamilyChange();
-        onRegEventChange();
+        onRegFamilyChange({ form: registrationForm });
+        onRegEventChange({ form: registrationForm });
       }
     }
     function registerTNTTForFamily(f) {
@@ -190,8 +290,8 @@
         beginCreateRegistration();
         registrationForm.familyId = f.id;
         registrationForm.eventId = tnttRegistration.value.id;
-        onRegFamilyChange();
-        onRegEventChange();
+        onRegFamilyChange({ form: registrationForm });
+        onRegEventChange({ form: registrationForm });
       } else {
         setStatus('Must already register for ADMIN event first', 'error', 3000);
       }
@@ -387,8 +487,9 @@
       return [...parentContacts, ...nonParentContacts].slice(0, 2);
     }
 
-    function hydratePrimaryContactsIntoForm(family) {
-      registrationForm.contacts = [];
+    function hydratePrimaryContactsIntoForm(family, ctx) {
+      const form = ctx?.form || registrationForm;
+      form.contacts = [];
       const two = pickTwoParents(family);
       for (const c of two) {
         const overrides = {
@@ -396,66 +497,58 @@
           relationship: c.relationship || '',
           phone: Util.Format.formatPhone(c.phone || ''),
         };
-        registrationForm.contacts.push(Schema.Forms.Registrations.newContact({ overrides }));
-      }
-    }
-
-    function buildPaymentsFromEventFees(ev) {
-      const fees = Array.isArray(ev?.fees) ? ev.fees : [];
-      registrationForm.payments = [];
-      for (const f of fees) {
-        const unit = Number(f?.amount) || 0;
-        const qty = 1;
-        const amt = Math.round(unit * qty * 100) / 100;
-        const overrides = {
-          code: f?.code || '',
-          unitAmount: unit,
-          quantity: qty,
-          amount: amt,
-          method: '', // force explicit choice; schema reacts on change
-          txnRef: '',
-          receiptNo: '',
-          receivedBy: '', // user picks from list; we can default below
-        };
-        registrationForm.payments.push(Schema.Forms.Registrations.newPayment({ overrides }));
-      }
-    }
-
-    function addOneChildRowIfPerChild(ev) {
-      const scope = String(ev?.level || '').trim();
-      if (scope && scope === LEVEL.PER_CHILD) {
-        if (!Array.isArray(registrationForm.children) || registrationForm.children.length === 0) {
-          registrationForm.children = [Schema.Forms.Registrations.newChild({})];
-        }
+        form.contacts.push(Schema.Forms.Registrations.newContact({ overrides }));
       }
     }
 
     // ---- hooks wired to schema (family & event changes) ----
-    function onRegFamilyChange(_ctx) {
-      const fam = familyById(registrationForm.familyId);
-      registrationForm.parishMember = fam ? fam.parishMember ?? null : null;
-      hydratePrimaryContactsIntoForm(fam);
-      if (MODE.CREATE) {
-        // clear dependent arrays in CREATE
-        registrationForm.children = [];
-        registrationForm.payments = [];
-        registrationForm.notes = [];
+    function onRegFamilyChange(ctx = { form: registrationForm }) {
+      const form = ctx.form;
+      // Snapshot (two) contacts, prioritized Father/Mother/Guardian
+      hydrateRegistrationContacts(ctx);
+
+      // Remove any already-chosen children that don't belong to this family
+      const fam = familyById(form.familyId);
+
+      // Snapshot parishMember status
+      form.parishMember = !!fam?.parishMember;
+
+      // Remove all children if any selected child doesn't belong to the family
+      const famChildIds = new Set((fam?.children || []).map((c) => String(c.childId)));
+      const currentRows = Array.isArray(form.children) ? form.children : [];
+
+      const hasForeignChild = currentRows.some((row) => {
+        const id = row?.childId;
+        return id && !famChildIds.has(String(id));
+      });
+
+      if (hasForeignChild) {
+        // Clear everything (your requested behavior)
+        form.children = [Schema.Forms.Registrations.newChild()];
+      } else {
+        // Keep existing rows (no foreign child found)
+        form.children = currentRows;
       }
+      // keep errors array aligned
+      registrationErrors.value.children = (form.children || []).map(() => ({}));
+
+      // Recompute/merge payments in case quantity depends on children
+      hydrateRegistrationPayments(ctx);
     }
 
-    function onRegEventChange(_ctx) {
-      const ev = (getEventRows() || []).find((e) => e.id === registrationForm.eventId);
-      // snapshot event block (title/year/programId/eventType)
-      const snap = ev
-        ? { title: ev.title, year: ev.year, programId: ev.programId, eventType: ev.eventType }
-        : { title: '', year: '', programId: '', eventType: '' };
-      Object.assign(registrationForm.event, snap);
+    function onRegEventChange(ctx = { form: registrationForm }) {
+      const form = ctx.form;
+      // (a) Snapshot event data
+      hydrateRegistrationEvent(ctx);
+      const ev = (getEventRows() || []).find((e) => e.id === form.eventId);
 
-      // build payments from event fees
-      if (ev) buildPaymentsFromEventFees(ev);
+      // (c) If per-child event, ensure one empty row exists at start
+      if (ev?.level === LEVEL.PER_CHILD) {
+        ensureOneChildRow(form);
+      }
 
-      // if "per child", create a child row placeholder
-      addOneChildRowIfPerChild(ev);
+      // (b) Hydrate/merge payments from event fees (preserve user fields)
+      hydrateRegistrationPayments(ctx);
     }
 
     // ---- install schema with our ctx ----
@@ -598,11 +691,10 @@
     // keep familyId/eventId triggers consistent even if set programmatically
     watch(
       () => registrationForm.familyId,
-      () => onRegFamilyChange({ form: registrationForm }),
-    );
-    watch(
-      () => registrationForm.eventId,
-      () => onRegEventChange({ form: registrationForm }),
+      (nv, ov) => {
+        if (String(nv ?? '') === String(ov ?? '')) return;
+        onRegFamilyChange({ form: registrationForm });
+      },
     );
 
     watch(
