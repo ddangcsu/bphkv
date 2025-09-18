@@ -1,8 +1,7 @@
 // /js/utils/mappers.factory.js
 (function (global) {
   'use strict';
-  const U = global.Util || (global.Util = {});
-  const Helpers = U.Helpers || (U.Helpers = {});
+  const Mappers = (window.Mappers ||= {});
 
   function cloneIfObject(valueToClone) {
     const isObjectLike = valueToClone && typeof valueToClone === 'object';
@@ -143,7 +142,7 @@
     return uiArraySource.map((rowObject) => mapFieldsToApi(rowObject, fieldMetas));
   }
 
-  Helpers.makeFamilyMappersFromSchema = function makeFamilyMappersFromSchema(familySchema) {
+  Mappers.makeFamilyMappersFromSchema = function makeFamilyMappersFromSchema(familySchema) {
     const mainFields = familySchema.household?.main || [];
     const addressFields = familySchema.household?.address || [];
     const contactFields = familySchema.contacts || [];
@@ -175,7 +174,7 @@
     return { toUi, toApi };
   };
 
-  Helpers.makeEventMappersFromSchema = function makeEventMappersFromSchema(eventSchema) {
+  Mappers.makeEventMappersFromSchema = function makeEventMappersFromSchema(eventSchema) {
     const mainFields = Array.isArray(eventSchema.main) ? eventSchema.main : [];
     const feeFields = Array.isArray(eventSchema.feeRow) ? eventSchema.feeRow : [];
     const prereqFields = Array.isArray(eventSchema.prerequisiteRow) ? eventSchema.prerequisiteRow : [];
@@ -201,7 +200,7 @@
     return { toUi, toApi };
   };
 
-  Helpers.makeRegistrationMappersFromSchema = function makeRegistrationMappersFromSchema(regSchema) {
+  Mappers.makeRegistrationMappersFromSchema = function makeRegistrationMappersFromSchema(regSchema) {
     const mainFields = Array.isArray(regSchema.main) ? regSchema.main : [];
     const metaFields = Array.isArray(regSchema.meta) ? regSchema.meta : [];
     const eventSnapFields = Array.isArray(regSchema.eventSnapshot) ? regSchema.eventSnapshot : [];
@@ -235,8 +234,6 @@
         children: mapRowsToApi(uiReg?.children, childFields),
         payments: mapRowsToApi(uiReg?.payments, paymentFields),
         notes: mapRowsToApi(uiReg?.notes, noteFields),
-        createdAt: uiReg.createdAt ? uiReg.createdAt : Util.Date.isoNowLocal(),
-        updatedAt: Util.Date.isoNowLocal(),
       };
 
       return api;
@@ -245,7 +242,7 @@
     return { toUi, toApi };
   };
 
-  Helpers.makeFamilyPatchFromSchema = function makeFamilyPatchFromSchema(
+  Mappers.makeFamilyPatchFromSchema = function makeFamilyPatchFromSchema(
     familySchema,
     originalApiObject,
     updatedUiObject,
@@ -260,7 +257,7 @@
     return delta || {};
   };
 
-  Helpers.makeEventPatchFromSchema = function makeEventPatchFromSchema(
+  Mappers.makeEventPatchFromSchema = function makeEventPatchFromSchema(
     eventSchema,
     originalApiObject,
     updatedUiObject,
@@ -275,7 +272,7 @@
     return delta || {};
   };
 
-  Helpers.makeRegistrationPatchFromSchema = function makeRegistrationPatchFromSchema(
+  Mappers.makeRegistrationPatchFromSchema = function makeRegistrationPatchFromSchema(
     regSchema,
     originalApiObject,
     updatedUiObject,

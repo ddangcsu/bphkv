@@ -7,7 +7,7 @@
       ? global.Schema.Forms.Registrations()
       : null;
 
-  const factory = global.Util && global.Util.Helpers && global.Util.Helpers.makeRegistrationMappersFromSchema;
+  const factory = root && root.makeRegistrationMappersFromSchema;
   const generated = factory && fields ? factory(fields) : { toUi: (x) => x || {}, toApi: (x) => x || {} };
 
   root.Registrations = generated;

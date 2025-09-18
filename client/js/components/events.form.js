@@ -45,16 +45,13 @@
     setup(props, { emit }) {
       const fees = computed(() => props.eventForm.fees || []);
       const prerequisites = computed(() => props.eventForm.prerequisites || []);
-      const modeObj = computed(() => props.mode || { EDIT: false });
       const readonlyFlag = computed(() => props.readonly || false);
-      const isEditMode = computed(() => !!modeObj.value.EDIT);
       const lockIcon = computed(() => (readonlyFlag.value ? 'fa-solid fa-lock' : 'fa-solid fa-lock-open'));
 
       return {
         fees,
         prerequisites,
         lockIcon,
-        isEditMode,
         save: () => emit('save'),
         cancel: () => emit('cancel'),
         toggleReadonly: () => emit('toggle-readonly'),
@@ -70,7 +67,7 @@
           </nav>
 
           <div class="formtabs-actions">
-              <button v-show="isEditMode" type="button" class="btn" @click="toggleReadonly">
+              <button v-show="mode.EDIT" type="button" class="btn" @click="toggleReadonly">
               <i :class="lockIcon"></i>
             </button>
             <button tabindex="-1" type="button" class="btn primary" :disabled="isReadOnly || !isEventDirty" @click="save">

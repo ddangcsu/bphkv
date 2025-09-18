@@ -180,7 +180,7 @@
 
     // Dirty / patch (uses your schema-driven patch factory)
     const eventPatch = computed(
-      () => Util.Helpers.makeEventPatchFromSchema(eventFields, originalApiEvent.value || {}, eventForm) || {},
+      () => Mappers.makeEventPatchFromSchema(eventFields, originalApiEvent.value || {}, eventForm) || {},
     );
     const isEventDirty = computed(() => Object.keys(eventPatch.value).length > 0);
     function snapshotEventForm() {

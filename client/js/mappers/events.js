@@ -7,7 +7,7 @@
       ? global.Schema.Forms.Events() // no ctx needed for mapping; we only read col/default/api
       : null;
 
-  const factory = global.Util && global.Util.Helpers && global.Util.Helpers.makeEventMappersFromSchema;
+  const factory = root && root.makeEventMappersFromSchema;
   const generated = factory && fields ? factory(fields) : { toUi: (x) => x || {}, toApi: (x) => x || {} };
 
   root.Events = generated;

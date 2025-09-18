@@ -72,8 +72,8 @@
       <button tabindex="-1" type="button" class="active" role="tab" :aria-controls="'panel-registration'">Manage Registration</button>
     </nav>
     <div class="formtabs-actions">
-      <button tabindex="-1" v-show="mode.EDIT && registrationForm.status === 'paid' " type="button" class="btn" @click="openReceipt(registrationForm)">
-        <i class="fa-solid fa-receipt"></i><span> Receipt</span>
+      <button tabindex="-1" v-show="mode.EDIT && registrationForm.status === 'paid' && !isRegistrationDirty" type="button" class="btn" @click="openReceipt(registrationForm)">
+        <i class="fa-solid fa-receipt"></i>
       </button>
 
       <button v-show="mode.EDIT" type="button" class="btn" @click="onToggleReadonly">

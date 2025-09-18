@@ -851,5 +851,6 @@ app.component('families-form', window.Components && window.Components.FamiliesFo
 app.component('registrations-toolbar', window.Components && window.Components.RegistrationsToolbar);
 app.component('registrations-table', window.Components && window.Components.RegistrationsTable);
 app.component('registrations-form', window.Components && window.Components.RegistrationsForm);
+app.component('registration-receipt', Components.RegistrationReceipt);
 
 app.mount('#app');

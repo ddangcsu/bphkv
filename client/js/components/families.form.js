@@ -9,6 +9,7 @@
       // state
       mode: { type: Object, required: true }, // pass MODE from parent
       readonly: { type: Boolean, required: true }, // pass READONLY from parent
+      currentMode: { type: String, default: '' },
       isFamilyDirty: { type: Boolean, required: true },
 
       // data/errors/meta
@@ -43,7 +44,6 @@
       const { computed } = Vue;
 
       // Match your helper contexts
-      const currentMode = computed(() => props.mode);
       const isReadOnly = computed(() => !!props.readonly);
 
       function toggleReadonly() {
@@ -51,7 +51,6 @@
       }
 
       return {
-        currentMode,
         isReadOnly,
         toggleReadonly,
       };

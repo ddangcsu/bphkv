@@ -107,6 +107,7 @@
     const registrationErrors = ref({});
     const registrationForm = reactive(Schema.Forms.Registrations.new());
     const editingRegistrationId = ref(null);
+    const _hydrating = ref(false);
 
     // ---- helpers from your current logic (ported) ----
     const LEVEL = ENUMS.LEVEL;
@@ -585,6 +586,7 @@
       }
     }
     const isRegistrationDirty = computed(() => {
+      if (_hydrating.value) return false;
       try {
         const now = Mappers.Registrations.toApi(registrationForm);
         return JSON.stringify(now) !== JSON.stringify(_apiSnapshot.value || {});
@@ -594,24 +596,32 @@
     });
 
     // ---- UI actions ----
-    function beginCreateRegistration() {
+    async function beginCreateRegistration() {
+      _hydrating.value = true;
       Object.assign(registrationForm, Schema.Forms.Registrations.new());
       editingRegistrationId.value = null;
       validateRegistration();
+      await nextTick();
       snapshotRegistration();
+      _hydrating.value = false;
       switchSection(SECTION_NAMES.REGISTRATIONS, MODE_NAMES.CREATE);
       setStatus('Creating new registration…', 'info', 1200);
     }
 
-    function beginEditRegistration(apiReg) {
+    async function beginEditRegistration(apiReg) {
       if (!apiReg || !apiReg.id) {
         setStatus('Nothing to edit.', 'warn', 1500);
         return;
       }
+      _hydrating.value = true;
       editingRegistrationId.value = apiReg.id;
       Object.assign(registrationForm, Schema.Forms.Registrations.new(), Mappers.Registrations.toUi(apiReg || {}));
+      onRegFamilyChange({ form: registrationForm });
+      onRegEventChange({ form: registrationForm });
       validateRegistration();
+      await nextTick();
       snapshotRegistration();
+      _hydrating.value = false;
       switchSection(SECTION_NAMES.REGISTRATIONS, MODE_NAMES.EDIT);
       setStatus(`Editing ${apiReg.id}`, 'info', 1200);
     }
@@ -631,9 +641,12 @@
       }
       setStatus('Saving Registration...');
       const payload = Mappers.Registrations.toApi(registrationForm);
+      const nowLocal = Util.Date.isoNowLocal();
       let result;
       try {
         if (MODE.CREATE) {
+          payload.createdAt = registrationForm.createdAt ? registrationForm.createdAt : nowLocal;
+          payload.updatedAt = nowLocal;
           result = await API.Registrations.create(payload);
           setStatus('Registration created.', 'success', 1500);
         } else {
@@ -698,6 +711,7 @@
     watch(
       () => registrationForm.familyId,
       (nv, ov) => {
+        if (_hydrating.value) return;
         if (String(nv ?? '') === String(ov ?? '')) return;
         onRegFamilyChange({ form: registrationForm });
       },
