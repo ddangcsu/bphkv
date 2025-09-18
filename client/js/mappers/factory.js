@@ -247,7 +247,7 @@
     originalApiObject,
     updatedUiObject,
   ) {
-    const mapperFactory = Helpers.makeFamilyMappersFromSchema;
+    const mapperFactory = Mappers.makeFamilyMappersFromSchema;
     if (typeof mapperFactory !== 'function') return {};
     const { toApi } = mapperFactory(familySchema);
 
@@ -262,7 +262,7 @@
     originalApiObject,
     updatedUiObject,
   ) {
-    const mapperFactory = Helpers.makeEventMappersFromSchema;
+    const mapperFactory = Mappers.makeEventMappersFromSchema;
     if (typeof mapperFactory !== 'function') return {};
     const { toApi } = mapperFactory(eventSchema);
 
@@ -277,7 +277,7 @@
     originalApiObject,
     updatedUiObject,
   ) {
-    const mapperFactory = Helpers.makeRegistrationMappersFromSchema;
+    const mapperFactory = Mappers.makeRegistrationMappersFromSchema;
     if (typeof mapperFactory !== 'function') return {};
     const { toApi } = mapperFactory(regSchema);
 
