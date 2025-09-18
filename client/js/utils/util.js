@@ -307,14 +307,14 @@
 
       const value = data ? data[fieldMeta.col] : undefined;
 
-      if (fieldMeta.required && isEmpty(value)) {
-        errors[fieldMeta.col] = fieldMeta.requiredMessage || 'Required';
-        return;
-      }
-
       if (typeof fieldMeta.validate === 'function') {
         const msg = fieldMeta.validate(value, scope);
         if (msg) errors[fieldMeta.col] = msg;
+      }
+
+      if (fieldMeta.required && isEmpty(value)) {
+        errors[fieldMeta.col] = fieldMeta.requiredMessage || 'Required';
+        return;
       }
     });
 

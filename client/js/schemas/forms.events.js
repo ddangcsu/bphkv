@@ -141,7 +141,7 @@
     prerequisiteRow: [
       {
         col: 'eventId',
-        label: 'Prerequisite Event',
+        label: 'Prereq Event',
         type: 'select',
         selOpt: (_meta, ctx) => {
           const list = (Ctx.availablePrerequisiteOptions && Ctx.availablePrerequisiteOptions(ctx)) || [];
@@ -153,6 +153,13 @@
           { label: 'Type', rdSource: 'eventRows', rdKey: 'id', rdCol: 'eventType', map: () => Options.EVENT_TYPES },
           { label: 'Description', rdSource: 'eventRows', rdKey: 'id', rdCol: 'title' },
         ],
+        validate: (value, ctx) => {
+          return Ctx.availablePrerequisiteOptions(ctx).length === 0
+            ? 'No PreReq in Open/End Range'
+            : !value.trim()
+            ? 'Required'
+            : '';
+        },
       },
     ],
   };
@@ -179,12 +186,6 @@
     const eventForm = eventDataRef || {};
     const eventErrors = eventErrorRef || {};
 
-    function requiredPrereqType() {
-      if (eventForm.eventType === Options.ENUMS.EVENT.REGISTRATION) return Options.ENUMS.EVENT.ADMIN;
-      if (eventForm.eventType === Options.ENUMS.EVENT.EVENT) return Options.ENUMS.EVENT.REGISTRATION;
-      return null; // ADM => none
-    }
-
     const errors = {};
     // main
     errors.main = Util.Helpers.validateFields(eventFields.main, eventForm, { form: eventForm });
@@ -197,7 +198,10 @@
     if (!Array.isArray(eventForm.fees) || eventForm.fees.length === 0) {
       errors.feeErrors = 'Event must have at least one fee entry';
     }
-    if (requiredPrereqType() && (!Array.isArray(eventForm.prerequisites) || eventForm.prerequisites.length === 0))
+    if (
+      Domain.Eligibility.requiredPrereqType(eventForm.eventType) &&
+      (!Array.isArray(eventForm.prerequisites) || eventForm.prerequisites.length === 0)
+    )
       errors.preqErrors = 'Event required at least one prerequisite';
 
     eventErrors.value = {

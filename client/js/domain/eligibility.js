@@ -26,7 +26,8 @@
   /**
    * Is a candidate event valid as a prerequisite for the current form?
    * Rules: same school year, not the same event, and the eventType must match
-   * the required type for this form's eventType.
+   * the required type for this form's eventType and the open date of the event must
+   * be greater or equal to the pre-req event open date
    */
   Eligibility.isValidPrereqSelection = function isValidPrereqSelection(candidateEvent, form) {
     if (!candidateEvent || !form) return false;
@@ -34,6 +35,7 @@
     if (!neededType) return false;
     if (String(candidateEvent.id) === String(form.id)) return false;
     if (Number(candidateEvent.year) !== Number(form.year)) return false;
+    if (Util.Date.dateStringToIso(form.openDate) < Util.Date.dateStringToIso(candidateEvent.openDate)) return false;
     return (candidateEvent.eventType || '') === neededType;
   };
 
