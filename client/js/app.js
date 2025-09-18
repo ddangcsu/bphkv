@@ -336,7 +336,7 @@ const app = createApp({
     const removeFamilyNote = Families.removeFamilyNote;
 
     // Others
-    const familiesDatalist = Families.familiesDatalist;
+    const familyDatalistOptions = Families.familyDatalistOptions;
 
     // =========================================================
     // EVENTS (delegated to Controllers.Events)
@@ -430,12 +430,11 @@ const app = createApp({
     const removeRegNote = Registrations.removeRegNote;
 
     // Others
-    const selectedEvent = Registrations.selectedEvent;
+    const selectedEventLevel = Registrations.selectedEventLevel;
     const familyById = Registrations.familyById;
     const availableChildOptions = Registrations.availableChildOptions;
 
     // Derived helpers
-    const selectedEventLevel = computed(() => selectedEvent.value?.level || '');
     const ageGroupLabelTNTT = Util.Format.ageGroupLabelTNTT;
 
     // =========================================================
@@ -800,7 +799,7 @@ const app = createApp({
       registrationFields,
       registrationErrors,
       submitRegistrationForm,
-      familiesDatalist,
+      familyDatalistOptions,
       availableChildOptions,
       addRegChild,
       removeRegChild,

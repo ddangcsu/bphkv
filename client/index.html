@@ -196,18 +196,19 @@
             <registrations-form
               :mode="MODE"
               :readonly="READONLY"
+              :current-mode="currentMode"
               :is-registration-dirty="isRegistrationDirty"
               :registration-form="registrationForm"
               :registration-errors="registrationErrors"
               :registration-fields="registrationFields"
-              :code-to-label="codeToLabel"
-              :format-option-label="formatOptionLabel"
-              :format-money="formatMoney"
+              :level="LEVEL"
+              :selected-event-level="selectedEventLevel"
               :is-visible="isVisible"
               :get-field-disabled="getFieldDisabled"
               :on-form-field-input="onFormFieldInput"
               :on-form-field-change="onFormFieldChange"
               :get-options="getOptions"
+              :format-option-label="formatOptionLabel"
               :field-class="fieldClass"
               :add-reg-child="addRegChild"
               :remove-reg-child="removeRegChild"
@@ -215,10 +216,10 @@
               :remove-reg-note="removeRegNote"
               :submit-registration-form="submitRegistrationForm"
               :go-back-section="goBackSection"
-              :open-receipt-by-id="openReceiptById"
+              :open-receipt="openReceipt"
               :available-child-options="availableChildOptions"
-              :family-datalist="familiesDatalist"
-              family-datalist-id="families-datalist">
+              :family-datalist-options="familyDatalistOptions"
+              @toggle-readonly="READONLY = !READONLY">
             </registrations-form>
           </section>
 

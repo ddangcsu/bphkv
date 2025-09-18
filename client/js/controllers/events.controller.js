@@ -76,7 +76,7 @@
     ];
     const eventsFilterMenu = Util.Helpers.createFilterMenu(eventFilterDefs);
     const eventsTextFilter = Util.Helpers.createTextFilter((row, raw, terms, utils) => {
-      const haystack = utils.normalize(`${row.id} ${row.title}`);
+      const haystack = utils.normalize(`${row.id} ${row.title} ${eventOpenStatus(row)}`);
       return utils.includesAllTerms(haystack, terms);
     });
     // Debounced query: only re-filter after the user pauses typing
@@ -170,9 +170,9 @@
     }
 
     function eventOpenStatus(evt) {
-      const start = new Date(evt.openDate);
-      const end = new Date(evt.endDate);
-      const now = new Date();
+      const start = Util.Date.dateStringToIso(evt.openDate);
+      const end = Util.Date.dateStringToIso(evt.endDate);
+      const now = Util.Date.isoNowLocal().slice(0, 10);
       if (now > end) return 'Closed';
       if (now < start) return 'Future';
       return 'Open';

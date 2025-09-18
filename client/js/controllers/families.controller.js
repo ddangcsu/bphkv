@@ -118,7 +118,6 @@
     });
     const familiesPager = Util.Helpers.createPager({ source: filteredFamilyRows }); // plural
 
-    const maskLast4 = Util.Format.maskLast4;
     const contactDisplay = (f, one = false) => {
       const contacts = Array.isArray(f?.contacts) ? f.contacts : [];
       if (!contacts.length) return '—';
@@ -128,8 +127,8 @@
       const pick = [...prioritized, ...others].slice(0, 2);
       const result = pick.map((c) =>
         'lastName' in c
-          ? `${c.lastName}, ${c.firstName}${c.middle ? ' ' + c.middle : ''} ${maskLast4(c.phone)}`
-          : `${c.name} ${maskLast4(c.phone)}`,
+          ? `${c.lastName}, ${c.firstName}${c.middle ? ' ' + c.middle : ''} ${Util.Format.maskLast4(c.phone)}`
+          : `${c.name} ${Util.Format.maskLast4(c.phone)}`,
       );
       return one ? result[0] : result.join(' / ');
     };
@@ -145,11 +144,9 @@
       }
     }
 
-    const familiesDatalist = Vue.computed(() =>
+    const familyDatalistOptions = Vue.computed(() =>
       (familyRows.value || []).map((f) => {
-        const label = [f.id, contactDisplay ? contactDisplay(f, true) : '', f.address?.city]
-          .filter(Boolean)
-          .join(' — ');
+        const label = [contactDisplay ? contactDisplay(f, false) : '', f.address?.city].filter(Boolean).join(' — ');
         return { value: f.id, label };
       }),
     );
@@ -323,7 +320,7 @@
       filteredFamilyRows,
       familiesPager,
       contactDisplay,
-      familiesDatalist,
+      familyDatalistOptions,
       loadFamilies,
 
       // form

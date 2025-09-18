@@ -213,9 +213,13 @@
     }
 
     const isOpenEventFilter = (ev) => {
-      const todayPST = new Date(Date.now() - 8 * 3600 * 1000).toISOString().slice(0, 10);
-      return (!ev?.openDate || ev?.openDate <= todayPST) && (!ev?.endDate || todayPST <= ev?.endDate);
+      if (Util.Helpers.isEmpty(ev)) return false;
+      const now = Util.Date.isoNowLocal().slice(0, 10);
+      const start = Util.Date.dateStringToIso(ev.openDate);
+      const end = Util.Date.dateStringToIso(ev.endDate);
+      return now >= start && now <= end;
     };
+
     const isCurrentSchoolYear = (ev) => Number(ev?.year) === Number(Util.Helpers.getCurrentSchoolYear());
 
     function alreadyRegistered({
@@ -248,6 +252,7 @@
 
     // Common finds used across helpers
     const selectedEvent = computed(() => (getEventRows() || []).find((e) => e.id === registrationForm.eventId) || null);
+    const selectedEventLevel = computed(() => selectedEvent.value?.level || '');
     const familyById = (id) => (getFamilyRows() || []).find((f) => f.id === id) || null;
 
     // Quick-register helpers (admin / tntt)
@@ -344,10 +349,11 @@
     function signedRegistrationOptions(ctx = { form: registrationForm }) {
       const form = ctx?.form || {};
       const fam = familyById(form.familyId);
-      return (fam?.contacts || []).map((c) => {
-        const name = [c.lastName, [c.firstName, c.middle].join(' ')].join(', ');
+      const list = (fam?.contacts || []).map((c) => {
+        const name = [c.lastName, [c.firstName, c.middle].filter(Boolean).join(' ')].filter(Boolean).join(', ');
         return { value: name, label: `${name} (${c.relationship})` };
       });
+      return list;
     }
 
     // selOpt for childId (understands { form, index })
@@ -555,7 +561,7 @@
     const registrationFields = Schema.Forms.Registrations({
       onRegFamilyChange,
       onRegEventChange,
-      eventOptionsForRegistration: () => eventOptionsForRegistration.value,
+      eventOptionsForRegistration,
       signedRegistrationOptions,
       childRegistrationOptions,
       hydrateChildSnapshot,
@@ -708,6 +714,7 @@
     return {
       // list
       selectedEvent,
+      selectedEventLevel,
       registrationRows,
       registrationsFilterMenu,
       registrationsTextFilter,

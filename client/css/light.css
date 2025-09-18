@@ -14,6 +14,7 @@
   --accent: #33a7fa;
   --danger: #f9a9a9;
   --focus: #93c5fd;
+  --open: #21cd0e;
 }
 
 * {
@@ -207,13 +208,19 @@ table.table tbody tr:nth-child(even) {
 /* Badges */
 .badge {
   text-transform: capitalize;
-  font-weight: 600;
+  font-weight: 500;
 }
-.badge[data-variant='Yes'] {
+
+.badge[data-variant='Future'] {
   color: var(--accent);
 }
-.badge[data-variant='No'] {
+.badge[data-variant='No'],
+.badge[data-variant='Closed'] {
   color: var(--danger);
+}
+.badge[data-variant='Yes'],
+.badge[data-variant='Open'] {
+  color: var(--open);
 }
 
 /* buttons */
