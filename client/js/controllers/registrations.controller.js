@@ -642,10 +642,10 @@
       const payload = Mappers.Registrations.toApi(registrationForm);
       const nowLocal = Util.Date.isoNowLocal();
       payload.updatedAt = nowLocal;
+      payload.createdAt = registrationForm.createdAt ? registrationForm.createdAt : nowLocal;
       let result;
       try {
         if (MODE.CREATE) {
-          payload.createdAt = registrationForm.createdAt ? registrationForm.createdAt : nowLocal;
           result = await API.Registrations.create(payload);
           setStatus('Registration created.', 'success', 1500);
         } else {

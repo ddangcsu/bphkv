@@ -235,9 +235,9 @@
       const payload = Mappers.Events.toApi(eventForm);
       const nowLocal = Util.Date.isoNowLocal();
       payload.updatedAt = nowLocal;
+      payload.createdAt = eventForm.createdAt ? eventForm.createdAt : nowLocal;
       try {
         if (MODE.CREATE) {
-          payload.createdAt = eventForm.createdAt ? eventForm.createdAt : nowLocal;
           await API.Events.create(payload);
           setStatus('Event created.', 'success', 1500);
         } else {

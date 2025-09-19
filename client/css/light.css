@@ -1178,3 +1178,36 @@ textarea.input[readonly] {
 .text-sm {
   font-size: small;
 }
+/* Roster-only print rules (scoped; won't affect receipt) */
+@media print {
+  html.printing-roster .toolbar,
+  html.printing-roster .pager,
+  html.printing-roster .filter-trigger,
+  html.printing-roster .filter-popover,
+  html.printing-roster .clickout-overlay {
+    display: none !important;
+  }
+
+  /* Hide everything except: Saint Name, Full Name, Grade/Group */
+  html.printing-roster .roster-table th.col-program,
+  html.printing-roster .roster-table td.col-program,
+  html.printing-roster .roster-table th.col-year,
+  html.printing-roster .roster-table td.col-year,
+  html.printing-roster .roster-table th.col-type,
+  html.printing-roster .roster-table td.col-type,
+  html.printing-roster .roster-table th.col-event,
+  html.printing-roster .roster-table td.col-event,
+  html.printing-roster .roster-table th.col-actions,
+  html.printing-roster .roster-table td.col-actions {
+    display: none !important;
+  }
+
+  /* optional: tighter table for paper */
+  html.printing-roster .roster-table {
+    width: 100% !important;
+  }
+  html.printing-roster .roster-table th,
+  html.printing-roster .roster-table td {
+    padding: 4px 6px !important;
+  }
+}

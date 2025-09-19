@@ -259,9 +259,9 @@
       const payload = Mappers.Families.toApi(familyForm);
       const nowLocal = Util.Date.isoNowLocal();
       payload.updatedAt = nowLocal;
+      payload.createdAt = familyForm.createdAt ? familyForm.createdAt : nowLocal;
       try {
         if (MODE.CREATE) {
-          payload.createdAt = familyForm.createdAt ? familyForm.createdAt : nowLocal;
           await API.Families.create(payload);
           setStatus('Family created.', 'success', 1500);
         } else {

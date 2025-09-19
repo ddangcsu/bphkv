@@ -175,10 +175,169 @@
     }
 
     function printRoster() {
-      document.documentElement.classList.add('printing-roster');
-      window.print?.();
-      setTimeout(() => document.documentElement.classList.remove('printing-roster'), 0);
-      setStatus('Sent roster to printer.', 'info', 1200);
+      const html = document.documentElement;
+
+      // cleanup helper
+      const cleanup = () => {
+        html.classList.remove('printing-roster');
+        window.removeEventListener('afterprint', cleanup);
+        if (mm) mm.removeEventListener?.('change', onMediaChange);
+      };
+
+      // some browsers don’t fire 'afterprint' reliably; use matchMedia as well
+      const mm = window.matchMedia ? window.matchMedia('print') : null;
+      const onMediaChange = (e) => {
+        if (!e.matches) cleanup();
+      };
+      if (mm && mm.addEventListener) mm.addEventListener('change', onMediaChange);
+      window.addEventListener('afterprint', cleanup, { once: true });
+
+      html.classList.add('printing-roster');
+
+      // Let styles apply before printing (2 x rAF is the safest simple trick)
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          try {
+            window.print();
+          } catch (e) {
+            cleanup();
+          }
+          // Fallback: ensure cleanup even if no events fire
+          setTimeout(cleanup, 4000);
+        });
+      });
+
+      setStatus('Preparing roster for print…', 'info', 1000);
+    }
+
+    async function printRosterTableOnly() {
+      rosterPager.pageSize = 0;
+      await nextTick();
+
+      const table = document.querySelector('.roster-table');
+      if (!table) {
+        setStatus('Roster table not found.', 'error', 2000);
+        return;
+      }
+
+      // --- Build a header: Event + filters + timestamp ---
+      const st = rosterFilterMenu?.state || {};
+      const labelFrom = (opts, v) => (opts || []).find((o) => String(o.value) === String(v))?.label || (v ?? '');
+      const programLabel = st.programId ? labelFrom(Schema.Options.PROGRAM_OPTIONS, st.programId) : 'All Programs';
+      const yearLabel = st.year ? labelFrom(Schema.Options.YEAR_OPTIONS, st.year) : 'All Years';
+      const typeLabel = st.eventType ? labelFrom(Schema.Options.EVENT_TYPES, st.eventType) : 'All Types';
+
+      let eventTitle = '';
+      if (st.eventId) {
+        const ev = (getEventRows() || []).find((e) => e.id === st.eventId);
+        eventTitle = ev?.title || '';
+      }
+
+      const timestamp = new Date().toLocaleString();
+
+      // --- Minimal print CSS: include your theme + repeat header each page ---
+      const css = `
+    @page { margin: 12mm; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+
+    header.print-header { margin-bottom: 10px; }
+    header.print-header h2 { margin: 0 0 6px 0; font-size: 18px; }
+    header.print-header .meta { font-size: 12px; color: #555; }
+
+    .table { border-collapse: collapse; width: 100%; }
+    .table th, .table td { border: 1px solid #ddd; padding: 6px 8px; font-size: 12px; }
+    .table thead th { background: #f5f5f5; }
+
+    /* Repeat thead on each printed page */
+    thead { display: table-header-group; }
+    tfoot { display: table-footer-group; }
+
+    /* Hide everything except: Saint Name, Full Name, Grade/Group */
+    .roster-table th.col-program, .roster-table td.col-program,
+    .roster-table th.col-year,    .roster-table td.col-year,
+    .roster-table th.col-type,    .roster-table td.col-type,
+    .roster-table th.col-event,   .roster-table td.col-event,
+    .roster-table th.col-actions, .roster-table td.col-actions {
+      display: none !important;
+    }
+  `;
+
+      const headerHtml = `
+    <header class="print-header">
+      <h2>Enrollment Roster${eventTitle ? ` — ${Util.Format.escapeHtml?.(eventTitle) || eventTitle}` : ''}</h2>
+      <div class="meta">
+        Program: ${programLabel} &nbsp;•&nbsp;
+        Year: ${yearLabel} &nbsp;•&nbsp;
+        Type: ${typeLabel}
+        ${
+          st.age
+            ? st.programId && st.programId === ENUMS.PROGRAM.TNTT
+              ? `Group: ${ageGroupLabelTNTT(st.age)}`
+              : ` &nbsp;•&nbsp; Age: ${st.age}`
+            : ''
+        }
+        ${st.allergies ? ` &nbsp;•&nbsp; Allergies: ${st.allergies === 'yes' ? 'Yes' : 'No'}` : ''}
+        <br/>
+        Printed: ${timestamp}
+      </div>
+    </header>
+  `;
+
+      const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Roster</title>
+        <link rel="stylesheet" href="./css/light.css">
+        <style>${css}</style>
+      </head>
+      <body>
+        ${headerHtml}
+        ${table.outerHTML}
+      </body>
+    </html>
+  `;
+
+      const iframe = document.createElement('iframe');
+      iframe.style.position = 'fixed';
+      iframe.style.right = '0';
+      iframe.style.bottom = '0';
+      iframe.style.width = '0';
+      iframe.style.height = '0';
+      iframe.style.border = '0';
+      document.body.appendChild(iframe);
+
+      const win = iframe.contentWindow;
+      const doc = win.document;
+      const cleanup = () => {
+        try {
+          document.body.removeChild(iframe);
+        } catch {}
+      };
+
+      win.onafterprint = cleanup;
+      if (win.matchMedia) {
+        const mq = win.matchMedia('print');
+        mq.addEventListener?.('change', (e) => {
+          if (!e.matches) cleanup();
+        });
+      }
+
+      doc.open();
+      doc.write(html);
+      doc.close();
+      win.focus();
+      setTimeout(() => {
+        try {
+          win.print();
+        } catch (e) {
+          cleanup();
+        }
+      }, 100);
+      setTimeout(cleanup, 5000);
+
+      setStatus('Preparing roster for print…', 'info', 1000);
     }
 
     return {
@@ -199,6 +358,7 @@
       programOptionsForRoster,
       eventTypeOptionsForRoster,
       printRoster,
+      printRosterTableOnly,
     };
   }
 

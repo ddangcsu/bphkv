@@ -9,6 +9,7 @@
       menu: { type: Object, required: true }, // rosterFilterMenu
       textFilter: { type: Object, required: true }, // rosterTextFilter
     },
+    emits: ['print'],
     template: `
 <div class="toolbar">
   <!-- Pager (same counters/buttons as your HTML) -->
@@ -68,6 +69,10 @@
   <button tabindex="-1" class="btn small" type="button" @click="menu.clear(); textFilter.clear()" title="Clear all filters">
     Clear
   </button>
+  <button tabindex="-1" class="btn" type="button" @click="$emit('print')" title="Print">
+    <i class="fa-solid fa-print"></i>
+  </button>
+
 </div>
     `,
   };

@@ -245,7 +245,7 @@
           <!-- List -->
           <section v-if="MODE.LIST" class="page">
             <div class="card">
-              <rosters-toolbar :pager="rosterPager" :menu="rosterFilterMenu" :text-filter="rosterTextFilter"> </rosters-toolbar>
+              <rosters-toolbar :pager="rosterPager" :menu="rosterFilterMenu" :text-filter="rosterTextFilter" @print="printRosterTableOnly"></rosters-toolbar>
 
               <rosters-table
                 :rows="rosterPager.items"
