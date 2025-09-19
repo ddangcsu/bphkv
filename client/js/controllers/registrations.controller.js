@@ -24,7 +24,6 @@
     getEventRows = () => [],
     getFamilyRows = () => [],
     volunteersFor, // optional: (programId) => [{value,label}, ...]
-    openReceiptById, // optional: (id) => void
   }) {
     // -------------------------
     // LIST (full: rows + filters + pager)
@@ -642,11 +641,11 @@
       setStatus('Saving Registration...');
       const payload = Mappers.Registrations.toApi(registrationForm);
       const nowLocal = Util.Date.isoNowLocal();
+      payload.updatedAt = nowLocal;
       let result;
       try {
         if (MODE.CREATE) {
           payload.createdAt = registrationForm.createdAt ? registrationForm.createdAt : nowLocal;
-          payload.updatedAt = nowLocal;
           result = await API.Registrations.create(payload);
           setStatus('Registration created.', 'success', 1500);
         } else {
@@ -724,6 +723,81 @@
       },
     );
 
+    // ======================= RECEIPT (view/print/email) =======================
+    const showReceiptModal = ref(false);
+    const receiptView = ref({});
+
+    function buildReceiptView(r) {
+      const fam = familyById(r.familyId);
+      const typeLabel = Util.Format.codeToLabel(r.event?.eventType, Schema.Options.EVENT_TYPES, undefined, {
+        fallback: r.event?.eventType || '',
+      });
+      const parishNumber = fam.parishMember ? fam.parishNumber : 'Non-Parish';
+
+      const pays = (r.payments || []).map((p) => ({
+        code: p.code,
+        codeLabel: Util.Format.codeToLabel(p.code, Schema.Options.FEE_CODES, undefined, { fallback: p.code }),
+        unitAmount: Number(p.unitAmount || p.amount || 0),
+        qty: Number(p.quantity || 1),
+        amount: Number(p.amount || 0),
+        method: p.method || '',
+        txnRef: p.txnRef || '',
+        receiptNo: p.receiptNo || '',
+        receivedBy: p.receivedBy || '',
+      }));
+
+      receiptView.value = {
+        receiptName: `Receipt ${r.event.title}`,
+        id: r.id,
+        eventTitle: r.event?.title || '',
+        eventTypeLabel: typeLabel,
+        programId: r.event?.programId,
+        year: r.event?.year,
+        familyId: r.familyId,
+        parishMember: r.parishMember ?? null,
+        parishNumber: parishNumber,
+        status: r.status,
+        contacts: r.contacts.sort(compareContactsByPriority),
+        children: (r.children || []).map((c) => ({
+          fullName: c.fullName || '',
+          saintName: c.saintName || '',
+          age: Util.Helpers.computeAgeByYear(c.dob),
+          grade:
+            r.event?.programId === ENUMS.PROGRAM.TNTT
+              ? Util.Format.ageGroupLabelTNTT(Util.Helpers.computeAgeByYear(c.dob))
+              : ' - ',
+        })),
+        payments: pays,
+        notes: r.notes,
+        total: pays.reduce((sum, p) => sum + Number(p.amount || 0), 0),
+        acceptedBy: r.acceptedBy || '',
+        updatedAt: (r.updatedAt || r.createdAt || '').slice(0, 10),
+      };
+    }
+
+    function openReceipt(r) {
+      buildReceiptView(r);
+      showReceiptModal.value = true;
+    }
+
+    function openReceiptById(id) {
+      // Try to use what’s already in the list
+      const row = (registrationRows.value || []).find((r) => r.id === id);
+      if (row) {
+        openReceipt(row); // your existing function from the list
+        return;
+      }
+      // Fallback: fetch and map, then open
+      API.Registrations.get(id).then((apiDoc) => {
+        const ui = Mappers.Registrations.toUi(apiDoc || {});
+        openReceipt(ui);
+      });
+    }
+
+    async function printReceipt() {
+      await nextTick(() => window.print());
+    }
+
     // expose what we need
     return {
       // list
@@ -763,6 +837,13 @@
       // others
       familyById,
       availableChildOptions,
+
+      // Receipt
+      showReceiptModal,
+      receiptView,
+      openReceipt,
+      openReceiptById,
+      printReceipt,
     };
   }
 

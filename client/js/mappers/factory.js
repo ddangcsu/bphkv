@@ -156,6 +156,8 @@
         contacts: mapRowsToUi(apiFamily?.contacts, contactFields),
         children: mapRowsToUi(apiFamily?.children, childFields),
         notes: mapRowsToUi(apiFamily?.notes, noteFields),
+        createdAt: apiFamily.createdAt !== undefined ? apiFamily.createdAt : null,
+        updatedAt: apiFamily.updatedAt !== undefined ? apiFamily.updatedAt : null,
       };
       return ui;
     }
@@ -184,6 +186,8 @@
         ...mapFieldsToUi(apiEvent, mainFields),
         fees: mapRowsToUi(apiEvent?.fees, feeFields),
         prerequisites: mapRowsToUi(apiEvent?.prerequisites, prereqFields),
+        createdAt: apiEvent.createdAt !== undefined ? apiEvent.createdAt : null,
+        updatedAt: apiEvent.updatedAt !== undefined ? apiEvent.updatedAt : null,
       };
       return ui;
     }

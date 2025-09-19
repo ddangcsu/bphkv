@@ -31,17 +31,18 @@
     },
     emits: ['update:open', 'print'],
     setup(props, { emit }) {
-      function updateOpen(v) {
-        emit('update:open', !!v);
-      }
+      const modelOpen = Vue.computed({
+        get: () => !!props.open,
+        set: (v) => emit('update:open', !!v),
+      });
       function printReceipt() {
         emit('print');
       }
-      return { updateOpen, printReceipt };
+      return { modelOpen, printReceipt };
     },
     template: `
 <ui-modal
-  v-model:open="open"
+  v-model:open="modelOpen"
   class="ui-modal--printable"
   :title="title"
   :placement="placement"
@@ -49,8 +50,7 @@
   :size="size"
   :close-on-backdrop="closeOnBackdrop"
   :close-on-esc="closeOnEsc"
-  :aria-description="ariaDescription"
-  @update:open="updateOpen">
+  :aria-description="ariaDescription">
   <template #header-actions>
     <button type="button" class="btn primary" @click="printReceipt">
       <i class="fa-solid fa-print"></i>

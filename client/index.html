@@ -245,108 +245,17 @@
           <!-- List -->
           <section v-if="MODE.LIST" class="page">
             <div class="card">
-              <div class="toolbar">
-                <!-- Page size selector -->
-                <div class="pager">
-                  <label class="nowrap">
-                    Rows:
-                    <select class="pager-size" v-model.number="rosterPager.pageSize">
-                      <option v-for="n in rosterPager.options" :key="n" :value="n">{{ n === rosterPager.allSentinel ? "All": n }}</option>
-                    </select>
-                  </label>
+              <rosters-toolbar :pager="rosterPager" :menu="rosterFilterMenu" :text-filter="rosterTextFilter"> </rosters-toolbar>
 
-                  <span>
-                    {{ rosterPager.totalRows ? (rosterPager.isAll ? 1 : rosterPager.pageStart + 1) : 0 }}–{{ rosterPager.isAll ? rosterPager.totalRows :
-                    Math.min(rosterPager.pageEnd, rosterPager.totalRows) }} of {{ rosterPager.totalRows }}
-                  </span>
+              <rosters-table
+                :rows="rosterPager.items"
+                :code-to-label="codeToLabel"
+                :year-options="YEAR_OPTIONS"
+                :event-types="EVENT_TYPES"
+                @contacts="openChildContactsModal">
+              </rosters-table>
 
-                  <div class="pager-buttons">
-                    <button tabindex="-1" @click="rosterPager.goFirst" :disabled="rosterPager.page <= 1 || rosterPager.isAll">
-                      <i class="fa fa-angle-double-left"></i>
-                    </button>
-                    <button tabindex="-1" @click="rosterPager.goPrev" :disabled="rosterPager.page <= 1 || rosterPager.isAll">
-                      <i class="fa fa-angle-left"></i>
-                    </button>
-                  </div>
-                  <span>Page {{ rosterPager.page }} / {{ rosterPager.totalPages }}</span>
-                  <div class="pager-buttons">
-                    <button tabindex="-1" @click="rosterPager.goNext" :disabled="rosterPager.page >= rosterPager.totalPages || rosterPager.isAll">
-                      <i class="fa fa-angle-right"></i>
-                    </button>
-                    <button tabindex="-1" @click="rosterPager.goLast" :disabled="rosterPager.page >= rosterPager.totalPages || rosterPager.isAll">
-                      <i class="fa fa-angle-double-right"></i>
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Filter menu button + popover -->
-                <div class="filter-trigger">
-                  <button tabindex="-1" class="btn" @click="rosterFilterMenu.toggle()">
-                    <i class="fa-solid fa-filter"></i>
-                    <span v-if="rosterFilterMenu.activeCount">({{ rosterFilterMenu.activeCount }})</span>
-                  </button>
-                  <div v-if="rosterFilterMenu.isOpen" class="clickout-overlay" @click="rosterFilterMenu.close()"></div>
-                  <div v-if="rosterFilterMenu.isOpen" class="filter-popover" @click.stop>
-                    <div class="item-header compact bordered">
-                      <h4 class="title">Rosters Filter</h4>
-                    </div>
-                    <div class="filter-row" v-for="def in rosterFilterMenu.definitions" :key="def.key">
-                      <label class="text-sm">{{ def.label }}</label>
-                      <select class="input" v-if="def.type==='select'" v-model="rosterFilterMenu.state[def.key]">
-                        <option :value="def.emptyValue ?? ''">All</option>
-                        <option v-for="opt in rosterFilterMenu.opt(def)" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
-                      </select>
-                    </div>
-                    <div class="filter-actions">
-                      <button tabindex="-1" class="btn" @click="rosterFilterMenu.clear()">Clear</button>
-                      <button tabindex="-1" class="btn" @click="rosterFilterMenu.close()">Close</button>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Filter text search -->
-                <input v-model.trim="rosterTextFilter.querySearch" class="input" placeholder="Search roster child name..." />
-
-                <button
-                  tabindex="-1"
-                  class="btn small"
-                  type="button"
-                  @click="rosterFilterMenu.clear() && rosterTextFilter.clear()"
-                  title="Clear Rosters filters">
-                  Clear
-                </button>
-              </div>
-
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th>Program</th>
-                    <th>Year</th>
-                    <th>Type</th>
-                    <th>Event</th>
-                    <th>Saint Name</th>
-                    <th>Full Name</th>
-                    <th>Grade/Group</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="r in rosterPager.items" :key="r.registrationId + '-' + r.childId">
-                    <td>{{ r.programId }}</td>
-                    <td>{{ codeToLabel(r.year, YEAR_OPTIONS) }}</td>
-                    <td>{{ codeToLabel(r.eventType, EVENT_TYPES) }}</td>
-                    <td>{{ r.eventTitle }}</td>
-                    <td>{{ r.saintName }}</td>
-                    <td>
-                      <a href="#" class="link" title="View Child's Contacts" @click.prevent="openChildContactsModal(r)"> {{ r.fullName }} </a>
-                    </td>
-                    <td>{{ r.grade }}</td>
-                    <td class="actions">
-                      <button tabindex="-1" class="btn secondary" type="button" @click=""><i class="fa-solid fa-pen-to-square"></i> Some Action</button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+              <!-- keep your existing UiModal for Contacts exactly as-is -->
             </div>
           </section>
 
@@ -789,11 +698,14 @@
     <script src="./js/components/registrations.table.js" defer></script>
     <script src="./js/components/registrations.form.js" defer></script>
     <script src="./js/components/registration.receipt.js" defer></script>
+    <script src="./js/components/rosters.toolbar.js" defer></script>
+    <script src="./js/components/rosters.table.js" defer></script>
 
     <!-- App Controllers -->
     <script src="./js/controllers/events.controller.js" defer></script>
     <script src="./js/controllers/families.controller.js" defer></script>
     <script src="./js/controllers/registrations.controller.js" defer></script>
+    <script src="./js/controllers/rosters.controller.js" defer></script>
 
     <script src="./js/app.js" defer></script>
   </body>

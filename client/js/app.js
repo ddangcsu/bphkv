@@ -396,7 +396,6 @@ const app = createApp({
       getEventRows: () => eventRows.value,
       getFamilyRows: () => familyRows.value,
       volunteersFor,
-      openReceiptById, // if you have this in app.js
     });
 
     // LIST (same names as your template)
@@ -437,10 +436,39 @@ const app = createApp({
     // Derived helpers
     const ageGroupLabelTNTT = Util.Format.ageGroupLabelTNTT;
 
+    // Receipt
+    const showReceiptModal = Registrations.showReceiptModal;
+    const receiptView = Registrations.receiptView;
+    const openReceipt = Registrations.openReceipt;
+    const printReceipt = Registrations.printReceipt;
+
     // =========================================================
     // Roster TNTT
     // =========================================================
+    // ---- Rosters (extracted 1:1) ----
+    const Rosters = Controllers.Rosters.create({
+      getEventRows: () => eventRows.value,
+      getRegistrationRows: () => registrationRows.value,
+      familyById: (id) => familyById(id), // from Registrations controller you already expose
+      ageGroupLabelTNTT: Util.Format.ageGroupLabelTNTT, // same helper you use
+      setStatus, // for print status toast
+    });
 
+    // expose exactly what index.html uses today
+    const rosterFilterMenu = Rosters.rosterFilterMenu;
+    const rosterTextFilter = Rosters.rosterTextFilter;
+    const rosterPager = Rosters.rosterPager;
+
+    // contacts modal API used in the roster section
+    const showContactsModal = Rosters.showContactsModal;
+    const contactsView = Rosters.contactsView;
+    const openChildContactsModal = Rosters.openChildContactsModal;
+    const closeChildContactsModal = Rosters.closeChildContactsModal;
+
+    // optional: print
+    const printRoster = Rosters.printRoster;
+
+    /*
     const programOptionsForRoster = computed(() => {
       return PROGRAM_OPTIONS.value?.filter((p) => p.value !== PROGRAM.BPH);
     });
@@ -483,9 +511,6 @@ const app = createApp({
         ),
     );
 
-    /**
-     * Define filter menu for registrations list
-     */
     const rosterFilterDef = [
       {
         key: 'programId',
@@ -583,83 +608,12 @@ const app = createApp({
     });
 
     const rosterPager = Util.Helpers.createPager({ source: filteredRosterRows });
-
-    // ======================= RECEIPT (view/print/email) =======================
-    const showReceiptModal = ref(false);
-    const receiptView = ref({});
-
-    function buildReceiptView(r) {
-      const fam = familyById(r.familyId);
-      const typeLabel = codeToLabel(r.event?.eventType, EVENT_TYPES.value, undefined, {
-        fallback: r.event?.eventType || '',
-      });
-      const parishNumber = fam.parishMember ? fam.parishNumber : 'Non-Parish';
-
-      const pays = (r.payments || []).map((p) => ({
-        code: p.code,
-        codeLabel: codeToLabel(p.code, FEE_CODES.value, undefined, { fallback: p.code }),
-        unitAmount: Number(p.unitAmount || p.amount || 0),
-        qty: Number(p.quantity || 1),
-        amount: Number(p.amount || 0),
-        method: p.method || '',
-        txnRef: p.txnRef || '',
-        receiptNo: p.receiptNo || '',
-        receivedBy: p.receivedBy || '',
-      }));
-
-      receiptView.value = {
-        receiptName: `Receipt ${r.event.title}`,
-        id: r.id,
-        eventTitle: r.event?.title || '',
-        eventTypeLabel: typeLabel,
-        programId: r.event?.programId,
-        year: r.event?.year,
-        familyId: r.familyId,
-        parishMember: r.parishMember ?? null,
-        parishNumber: parishNumber,
-        status: r.status,
-        contacts: getPrimaryContactsForFamily(fam),
-        children: (r.children || []).map((c) => ({
-          fullName: c.fullName || '',
-          saintName: c.saintName || '',
-          age: computeAgeByYear(c.dob),
-          grade: r.event?.programId === PROGRAM.TNTT ? ageGroupLabelTNTT(computeAgeByYear(c.dob)) : ' - ',
-        })),
-        payments: pays,
-        notes: r.notes,
-        total: pays.reduce((sum, p) => sum + Number(p.amount || 0), 0),
-        acceptedBy: r.acceptedBy || '',
-        updatedAt: (r.updatedAt || r.createdAt || '').slice(0, 10),
-      };
-    }
-
-    function openReceipt(r) {
-      buildReceiptView(r);
-      showReceiptModal.value = true;
-    }
-
-    function openReceiptById(id) {
-      // Try to use what’s already in the list
-      const row = (registrationRows.value || []).find((r) => r.id === id);
-      if (row) {
-        openReceipt(row); // your existing function from the list
-        return;
-      }
-      // Fallback: fetch and map, then open
-      API.Registrations.get(id).then((apiDoc) => {
-        const ui = Mappers.Registrations.toUi(apiDoc || {});
-        openReceipt(ui);
-      });
-    }
-
-    async function printReceipt() {
-      await nextTick(() => window.print());
-    }
+    */
 
     // ---- Roster "Contacts" modal ----
-    const showContactsModal = ref(false);
-    const contactsView = ref({});
-
+    //const showContactsModal = ref(false);
+    //const contactsView = ref({});
+    /*
     function getPrimaryContactsForFamily(f) {
       const contacts = Array.isArray(f?.contacts) ? f.contacts : [];
       const prioritized = contacts.filter((c) => Schema.Options.PARENTS.has((c.relationship || '').trim()));
@@ -687,7 +641,7 @@ const app = createApp({
     function closeChildContactsModal() {
       showContactsModal.value = false;
     }
-
+    */
     // =========================================================
     // INITIAL LOAD (quiet)
     // =========================================================
@@ -852,5 +806,8 @@ app.component('registrations-toolbar', window.Components && window.Components.Re
 app.component('registrations-table', window.Components && window.Components.RegistrationsTable);
 app.component('registrations-form', window.Components && window.Components.RegistrationsForm);
 app.component('registration-receipt', Components.RegistrationReceipt);
+// components
+app.component('rosters-toolbar', Components.RostersToolbar);
+app.component('rosters-table', Components.RostersTable);
 
 app.mount('#app');

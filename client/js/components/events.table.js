@@ -53,7 +53,7 @@
               <th scope="col">Status</th>
               <th scope="col">Open Window</th>
               <th scope="col">Schedule Fees</th>
-              <th scope="col" class="col-actions">Actions</th>
+              <th scope="col" class="col-actions">Action</th>
             </tr>
           </thead>
           <tbody>
@@ -69,7 +69,7 @@
               <td>{{ displayEventFees(ev) }}</td>
               <td class="actions">
                 <button tabindex="-1" class="btn secondary" type="button" @click="onEdit(ev)">
-                  <i class="fa-solid fa-pen-to-square"></i> Edit
+                  <i class="fa-solid fa-pen-to-square"></i>
                 </button>
               </td>
             </tr>

@@ -69,13 +69,13 @@
 
               <td class="actions">
                 <button tabindex="-1" class="btn secondary" type="button" @click="onEdit(f)">
-                  <i class="fa-solid fa-pen-to-square"></i> Edit
+                  <i class="fa-solid fa-pen-to-square"></i>
                 </button>
               </td>
 
               <!-- BPH column -->
               <td>
-                <button tabindex="-1" class="btn" type="button" @click="registerAdminForFamily(f)">
+                <button tabindex="-1" class="btn badge" type="button" :data-variant="isRegisteredBPH(f)" @click="registerAdminForFamily(f)">
                   <template v-if="isRegisteredBPH(f)">
                     <i class="fa-solid fa-check-to-slot"></i>
                   </template>
@@ -90,7 +90,8 @@
                 <button
                   tabindex="-1"
                   v-if="isRegisteredBPH(f)"
-                  class="btn"
+                  class="btn badge"
+                  :data-variant="isRegisteredTnttReg(f)"
                   type="button"
                   @click="registerTnttForFamily(f)"
                 >

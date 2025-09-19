@@ -210,7 +210,7 @@ table.table tbody tr:nth-child(even) {
   text-transform: capitalize;
   font-weight: 500;
 }
-
+.badge[data-variant='false'],
 .badge[data-variant='Future'] {
   color: var(--accent);
 }
@@ -218,6 +218,7 @@ table.table tbody tr:nth-child(even) {
 .badge[data-variant='Closed'] {
   color: var(--danger);
 }
+.badge[data-variant='true'],
 .badge[data-variant='Yes'],
 .badge[data-variant='Open'] {
   color: var(--open);

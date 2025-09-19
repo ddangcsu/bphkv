@@ -46,10 +46,10 @@
             <th>Program</th>
             <th>Family</th>
             <th># Children</th>
-            <th>Receipt</th>
             <th>Payments</th>
             <th>Updated</th>
-            <th>Actions</th>
+            <th>Action</th>
+            <th>Receipt</th>
           </tr>
         </thead>
         <tbody>
@@ -59,15 +59,21 @@
             <td>{{ codeToLabel(r.event?.year, yearOptions) }}</td>
             <td>{{ programLabel(r.event?.programId) }}</td>
             <td v-html="contactDisplay(r, true)"></td>
-            <td>{{ Array.isArray(r.children) && r.children.length ? r.children.length : '' }}</td>
-            <td><button tabindex="-1" class="btn" type="button" v-if="r.status === 'paid'" @click="openReceipt(r)"><i class="fa-solid fa-receipt"></i></button>
-                      <span v-else>'—'</span></td>
+            <td style="text-align: center;">{{ Array.isArray(r.children) && r.children.length ? r.children.length : '—' }}</td>
             <td>{{ paymentSummary(r) }}</td>
             <td>{{ updatedDate(r) }}</td>
             <td class="actions">
               <button tabindex="-1" class="btn" type="button" @click="$emit('edit', r)">
-                <i class="fa-solid fa-pen-to-square"></i> <span>Edit</span>
+                <i class="fa-solid fa-pen-to-square"></i>
               </button>
+            </td>
+            <td>
+              <button tabindex="-1" class="btn" type="button"
+              v-if="r.status === 'paid'"
+              @click="openReceipt(r)">
+                <i class="fa-solid fa-receipt"></i>
+              </button>
+              <span v-else>'—'</span>
             </td>
           </tr>
         </tbody>
