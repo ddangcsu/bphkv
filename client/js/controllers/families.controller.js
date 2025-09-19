@@ -127,7 +127,7 @@
       const pick = [...prioritized, ...others].slice(0, 2);
       const result = pick.map((c) =>
         'lastName' in c
-          ? `${c.lastName}, ${c.firstName}${c.middle ? ' ' + c.middle : ''} ${Util.Format.maskLast4(c.phone)}`
+          ? `${Util.Format.formatFullName(c)} ${Util.Format.maskLast4(c.phone)}`
           : `${c.name} ${Util.Format.maskLast4(c.phone)}`,
       );
       return one ? result[0] : result.join(' / ');

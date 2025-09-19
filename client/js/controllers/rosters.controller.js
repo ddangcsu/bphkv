@@ -152,7 +152,7 @@
       const others = contacts.filter((c) => !isParentish(c.relationship));
       const pick = [...prioritized, ...others].slice(0, 3);
       return pick.map((c) => ({
-        name: `${c.lastName}, ${c.firstName}${c.middle ? ' ' + c.middle : ''}`,
+        name: Util.Format.formatFullName(c),
         relationship: c.relationship || '',
         phone: Util.Format.formatPhone(c.phone || ''),
       }));

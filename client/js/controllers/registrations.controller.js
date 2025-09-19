@@ -142,7 +142,7 @@
         form.contacts.push(
           Schema.Forms.Registrations.newContact({
             overrides: {
-              name: [c.lastName, [c.firstName, c.middle].filter(Boolean).join(' ')].filter(Boolean).join(', '),
+              name: Util.Format.formatFullName(c),
               relationship: c.relationship || '',
               phone: Util.Format.formatPhone(c.phone || ''),
             },
@@ -350,7 +350,7 @@
       const form = ctx?.form || {};
       const fam = familyById(form.familyId);
       const list = (fam?.contacts || []).map((c) => {
-        const name = [c.lastName, [c.firstName, c.middle].filter(Boolean).join(' ')].filter(Boolean).join(', ');
+        const name = Util.Format.formatFullName(c);
         return { value: name, label: `${name} (${c.relationship})` };
       });
       return list;
@@ -439,7 +439,7 @@
       if (!ch) return;
 
       // Match original display + data shapes
-      row.fullName = [ch.lastName, [ch.firstName, ch.middle].join(' ')].join(', ');
+      row.fullName = Util.Format.formatFullName(ch);
       row.saintName = ch.saintName;
       row.dob = ch.dob;
       row.allergies = Array.isArray(ch.allergies) ? ch.allergies.slice() : [];
@@ -499,7 +499,7 @@
       const two = pickTwoParents(family);
       for (const c of two) {
         const overrides = {
-          name: [c.lastName, [c.firstName, c.middle].filter(Boolean).join(' ')].filter(Boolean).join(', '),
+          name: Util.Format.formatFullName(c),
           relationship: c.relationship || '',
           phone: Util.Format.formatPhone(c.phone || ''),
         };

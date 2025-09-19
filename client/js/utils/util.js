@@ -64,14 +64,18 @@
     return d ? `•${d.slice(-4)}` : '';
   };
 
-  function displayChildNameAndAge(child) {
-    if (typeof child !== 'object') return null;
-
-    const ln = (child?.lastName ?? '').trim();
-    const fn = (child?.firstName ?? '').trim();
-    const mn = (child?.middle ?? '').trim();
+  function formatFullName(row) {
+    if (typeof row !== 'object') return null;
+    const ln = (row?.lastName ?? '').trim();
+    const fn = (row?.firstName ?? '').trim();
+    const mn = (row?.middle ?? '').trim();
     // Use array to join it
-    const name = [ln, [fn, mn].filter(Boolean).join(' ')].filter(Boolean).join(', ');
+    return [ln, [fn, mn].filter(Boolean).join(' ')].filter(Boolean).join(', ');
+  }
+
+  function displayChildNameAndAge(child) {
+    // Use array to join it
+    const name = formatFullName(child);
     const age = computeAgeByYear(child?.dob);
     return age == null ? name : `${name} - ${age} yo`;
   }
@@ -444,6 +448,7 @@
     onDateInput,
     onPhoneInput,
     formatDate,
+    formatFullName,
   };
   root.Helpers = {
     makeId,
