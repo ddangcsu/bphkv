@@ -293,7 +293,6 @@ const app = createApp({
     const isVisible = Util.Helpers.isVisible;
     const fieldClass = Util.Helpers.fieldClass;
     const getFieldDisabled = Util.Helpers.getFieldDisabled;
-    const computeAgeByYear = Util.Helpers.computeAgeByYear;
     const displayChildNameAndAge = Util.Format.displayChildNameAndAge;
 
     // =========================================================

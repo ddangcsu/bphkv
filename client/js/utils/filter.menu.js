@@ -123,8 +123,12 @@
     const query = ref('');
 
     function normalize(input) {
-      return String(input ?? '').toLowerCase();
+      // lowercase → NFD decompose → strip combining marks → map Vietnamese 'đ'
+      const s = String(input ?? '').toLowerCase();
+      const nfd = s.normalize ? s.normalize('NFD') : s; // fallback if normalize() missing
+      return nfd.replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd');
     }
+
     function tokenize(raw) {
       return normalize(raw).split(/\s+/).filter(Boolean);
     }
