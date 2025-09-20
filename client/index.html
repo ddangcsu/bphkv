@@ -267,20 +267,22 @@
             :aria-description="'Parents/Guardians for selected child from roster.'">
             <!-- BODY: keep your existing content 100% unchanged -->
             <!-- BEGIN existing roster child-contacts markup -->
-            <div class="grid col3">
-              <label>
-                Child Name
-                <input class="input" :value="contactsView.childName" disabled />
-              </label>
-              <label>
-                Age
-                <input class="input" :value="contactsView.age" disabled />
-              </label>
-              <label v-if="contactsView.allergies">
-                Allergies
-                <input class="input" :value="contactsView.allergies" disabled />
-              </label>
-            </div>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Child Name</th>
+                  <th>Age</th>
+                  <th v-if="contactsView.allergies">Allergies</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>{{ contactsView.childName }}</td>
+                  <td>{{ contactView.age }}</td>
+                  <td v-if="contactsView.allergies">{{ contactsView.allergies }}</td>
+                </tr>
+              </tbody>
+            </table>
             <table class="table">
               <thead>
                 <tr>

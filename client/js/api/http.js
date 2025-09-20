@@ -7,7 +7,8 @@
   'use strict';
   const root = global.API || (global.API = {});
 
-  const DEFAULT_BASE_URL = 'http://localhost:3000';
+  const DEFAULT_BASE_URL =
+    typeof window !== 'undefined' && window.location ? window.location.origin : 'http://localhost:3000';
 
   // Create axios instance
   const http = axios.create({

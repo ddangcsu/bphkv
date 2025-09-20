@@ -26,7 +26,7 @@
   }
 
   async function list() {
-    const { data } = await http.get(BASE, { params: { _: Date.now() } });
+    const { data } = await http.get(BASE);
     // The settings collection is expected to be an array
     return Array.isArray(data) ? data : [];
   }

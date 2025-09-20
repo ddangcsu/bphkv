@@ -6,7 +6,7 @@
   const BASE = '/registrations';
 
   async function list() {
-    const { data } = await http.get(BASE, { params: { _: Date.now() } });
+    const { data } = await http.get(BASE);
     return Array.isArray(data) ? data.map(map.toUi) : [];
   }
   async function get(id) {

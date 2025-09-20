@@ -27,9 +27,9 @@
       for (const reg of list) {
         if (reg.familyId !== familyId) continue;
         const ev = reg.event || {};
+        if (Number(ev.year) !== Number(Util.Helpers.getCurrentSchoolYear())) continue;
         if (state.programId && ev.programId !== state.programId) continue;
         if (state.eventType && ev.eventType !== state.eventType) continue;
-        if (state.year && Number(ev.year) !== Number(state.year)) continue;
         return true;
       }
       return false;
@@ -42,6 +42,21 @@
         type: 'select',
         options: () => Schema.Options.YES_NO_OPTIONS,
         emptyValue: '',
+      },
+      {
+        key: 'regMode',
+        label: 'Registration',
+        type: 'select',
+        options: () => [
+          { value: 'registered', label: 'Registered (matches filters)' },
+          { value: 'not-registered', label: 'Not registered (matches filters)' },
+        ],
+        emptyValue: '',
+        matches: (familyRow, selectedMode, state) => {
+          if (!selectedMode) return true;
+          const has = familyHasRegistrationForState(familyRow.id, state);
+          return selectedMode === 'registered' ? has : !has;
+        },
       },
       {
         key: 'programId',
@@ -58,29 +73,6 @@
         options: () => Schema.Options.EVENT_TYPES,
         emptyValue: '',
         bypass: true,
-      },
-      {
-        key: 'year',
-        label: 'School Year',
-        type: 'select',
-        options: () => Schema.Options.YEAR_OPTIONS,
-        emptyValue: '',
-        bypass: true,
-      },
-      {
-        key: 'regMode',
-        label: 'Registration',
-        type: 'select',
-        options: () => [
-          { value: 'registered', label: 'Registered (matches filters)' },
-          { value: 'not-registered', label: 'Not registered (matches filters)' },
-        ],
-        emptyValue: '',
-        matches: (familyRow, selectedMode, state) => {
-          if (!selectedMode) return true;
-          const has = familyHasRegistrationForState(familyRow.id, state);
-          return selectedMode === 'registered' ? has : !has;
-        },
       },
     ];
     const familiesFilterMenu = Util.Helpers.createFilterMenu(familyFilterDefs);

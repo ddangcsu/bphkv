@@ -55,7 +55,8 @@
               allergies: (Array.isArray(ch.allergies) ? ch.allergies : []).join(', '),
             };
           }),
-        ),
+        )
+        .sort((a, b) => Number(a.age) - Number(b.age)),
     );
 
     // ---- Filters (exact def from app.js, but fixing the small "rosterFilter" reference bug)
