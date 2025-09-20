@@ -17,6 +17,21 @@
     timeout: 5000,
   });
 
+  // after you create the axios instance
+  http.interceptors.request.use((config) => {
+    if (config && config.method && config.method.toLowerCase() === 'get') {
+      // remove legacy cache-buster, if present
+      if (config.params && Object.prototype.hasOwnProperty.call(config.params, '_')) {
+        delete config.params._;
+      }
+      // prefer headers for no-cache behavior (harmless if upstream ignores)
+      config.headers = config.headers || {};
+      config.headers['Cache-Control'] = 'no-cache';
+      config.headers['Pragma'] = 'no-cache';
+    }
+    return config;
+  });
+
   // Response interceptor hook (optional: ETag/304, auth, logging)
   http.interceptors.response.use(
     (resp) => resp,
