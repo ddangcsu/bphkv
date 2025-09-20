@@ -7,7 +7,7 @@
   const BASE = '/events';
 
   async function list() {
-    const { data } = await http.get(BASE);
+    const { data } = await http.get(BASE, { params: { _: Date.now() } });
     return Array.isArray(data) ? data.map(map.toUi) : [];
   }
   async function get(id) {
